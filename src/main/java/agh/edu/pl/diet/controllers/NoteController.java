@@ -35,14 +35,18 @@ public class NoteController
 	}
 
 	@PostMapping("/addnote")
-	public String addNote(Principal principal, String title, String product, String note)
+	public String addNote(Principal principal, String title, String note, String calories, String totalFat, String totalCarbohydrate, String protein, String sodium)
 	{
 		User user = (User) userService.loadUserByUsername(principal.getName());
 
 		Note newNote = new Note();
 		newNote.setTitle(title);
-		newNote.setProduct(product);
 		newNote.setNote(note);
+		newNote.setCalories(calories);
+		newNote.setTotalFat(totalFat);
+		newNote.setTotalCarbohydrate(totalCarbohydrate);
+		newNote.setProtein(protein);
+		newNote.setSodium(sodium);
 		newNote.setUserId(user.getId());
 
 		noteRepo.save(newNote);
