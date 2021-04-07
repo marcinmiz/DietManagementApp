@@ -16,10 +16,22 @@ public class Note
 	private String title;
 
 	@NotNull
-	private String product;
+	private String note;
 
 	@NotNull
-	private String note;
+	private String calories;
+
+	@NotNull
+	private String totalFat;
+
+	@NotNull
+	private String totalCarbohydrate;
+
+	@NotNull
+	private String protein;
+
+	@NotNull
+	private String sodium;
 
 	@NotNull
 	private Long userId;
@@ -44,16 +56,6 @@ public class Note
 		this.title = title;
 	}
 
-	public String getProduct()
-	{
-		return product;
-	}
-
-	public void setProduct(String product)
-	{
-		this.product = product;
-	}
-
 	public String getNote()
 	{
 		return note;
@@ -62,6 +64,46 @@ public class Note
 	public void setNote(String note)
 	{
 		this.note = note;
+	}
+
+	public String getCalories() {
+		return calories;
+	}
+
+	public void setCalories(String calories) {
+		this.calories = calories;
+	}
+
+	public String getTotalFat() {
+		return totalFat;
+	}
+
+	public void setTotalFat(String totalFat) {
+		this.totalFat = totalFat;
+	}
+
+	public String getTotalCarbohydrate() {
+		return totalCarbohydrate;
+	}
+
+	public void setTotalCarbohydrate(String totalCarbohydrate) {
+		this.totalCarbohydrate = totalCarbohydrate;
+	}
+
+	public String getProtein() {
+		return protein;
+	}
+
+	public void setProtein(String protein) {
+		this.protein = protein;
+	}
+
+	public String getSodium() {
+		return sodium;
+	}
+
+	public void setSodium(String sodium) {
+		this.sodium = sodium;
 	}
 
 	public Long getUserId()
@@ -80,8 +122,12 @@ public class Note
 		return "Note{" +
 				"id=" + id +
 				", title='" + title + '\'' +
-				", product='" + product + '\'' +
 				", note='" + note + '\'' +
+				", product='" + calories + '\'' +
+				", product='" + totalFat + '\'' +
+				", product='" + totalCarbohydrate + '\'' +
+				", product='" + protein + '\'' +
+				", product='" + sodium + '\'' +
 				", userId=" + userId +
 				'}';
 	}
@@ -94,14 +140,18 @@ public class Note
 		Note note1 = (Note) o;
 		return Objects.equals(getId(), note1.getId()) &&
 				Objects.equals(getTitle(), note1.getTitle()) &&
-				Objects.equals(getProduct(), note1.getProduct()) &&
 				Objects.equals(getNote(), note1.getNote()) &&
+				Objects.equals(getCalories(), note1.getCalories()) &&
+				Objects.equals(getTotalFat(), note1.getTotalFat()) &&
+				Objects.equals(getTotalCarbohydrate(), note1.getTotalCarbohydrate()) &&
+				Objects.equals(getProtein(), note1.getProtein()) &&
+				Objects.equals(getSodium(), note1.getSodium()) &&
 				Objects.equals(getUserId(), note1.getUserId());
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(getId(), getTitle(), getProduct(), getNote(), getUserId());
+		return Objects.hash(getId(), getTitle(), getNote(), getCalories(), getTotalFat(), getTotalCarbohydrate(), getProtein(), getSodium(), getUserId());
 	}
 }

@@ -150,8 +150,6 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices
 	/**
 	 * Return the principal that should be used for the token. The default implementation
 	 * delegates to the {@link PrincipalExtractor}.
-	 * @param map the source map
-	 * @return the principal or {@literal "unknown"}
 	 */
 	protected Object getPrincipal(Map<String, Object> map) {
 		Object principal = this.principalExtractor.extractPrincipal(map);
