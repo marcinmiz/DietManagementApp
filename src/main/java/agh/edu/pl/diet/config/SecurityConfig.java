@@ -92,7 +92,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.antMatchers("/resources/**", "/", "/login**", "/registration").permitAll()
 				.anyRequest().authenticated()
 				.and().formLogin().loginPage("/login")
-				.defaultSuccessUrl("/notes").failureUrl("/login?error").permitAll()
+				.defaultSuccessUrl("/products").failureUrl("/login?error").permitAll()
 				.and().logout().logoutSuccessUrl("/").permitAll();
 
 		http

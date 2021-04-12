@@ -1,8 +1,8 @@
 package agh.edu.pl.diet.controllers;
 
-import agh.edu.pl.diet.entities.Note;
+import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.User;
-import agh.edu.pl.diet.repos.NoteRepo;
+import agh.edu.pl.diet.repos.ProductRepo;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,43 +14,43 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-public class NoteController
+public class ProductController
 {
 	@Autowired
-	private NoteRepo noteRepo;
+	private ProductRepo productRepo;
 
 	@Autowired
 	private UserService userService;
 
-	@GetMapping("/notes")
+	@GetMapping("/products")
 	public String notes(Principal principal, Model model)
 	{
 		User user = (User) userService.loadUserByUsername(principal.getName());
 
-		List<Note> notes = noteRepo.findByUserId(user.getId());
-		model.addAttribute("notes", notes);
+		List<Product> products = productRepo.findByUserId(user.getId());
+		model.addAttribute("notes", products);
 		model.addAttribute("user", user);
 
 		return "notes";
 	}
 
-	@PostMapping("/addnote")
+	@PostMapping("/addproduct")
 	public String addNote(Principal principal, String title, String note, String calories, String totalFat, String totalCarbohydrate, String protein, String sodium)
 	{
 		User user = (User) userService.loadUserByUsername(principal.getName());
 
-		Note newNote = new Note();
-		newNote.setTitle(title);
-		newNote.setNote(note);
-		newNote.setCalories(calories);
-		newNote.setTotalFat(totalFat);
-		newNote.setTotalCarbohydrate(totalCarbohydrate);
-		newNote.setProtein(protein);
-		newNote.setSodium(sodium);
-		newNote.setUserId(user.getId());
+		Product newProduct = new Product();
+		newProduct.setTitle(title);
+		newProduct.setNote(note);
+		newProduct.setCalories(calories);
+		newProduct.setTotalFat(totalFat);
+		newProduct.setTotalCarbohydrate(totalCarbohydrate);
+		newProduct.setProtein(protein);
+		newProduct.setSodium(sodium);
+		newProduct.setUserId(user.getId());
 
-		noteRepo.save(newNote);
+		productRepo.save(newProduct);
 
-		return "redirect:/notes";
+		return "redirect:/products";
 	}
 }

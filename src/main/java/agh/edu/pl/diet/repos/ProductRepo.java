@@ -1,6 +1,6 @@
 package agh.edu.pl.diet.repos;
 
-import agh.edu.pl.diet.entities.Note;
+import agh.edu.pl.diet.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 @Repository
-public interface NoteRepo extends JpaRepository<Note, Long>
+public interface ProductRepo extends JpaRepository<Product, Long>
 {
-    List<Note> findByUserId(Long userId);
+    List<Product> findByUserId(Long userId);
 }

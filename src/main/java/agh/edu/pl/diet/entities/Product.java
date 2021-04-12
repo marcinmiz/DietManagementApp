@@ -6,7 +6,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "product")
-public class Note
+public class Product
 {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -119,7 +119,7 @@ public class Note
 	@Override
 	public String toString()
 	{
-		return "Note{" +
+		return "Product{" +
 				"id=" + id +
 				", title='" + title + '\'' +
 				", note='" + note + '\'' +
@@ -137,16 +137,16 @@ public class Note
 	{
 		if(this == o) return true;
 		if(o == null || getClass() != o.getClass()) return false;
-		Note note1 = (Note) o;
-		return Objects.equals(getId(), note1.getId()) &&
-				Objects.equals(getTitle(), note1.getTitle()) &&
-				Objects.equals(getNote(), note1.getNote()) &&
-				Objects.equals(getCalories(), note1.getCalories()) &&
-				Objects.equals(getTotalFat(), note1.getTotalFat()) &&
-				Objects.equals(getTotalCarbohydrate(), note1.getTotalCarbohydrate()) &&
-				Objects.equals(getProtein(), note1.getProtein()) &&
-				Objects.equals(getSodium(), note1.getSodium()) &&
-				Objects.equals(getUserId(), note1.getUserId());
+		Product product1 = (Product) o;
+		return Objects.equals(getId(), product1.getId()) &&
+				Objects.equals(getTitle(), product1.getTitle()) &&
+				Objects.equals(getNote(), product1.getNote()) &&
+				Objects.equals(getCalories(), product1.getCalories()) &&
+				Objects.equals(getTotalFat(), product1.getTotalFat()) &&
+				Objects.equals(getTotalCarbohydrate(), product1.getTotalCarbohydrate()) &&
+				Objects.equals(getProtein(), product1.getProtein()) &&
+				Objects.equals(getSodium(), product1.getSodium()) &&
+				Objects.equals(getUserId(), product1.getUserId());
 	}
 
 	@Override
