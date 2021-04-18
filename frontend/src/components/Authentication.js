@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import "../Authentication.css"
 
 export default class Authentication extends Component {
     constructor(props) {
@@ -31,7 +32,7 @@ export default class Authentication extends Component {
     render() {
         return (
             <div className="container">
-                <div className="card">
+                <div className="card auth_card">
                     <form className="form" onSubmit={this.handleSubmit}>
 
                         <label htmlFor="name">Name</label>
