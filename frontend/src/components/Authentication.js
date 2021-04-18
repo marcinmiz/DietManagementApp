@@ -11,11 +11,13 @@ export default class Authentication extends Component {
             email: "",
             password: "",
             password_confirmation: "",
-            registrationErrors: ""
+            registrationErrors: "",
+            mode: "login"
         }
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleTab = this.handleTab.bind(this);
     }
 
     handleSubmit(event) {
@@ -29,10 +31,34 @@ export default class Authentication extends Component {
         });
     }
 
+    handleTab(event) {
+        if (event.target.name === "register_tab") {
+            this.setState({mode: "register"})
+        } else {
+            this.setState({mode: "login"})
+        }
+    }
+
     render() {
-        return (
-            <div className="container">
+        if (this.state.mode === "register") {
+            return <div className="container">
                 <div className="card auth_card">
+                    <div className="tabs_area">
+                        <button
+                            type="button"
+                            className="tab first_tab"
+                            name="login_tab"
+                            onClick={this.handleTab}>
+                            Log in
+                        </button>
+                        <button
+                            type="button"
+                            className="tab last_tab current_tab"
+                            name="register_tab"
+                            onClick={this.handleTab}>
+                            Register
+                        </button>
+                    </div>
                     <form className="form" onSubmit={this.handleSubmit}>
 
                         <label htmlFor="name">Name</label>
