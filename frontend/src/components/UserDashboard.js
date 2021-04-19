@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 
-export default class Dashboard extends Component {
+export default class UserDashboard extends Component {
     constructor(props) {
         super(props);
     }

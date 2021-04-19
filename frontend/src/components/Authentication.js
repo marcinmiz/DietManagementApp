@@ -43,6 +43,9 @@ export default class Authentication extends Component {
         if (this.state.mode === "register") {
             return <div className="container">
                 <div className="card auth_card">
+                    <div className="logo">
+                        DIETIX
+                    </div>
                     <div className="tabs_area">
                         <button
                             type="button"
@@ -120,6 +123,9 @@ export default class Authentication extends Component {
         } else {
           return <div className="container">
               <div className="card auth_card">
+                  <div className="logo">
+                      DIETIX
+                  </div>
                   <div className="tabs_area">
                       <button
                           type="button"
