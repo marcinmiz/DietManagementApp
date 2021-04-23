@@ -41,7 +41,7 @@ export default class Authentication extends Component {
 
     render() {
         if (this.state.mode === "register") {
-            return <div className="container">
+            return <div className="auth_container">
                 <div className="card auth_card">
                     <div className="logo">
                         DIETIX
@@ -121,7 +121,7 @@ export default class Authentication extends Component {
             </div>
 
         } else {
-          return <div className="container">
+          return <div className="auth_container">
               <div className="card auth_card">
                   <div className="logo">
                       DIETIX

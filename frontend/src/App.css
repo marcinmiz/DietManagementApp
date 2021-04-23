@@ -11,13 +11,10 @@
   color: white;
 }
 
-.App_content_auth {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  /*align-items: center;*/
-  justify-content: center;
-  color: white;
+.auth_container {
+    position: fixed;
+    left: 40%;
+    top: 10%;
 }
 
 .card {
@@ -34,8 +31,8 @@
 }
 
 .input_field {
-  margin: 5px;
-  padding: 5px;
+  margin: 10px !important;
+  padding: 10px !important;
   background-color: bisque;
   border-radius: 10px;
   border: 0;
@@ -120,4 +117,22 @@
     left: 0;
     bottom: 0;
     width: 100%;
+}
+
+@media screen and (max-width: 800px) {
+    .auth_container {
+        left: 30%;
+    }
+}
+
+@media screen and (max-width: 650px) {
+    .auth_container {
+        left: 20%;
+    }
+}
+
+@media screen and (max-width: 530px){
+    .auth_container {
+        left: 15%;
+    }
 }
