@@ -1,4 +1,4 @@
-package agh.edu.pl.diet.services;
+package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class AuthProvider implements AuthenticationProvider
 
 		User user = (User) userService.loadUserByUsername(username);
 
-		if(user != null && (user.getUsername().equals(username) || user.getName().equals(username)))
+		if(user != null && (user.getUsername().equals(username) || user.getUsername().equals(username)))
 		{
 			if(!passwordEncoder.matches(password, user.getPassword()))
 			{

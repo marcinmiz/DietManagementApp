@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1000/xhtml">
+<head th:replace="common/header :: common-header" />
+
+<body>
+	<div th:replace="common/header :: navbar" />
+
+	<div class="container">
+		<div class="row">
+			<form class="form-horizontal" th:action="@{/product/updateProduct}" method="post"
+				enctype="multipart/form-data">
+				<fieldset>
+					<legend class="center-block">
+						Update Product Information<span style="font-size: small"> * is a
+							required field</span>
+					</legend>
+					
+					<input hidden="hidden" name="id" th:value="${product.id}" />
+
+
+					<!-- title -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="title">* Title</label>
+
+						<div class="col-md-8">
+							<input type="text" name="title" class="form-control" id="title"
+								th:value="${product.title}" required="required" placeholder="Title" />
+							<span class="help-block">Title of the product</span>
+						</div>
+					</div>
+
+					<!-- note -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="note">*
+							Note</label>
+						<div class="col-md-8">
+							<input type="text" name="note" class="form-control" id="note"
+								th:value="${product.note}" required="required"
+								placeholder="Note" /> <span class="help-block">Note
+								of the product</span>
+						</div>
+					</div>
+
+					<!-- calories -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="calories">Calories</label>
+						<div class="col-md-8">
+							<input type="text" name="calories" class="form-control"
+								id="calories" th:value="${product.calories}"
+								placeholder="Calories" /> <span class="help-block">Calories
+								of the product</span>
+						</div>
+					</div>
+
+<!--					&lt;!&ndash; publication date &ndash;&gt;-->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="publicationDate">Publication-->
+<!--							Date</label>-->
+<!--						<div class="col-md-8">-->
+<!--							<input type="date" class="form-control" id="publicationDate"-->
+<!--								name="publicationDate" th:value="${product.publicationDate}"-->
+<!--								placeholder="ublication Date" /> <span class="help-block">Publication-->
+<!--								Date of the product</span>-->
+<!--						</div>-->
+<!--					</div>-->
+
+<!--					&lt;!&ndash; language &ndash;&gt;-->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="language">Language</label>-->
+<!--						<div class="col-md-8">-->
+<!--							<select th:value="${product.language}" id="language" name="language"-->
+<!--								class="form-control">-->
+<!--								<option value="english">English</option>-->
+<!--								<option value="russian">Russian</option>-->
+<!--								<option value="kazakh">Kazakh</option>-->
+<!--							</select>-->
+<!--						</div>-->
+<!--					</div>-->
+
+					<!-- category -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="category">*
+							Category</label>
+						<div class="col-md-8">
+							<select th:value="${product.category}" id="category" name="category"
+								class="form-control">
+								<option value="" selected="selected" disabled="disabled">Please
+									select an option...</option>
+								<option value="Bread"
+										th:selected="(${product.category}=='Bread')">Bread</option>
+								<option value="Dairy"
+										th:selected="(${product.category}=='Dairy')">Dairy</option>
+								<option value="Meat"
+										th:selected="(${product.category}=='Meat')">Meat</option>
+								<option value="Groceries"
+										th:selected="(${product.category}=='Groceries')">Groceries</option>
+								<option value="Fruits"
+										th:selected="(${product.category}=='Fruits &amp; Vegetables')">Fruits and vegetables</option>
+								<option value="Drinks"
+										th:selected="(${product.category}=='Drinks')">Drinks</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- pages -->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="pageNumber">Pages</label>-->
+
+<!--						<div class="col-md-8">-->
+<!--							<input type="number" name="numberOfPages" class="form-control"-->
+<!--								id="pageNumber" th:value="${product.numberOfPages}"-->
+<!--								placeholder="Page Number" /> <span class="help-block">Number-->
+<!--								of pages of the product</span>-->
+<!--						</div>-->
+<!--					</div>-->
+
+					<!-- totalFat -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="totalFat">Total Fat</label>
+						<div class="col-md-8">
+							<input type="text" name="totalFat" class="form-control" id="totalFat"
+								   th:value="${product.totalFat}" placeholder="Total Fat" /> <span
+								class="help-block">Total Fat</span>
+						</div>
+					</div>
+
+					<!-- totalCarbohydrate -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="totalCarbohydrate">Total Carbohydrate</label>
+
+						<div class="col-md-8">
+							<input type="text" name="totalCarbohydrate" class="form-control" id="totalCarbohydrate"
+								   th:value="${product.totalCarbohydrate}" placeholder="Total Carbohydrate" /> <span
+								class="help-block">Total Carbohydrate</span>
+						</div>
+					</div>
+
+					<!-- Protein -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="protein">Protein
+							</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<input th:value="${product.protein}" type="number" step="0.01"
+									   name="protein" class="form-control" id="protein"
+									   placeholder="Protein" /> <span
+									class="input-group-addon">g/100g</span>
+							</div>
+							<span class="help-block">Protein in the product</span>
+						</div>
+					</div>
+
+					<!-- Sodium -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="sodium">Sodium</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<input	th:value="${product.sodium}" type="number" name="sodium" step="0.01"
+										  class="form-control" id="sodium" placeholder="Sodium" /> <span class="input-group-addon">g/100g</span>
+							</div>
+							<span class="help-block">Sodium in the product</span>
+						</div>
+					</div>
+
+					<!-- our price -->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="ourPrice">Our-->
+<!--							Price</label>-->
+<!--						<div class="col-md-8">-->
+<!--							<div class="input-group">-->
+<!--								<span class="input-group-addon">$</span> <input-->
+<!--									th:value="${product.ourPrice}" type="number" name="ourPrice" step="0.01"-->
+<!--									class="form-control" id="ourPrice" placeholder="Our Price" />-->
+<!--							</div>-->
+<!--							<span class="help-block">Our price of the product</span>-->
+<!--						</div>-->
+<!--					</div>-->
+
+					<!-- in stock number -->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="inStockNumber">Number-->
+<!--							in stock</label>-->
+<!--						<div class="col-md-8">-->
+<!--							<input th:value="${product.inStockNumber}" type="number"-->
+<!--								name="inStockNumber" class="form-control" id="inStockNumber"-->
+<!--								placeholder="Number of in-stock copies" /> <span-->
+<!--								class="help-block">Number of in-stock copies</span>-->
+<!--						</div>-->
+<!--					</div>-->
+
+					<!-- status of product -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="status">Status</label>
+						<div class="col-md-8">
+							<label><input value="true" type="radio" name="active"
+								th:checked="${product.active}" /> Active </label> <label><input
+								value="false" type="radio" name="active" th:checked="${!product.active}"/>
+								Inactive </label> <span class="help-block">Whether the product is
+								active or inactive</span>
+						</div>
+					</div>
+
+					<!-- description -->
+<!--					<div class="form-group">-->
+<!--						<label class="col-md-2 control-label" for="description">Description</label>-->
+<!--						<div class="col-md-8">-->
+<!--							<textarea name="description" rows="5" class="form-control"-->
+<!--								id="description" th:value="${product.description}" th:text="${product.description}"-->
+<!--								placeholder="Description" />-->
+<!--							<span class="help-block">Description of the product</span>-->
+<!--						</div>-->
+<!--					</div>-->
+
+					<!-- upload image -->
+					<div class="form-group">
+						<div class="col-md-2">
+							<label for="bookImage">Upload product image</label>
+						</div>
+						<div class="col-md-8">
+							<input id="bookImage" type="file" name="bookImage"
+								th:value="${product.bookImage}" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-md-2"></div>
+						<div class="col-md-8">
+							<button type="submit" class="btn btn-success">Update Product</button>
+							<a class="btn btn-danger" th:href="@{/product/bookInfo(id=${product.id})}">Cancel</a>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+
+
+	<div th:replace="common/header :: body-bottom-scripts" />
+</body>
+</html>

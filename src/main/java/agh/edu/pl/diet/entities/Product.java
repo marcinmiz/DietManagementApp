@@ -1,68 +1,70 @@
 package agh.edu.pl.diet.entities;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "product")
-public class Product
-{
+public class Product {
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-
-	@NotNull
 	private String title;
-
-	@NotNull
 	private String note;
-
-	@NotNull
 	private String calories;
-
-	@NotNull
+	//	private String publicationDate;
+//	private String language;
+	private String category;
 	private String totalFat;
-
-	@NotNull
 	private String totalCarbohydrate;
-
-	@NotNull
 	private String protein;
-
-	@NotNull
 	private String sodium;
+	private boolean active=true;
 
-	@NotNull
-	private Long userId;
+//	@Column(columnDefinition="text")
+//	private String description;
+//	private int inStockNumber;
 
-	public Long getId()
-	{
+	@Transient
+	private MultipartFile bookImage;
+
+
+//	@OneToMany(mappedBy = "product")
+//	@JsonIgnore
+//	private List<BookToCartItem> bookToCartItemList;
+
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id)
-	{
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getTitle()
-	{
+	public String getTitle() {
 		return title;
 	}
 
-	public void setTitle(String title)
-	{
+	public void setTitle(String title) {
 		this.title = title;
 	}
 
-	public String getNote()
-	{
+	public String getNote() {
 		return note;
 	}
 
-	public void setNote(String note)
-	{
+	public void setNote(String note) {
 		this.note = note;
 	}
 
@@ -73,6 +75,31 @@ public class Product
 	public void setCalories(String calories) {
 		this.calories = calories;
 	}
+
+//	public String getPublicationDate() {
+//		return publicationDate;
+//	}
+//
+//	public void setPublicationDate(String publicationDate) {
+//		this.publicationDate = publicationDate;
+//	}
+//
+//	public String getLanguage() {
+//		return language;
+//	}
+//
+//	public void setLanguage(String language) {
+//		this.language = language;
+//	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
 
 	public String getTotalFat() {
 		return totalFat;
@@ -106,52 +133,37 @@ public class Product
 		this.sodium = sodium;
 	}
 
-	public Long getUserId()
-	{
-		return userId;
+	public boolean isActive() {
+		return active;
 	}
 
-	public void setUserId(Long userId)
-	{
-		this.userId = userId;
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
-	@Override
-	public String toString()
-	{
-		return "Product{" +
-				"id=" + id +
-				", title='" + title + '\'' +
-				", note='" + note + '\'' +
-				", product='" + calories + '\'' +
-				", product='" + totalFat + '\'' +
-				", product='" + totalCarbohydrate + '\'' +
-				", product='" + protein + '\'' +
-				", product='" + sodium + '\'' +
-				", userId=" + userId +
-				'}';
+//	public int getInStockNumber() {
+//		return inStockNumber;
+//	}
+//
+//	public void setInStockNumber(int inStockNumber) {
+//		this.inStockNumber = inStockNumber;
+//	}
+
+	public MultipartFile getBookImage() {
+		return bookImage;
 	}
 
-	@Override
-	public boolean equals(Object o)
-	{
-		if(this == o) return true;
-		if(o == null || getClass() != o.getClass()) return false;
-		Product product1 = (Product) o;
-		return Objects.equals(getId(), product1.getId()) &&
-				Objects.equals(getTitle(), product1.getTitle()) &&
-				Objects.equals(getNote(), product1.getNote()) &&
-				Objects.equals(getCalories(), product1.getCalories()) &&
-				Objects.equals(getTotalFat(), product1.getTotalFat()) &&
-				Objects.equals(getTotalCarbohydrate(), product1.getTotalCarbohydrate()) &&
-				Objects.equals(getProtein(), product1.getProtein()) &&
-				Objects.equals(getSodium(), product1.getSodium()) &&
-				Objects.equals(getUserId(), product1.getUserId());
+	public void setBookImage(MultipartFile bookImage) {
+		this.bookImage = bookImage;
 	}
 
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(getId(), getTitle(), getNote(), getCalories(), getTotalFat(), getTotalCarbohydrate(), getProtein(), getSodium(), getUserId());
-	}
+//	public List<BookToCartItem> getBookToCartItemList() {
+//		return bookToCartItemList;
+//	}
+//
+//	public void setBookToCartItemList(List<BookToCartItem> bookToCartItemList) {
+//		this.bookToCartItemList = bookToCartItemList;
+//	}
+
+
 }

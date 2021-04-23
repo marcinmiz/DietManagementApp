@@ -1,6 +1,6 @@
 package agh.edu.pl.diet.config;
 
-import agh.edu.pl.diet.entities.Role;
+import agh.edu.pl.diet.entities.security.Role;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.repos.UserRepo;
 import org.apache.commons.logging.Log;
@@ -106,11 +106,11 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices
 			if(user == null)
 			{
 				user = new User();
-				user.setActive(true);
-				user.setRoles(Collections.singleton(Role.USER));
+				user.setEnabled(true);
+				//user.setUserRoles(Collections.singleton());
 			}
 
-			user.setName(googleName);
+			//user.getFirstName(googleName);
 			user.setUsername(googleUsername);
 			user.setGoogleName(googleName);
 			user.setGoogleUsername(googleUsername);
@@ -147,10 +147,7 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices
 		return new OAuth2Authentication(request, token);
 	}
 
-	/**
-	 * Return the principal that should be used for the token. The default implementation
-	 * delegates to the {@link PrincipalExtractor}.
-	 */
+
 	protected Object getPrincipal(Map<String, Object> map) {
 		Object principal = this.principalExtractor.extractPrincipal(map);
 		return (principal == null ? "unknown" : principal);

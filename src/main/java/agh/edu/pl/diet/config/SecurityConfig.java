@@ -1,14 +1,18 @@
 package agh.edu.pl.diet.config;
 
 import agh.edu.pl.diet.repos.UserRepo;
-import agh.edu.pl.diet.services.AuthProvider;
+
+import agh.edu.pl.diet.services.impl.AuthProvider;
+import agh.edu.pl.diet.services.impl.UserSecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -27,8 +31,15 @@ import javax.servlet.Filter;
 @Configuration
 @EnableWebSecurity
 @EnableOAuth2Client
+@EnableGlobalMethodSecurity(prePostEnabled=true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
+	@Autowired
+	private Environment env;
+
+	@Autowired
+	private UserSecurityService userSecurityService;
+
 	@Autowired
 	private AuthProvider authProvider;
 
@@ -40,6 +51,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
 	@Autowired
 	private UserRepo userRepo;
+
+	private static final String[] PUBLIC_MATCHERS = {
+			"/css/**",
+			"/js/**",
+			"/image/**",
+			"/newUser",
+			"/forgetPassword",
+			"/fonts/**",
+			"/resources/**",
+			"/",
+			"/login**",
+			"/registration"
+
+	};
 
 	@Bean
 	PasswordEncoder passwordEncoder()
@@ -88,8 +113,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	protected void configure(HttpSecurity http) throws Exception
 	{
 		http
+				//.csrf().disable().cors().disable()
 				.authorizeRequests()
-				.antMatchers("/resources/**", "/", "/login**", "/registration").permitAll()
+				.antMatchers(PUBLIC_MATCHERS).permitAll()
 				.anyRequest().authenticated()
 				.and().formLogin().loginPage("/login")
 				.defaultSuccessUrl("/products").failureUrl("/login?error").permitAll()
@@ -104,4 +130,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	{
 		auth.authenticationProvider(authProvider);
 	}
+@Autowired
+public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+	auth.userDetailsService(userSecurityService).passwordEncoder(passwordEncoder());
+}
 }

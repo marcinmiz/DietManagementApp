@@ -1,131 +1,102 @@
 package agh.edu.pl.diet.entities;
 
-
+import agh.edu.pl.diet.entities.security.UserRole;
+import agh.edu.pl.diet.entities.security.Authority;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import java.util.Collection;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
-public class User implements UserDetails
-{
+public class User implements UserDetails{
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @Column(name="id", nullable = false, updatable = false)
     private Long id;
-
-    @NotNull
     private String username;
-
-    @NotNull
     private String password;
+    private String firstName;
+    private String lastName;
 
-    @NotNull
-    private String name;
-
-    private boolean active;
+    @Transient
+    @Column(name="email", nullable = false, updatable = false)
+    private String email;
+    private String phone;
+    private boolean enabled=true;
 
     private String googleName;
     private String googleUsername;
 
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+//	@OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+//	private ShoppingCart shoppingCart;
 
-    public Long getId()
-    {
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+//	private List<UserShipping> userShippingList;
+//
+//
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+//	private List<UserPayment> userPaymentList;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<UserRole> userRoles = new HashSet<>();
+
+    public Long getId() {
         return id;
     }
-
-    public void setId(Long id)
-    {
+    public void setId(Long id) {
         this.id = id;
     }
-
-    public String getUsername()
-    {
+    public String getUsername() {
         return username;
     }
-
-    public void setUsername(String username)
-    {
+    public void setUsername(String username) {
         this.username = username;
     }
-
-    @Override
-    public boolean isAccountNonExpired()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return isActive();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities()
-    {
-        return getRoles();
-    }
-
-    public String getPassword()
-    {
+    public String getPassword() {
         return password;
     }
-
-    public void setPassword(String password)
-    {
+    public void setPassword(String password) {
         this.password = password;
     }
-
-    public String getName()
-    {
-        return name;
+    public String getFirstName() {
+        return firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
-
-    public boolean isActive()
-    {
-        return active;
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
     }
-
-    public void setActive(boolean active)
-    {
-        this.active = active;
-    }
-
-    public Set<Role> getRoles()
-    {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles)
-    {
-        this.roles = roles;
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 
     public String getGoogleName()
@@ -148,40 +119,54 @@ public class User implements UserDetails
         this.googleUsername = googleUsername;
     }
 
+
+
+//	public List<UserShipping> getUserShippingList() {
+//		return userShippingList;
+//	}
+//	public void setUserShippingList(List<UserShipping> userShippingList) {
+//		this.userShippingList = userShippingList;
+//	}
+//	public List<UserPayment> getUserPaymentList() {
+//		return userPaymentList;
+//	}
+//	public void setUserPaymentList(List<UserPayment> userPaymentList) {
+//		this.userPaymentList = userPaymentList;
+//	}
+
+    //	public ShoppingCart getShoppingCart() {
+//		return shoppingCart;
+//	}
+//	public void setShoppingCart(ShoppingCart shoppingCart) {
+//		this.shoppingCart = shoppingCart;
+//	}
     @Override
-    public String toString()
-    {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", name='" + name + '\'' +
-                ", active=" + active +
-                ", googleName='" + googleName + '\'' +
-                ", googleUsername='" + googleUsername + '\'' +
-                ", roles=" + roles +
-                '}';
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> authorites = new HashSet<>();
+        userRoles.forEach(ur -> authorites.add(new Authority(ur.getRole().getName())));
+
+        return authorites;
+    }
+    @Override
+    public boolean isAccountNonExpired() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+    @Override
+    public boolean isAccountNonLocked() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        // TODO Auto-generated method stub
+        return true;
     }
 
     @Override
-    public boolean equals(Object o)
-    {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return isActive() == user.isActive() &&
-                Objects.equals(getId(), user.getId()) &&
-                Objects.equals(getUsername(), user.getUsername()) &&
-                Objects.equals(getPassword(), user.getPassword()) &&
-                Objects.equals(getName(), user.getName()) &&
-                Objects.equals(getGoogleName(), user.getGoogleName()) &&
-                Objects.equals(getGoogleUsername(), user.getGoogleUsername()) &&
-                Objects.equals(getRoles(), user.getRoles());
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(getId(), getUsername(), getPassword(), getName(), isActive(), getGoogleName(), getGoogleUsername(), getRoles());
-    }
+
 }

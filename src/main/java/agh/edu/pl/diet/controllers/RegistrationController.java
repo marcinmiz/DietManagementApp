@@ -1,6 +1,6 @@
 package agh.edu.pl.diet.controllers;
 
-import agh.edu.pl.diet.entities.Role;
+import agh.edu.pl.diet.entities.security.Role;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +30,11 @@ public class RegistrationController
 	public String addUser(String name, String username, String password)
 	{
 		User user = new User();
-		user.setName(name);
+		user.setUsername(name);
 		user.setUsername(username);
 		user.setPassword(passwordEncoder.encode(password));
-		user.setActive(true);
-		user.setRoles(Collections.singleton(Role.USER));
+		user.setEnabled(true);
+		//user.setRoles(Collections.singleton(Role.USER));
 
 		userRepo.save(user);
 
