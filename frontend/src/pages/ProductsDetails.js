@@ -48,7 +48,7 @@ export default function ProductsDetails () {
         product_add_ingredient: "",
     });
 
-    let current_product;
+    let current_product, tab;
 
     if (state.mode === 'view') {
         current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
@@ -235,7 +235,7 @@ export default function ProductsDetails () {
                                 size="small"
                             />
                             <Tooltip title="Add ingredient" aria-label="add ingredient">
-                                <IconButton aria-label="add ingredient" className="product_icon_button"disabled={state.product_add_ingredient === ""}>
+                                <IconButton aria-label="add ingredient" className="product_icon_button" disabled={state.product_add_ingredient === ""}>
                                     <AddIcon fontSize="large"/>
                                 </IconButton>
                             </Tooltip>
@@ -267,4 +267,109 @@ export default function ProductsDetails () {
             </form>
         </div>;
     }
+
+    if (state.products_group === 0) {
+        //retrieve all products and set its values to product state field
+    } else if (state.products_group === 1) {
+        //retrieve new products and set its values to product state field
+    } else {
+        //retrieve favourite products and set its values to product state field
+    }
+
+    tab = <Grid container className="products_list" spacing={1}>
+        { state.products.map((product, index) => (
+            <Grid item id={product.product_id} className="product">
+                <div className="product_image_container">
+                    <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                </div>
+                <div className="product_description">
+                    <div className="product_name">
+                        {product.product_name}
+                    </div>
+                    <div className="product_category">
+                        <Chip
+                            name="category"
+                            size="small"
+                            avatar={<CategoryIcon/>}
+                            label={product.product_category}
+                        />
+                    </div>
+                    <div className="product_author">
+                        <Avatar/>
+                        <div className="product_author_name">{product.product_author}</div>
+                    </div>
+                </div>
+                <div className="product_buttons">
+                    <Tooltip title="Delete" aria-label="delete">
+                        <IconButton aria-label="delete" className="product_icon_button">
+                            <DeleteIcon fontSize="small"/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit" aria-label="edit">
+                        <IconButton aria-label="edit" className="product_icon_button">
+                            <EditIcon fontSize="small"/>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Change favourite status" aria-label="Change favourite status">
+                        <IconButton aria-label="Change favourite status" className="product_icon_button" disabled>
+                        </IconButton>
+                    </Tooltip>
+                </div>
+            </Grid>
+        ))}
+    </Grid>;
+
+    return(
+        <Container maxWidth="xl">
+            {current_product}
+            <div className="page_container background_blur">
+                <h2>Products</h2>
+                <div className="toolbar_container">
+                    <Tabs
+                        name="products_group"
+                        value={state.products_group}
+                        indicatorColor="primary"
+                        textColor="inherit"
+                        aria-label="product groups buttons"
+                    >
+                        <Tab className="product_group_tab" label="All" />
+                        <Tab className="product_group_tab" label="New" />
+                        <Tab className="product_group_tab" label="Favourite" />
+                    </Tabs>
+                    <div>
+                        <FormControl variant="filled">
+                            <InputLabel htmlFor="search" className="search_input">Search</InputLabel>
+                            <FilledInput
+                                id="search"
+                                name="search"
+                                className="search_input"
+                                placeholder="Type product name"
+                                value={state.search}
+                            />
+                        </FormControl>
+                        <FormControl variant="filled" className={classes.formControl}>
+                            <InputLabel id="category_select_label" className="category_select">Category</InputLabel>
+                            <Select
+                                labelId="category_select_label"
+                                id="category_select"
+                                className="category_select"
+                                name="category"
+                                value={state.category}
+                            >
+                                <MenuItem value="Fruit">Fruit</MenuItem>
+                                <MenuItem value="Vegetables">Vegetables</MenuItem>
+                                <MenuItem value="Dairy">Dairy</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <Fab className="add_button" aria-label="add">
+                        <AddIcon />
+                    </Fab>
+                </div>
+                <div className="products_list" spacing={3}>
+                    {tab}
+                </div>
+            </div>
+        </Container>
+    );
 }
