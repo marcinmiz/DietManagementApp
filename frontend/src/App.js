@@ -8,7 +8,7 @@ export default class App extends Component{
         super();
 
         this.state = {
-            loggedInStatus: "NOT_LOGGED_IN",
+            loggedInStatus: "LOGGED_IN",
             user: {}
         }
     }
