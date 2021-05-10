@@ -41,6 +41,83 @@ export default function Products () {
             {product_id: 3, product_name: "Orange", product_image: orange, product_category: "Fruit", product_author: "Paul Weasley", product_favourite: false}],
     });
 
+    const handleChange = (event) => {
+        setState({
+            ...state,
+            [event.target.name]: event.target.value,
+        });
+
+    };
+
+    const handleTab = (event, newValue) => {
+        setState({
+            ...state,
+            products_group: newValue,
+        });
+    };
+
+    const handleProduct = (event) => {
+        let destination;
+        if (event.target.parentElement.className === document.getElementsByClassName("product").item(0).className) {
+            destination = "/products/" + event.target.parentElement.id;
+        } else if (event.target.parentElement.parentElement.className === document.getElementsByClassName("product").item(0).className) {
+            destination = "/products/" + event.target.parentElement.parentElement.id;
+        } else {
+            destination = "/products/" + event.target.id;
+        }
+        history.push(destination);
+    };
+
+    const handleCategory = (event) => {
+        event.cancelBubble = true;
+        if(event.stopPropagation) event.stopPropagation();
+        console.info("Category");
+    };
+
+    const handleAuthor = (event) => {
+        event.cancelBubble = true;
+        if(event.stopPropagation) event.stopPropagation();
+        console.info("Author");
+    };
+
+    const handleFavouriteIcon = (product_id) => {
+        let index = 0, products_quantity = state.products.length;
+        while (index < products_quantity) {
+            if (state.products[index].product_id === product_id) {
+                break;
+            }
+            index += 1;
+        }
+        if (state.products[index].product_favourite) {
+            return(
+                    <FavoriteIcon fontSize="small"/>
+            );
+        } else {
+            return(
+                    <FavoriteBorderIcon fontSize="small"/>
+            )
+        }
+    }
+
+    // const handleAddToFavourite = (product_id) => {
+    //     let index = 0, products_quantity = state.products.length;
+    //     while (index < products_quantity) {
+    //         if (state.products[index].product_id === product_id) {
+    //             break;
+    //         }
+    //         index += 1;
+    //     }
+    //     const product_favourite = !state.products[index].product_favourite;
+    //     const values = [{
+    //         ...state.products[index],
+    //         "product_favourite": product_favourite
+    //     }];
+    //     setState({
+    //         ...state,
+    //         "products": [...state.products, values]
+    //     });
+    // }
+
     let tab;
 
     if (state.products_group === 0) {
@@ -53,7 +130,7 @@ export default function Products () {
 
     tab = <Grid container className="products_list" spacing={1}>
         { state.products.map((product, index) => (
-            <Grid item id={product.product_id} className="product">
+            <Grid item id={product.product_id} className="product" onClick={handleProduct}>
                 <div className="product_image_container">
                     <img src={product.product_image} alt={product.product_name} className="product_image"/>
                 </div>
@@ -67,9 +144,10 @@ export default function Products () {
                             size="small"
                             avatar={<CategoryIcon/>}
                             label={product.product_category}
+                            onClick={handleCategory}
                         />
                     </div>
-                    <div className="product_author">
+                    <div className="product_author" onClick={handleAuthor}>
                         <Avatar/>
                         <div className="product_author_name">{product.product_author}</div>
                     </div>
@@ -87,6 +165,7 @@ export default function Products () {
                     </Tooltip>
                     <Tooltip title="Change favourite status" aria-label="Change favourite status">
                         <IconButton aria-label="Change favourite status" className="product_icon_button" disabled>
+                            {handleFavouriteIcon(product.product_id)}
                         </IconButton>
                     </Tooltip>
                 </div>
@@ -104,6 +183,7 @@ export default function Products () {
                             value={state.products_group}
                             indicatorColor="primary"
                             textColor="inherit"
+                            onChange={handleTab}
                             aria-label="product groups buttons"
                         >
                             <Tab className="product_group_tab" label="All" />
@@ -119,6 +199,7 @@ export default function Products () {
                                     className="search_input"
                                     placeholder="Type product name"
                                     value={state.search}
+                                    onChange={handleChange}
                                 />
                             </FormControl>
                             <FormControl variant="filled" className={classes.formControl}>
@@ -129,6 +210,7 @@ export default function Products () {
                                     className="category_select"
                                     name="category"
                                     value={state.category}
+                                    onChange={handleChange}
                                 >
                                     <MenuItem value="Fruit">Fruit</MenuItem>
                                     <MenuItem value="Vegetables">Vegetables</MenuItem>
