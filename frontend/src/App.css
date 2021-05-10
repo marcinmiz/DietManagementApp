@@ -313,3 +313,51 @@
         width: 24%;
     }
 }
+
+.add_ingredient {
+    display: flex;
+    align-items: center;
+}
+
+.product_selected {
+    position: absolute;
+    top: 29%;
+    left: 33%;
+    width: 35vw;
+    height: 40vh;
+    z-index: 100;
+    transition: all 2s ease-in-out;
+}
+
+.product_selected_element {
+    margin: 5px;
+}
+
+.product_selected_moved {
+    transform: scale(2);
+}
+
+.product_selected_element_moved {
+    transform: scale(0.6);
+}
+
+.background_blur {
+    filter: blur(3px);
+}
+
+.edit_mode {
+    background-color: rgb(102, 120, 135) !important;
+}
+
+.product_edit_form {
+    display: inherit;
+    width: 100%;
+}
+
+.ingredient_edit {
+    display: flex;
+}
+
+.product_details_edit {
+    width: 150% !important;
+}

@@ -1,33 +1,38 @@
 import React from 'react'
 import {Switch, Route, Redirect} from 'react-router-dom'
+import Products from "../pages/Products";
+import ProductsDetails from "../pages/ProductsDetails";
 
 export default function PageRoutes () {
 
-        return (
+    return (
             <div>
                 <Switch>
-                    <Route exaxct path="/now">
+                    <Route exact path="/now">
                         Now
                     </Route>
-                    <Route path="/products">
-                        Products
+                    <Route exact path="/products">
+                        <Products/>
                     </Route>
-                    <Route path="/recipes">
+                    <Route exact path="/products/([1-9][1-9]*)">
+                        <ProductsDetails/>
+                    </Route>
+                    <Route exact path="/recipes">
                         Recipes
                     </Route>
-                    <Route path="/programmes">
+                    <Route exact path="/programmes">
                         Dietary Programmes
                     </Route>
-                    <Route path="/preferences">
+                    <Route exact path="/preferences">
                         Dietary Preferences
                     </Route>
-                    <Route path="/menus">
+                    <Route exact path="/menus">
                         Daily menus
                     </Route>
-                    <Route path="/shopping">
+                    <Route exact path="/shopping">
                         Shopping lists
                     </Route>
-                    <Route path="/settings">
+                    <Route exact path="/settings">
                         Settings
                     </Route>
                     <Route path="*">
@@ -36,5 +41,4 @@ export default function PageRoutes () {
                 </Switch>
             </div>
     );
-    // }
 }
