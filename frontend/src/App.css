@@ -203,6 +203,34 @@
     margin-left: 0.5rem;
 }
 
+.product_details {
+    background-color: #5e98b3;
+    display: flex;
+    padding: 5px;
+    border-radius: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 108%;
+}
+
+.nutrients, .ingredients{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    width: fit-content;
+}
+
+.nutrient, .ingredient {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nutrient_unit, .nutrient_amount,.ingredient_unit, .ingredient_amount {
+    margin-left: 0.5rem;
+}
+
 .product_buttons {
     display: flex;
     align-items: center;
