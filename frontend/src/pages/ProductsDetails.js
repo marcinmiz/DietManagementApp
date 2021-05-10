@@ -50,6 +50,121 @@ export default function ProductsDetails () {
 
     let current_product, tab;
 
+    useEffect(() => {
+        document.getElementById(state.selected_product[0].product_id).classList.add("product_selected_moved")
+    }, )
+
+    const handleChangeProductId = (event) => {
+            console.log(event);
+        const values = [{
+            ...state.selected_product[0],
+            [event.target.name]: event.target.value
+        }];
+        setState({
+            ...state,
+            "selected_product": values
+        });
+    };
+
+    const handleEdit = () => {
+        if (state.mode === "view")
+        {
+            setState({
+                ...state,
+                mode: "edit",
+            });
+        } else {
+            setState({
+                ...state,
+                mode: "view",
+            });
+        }
+
+    }
+
+    const handleClose = () => {
+        document.getElementById(state.selected_product[0].product_id).classList.remove("product_selected_moved");
+        setTimeout(() => history.push("/products"), 2000);
+    }
+
+    const handleChangeIngredient = (event, index) => {
+        if (event.target.name === "product_add_ingredient") {
+            setState({
+                ...state,
+                "product_add_ingredient": event.target.value
+            });
+        } else {
+            const values = [...state.product_ingredients];
+            values[index][1] = Number(event.target.value);
+            setState({
+                ...state,
+                "product_ingredients": values
+            });
+        }
+    }
+
+    const handleChangeNutrient = (index, event) => {
+        const values = [...state.product_nutrients];
+        values[index].nutrient_amount = Number(event.target.value);
+        setState({
+            ...state,
+            "product_nutrients": values
+        });
+    }
+
+    const handleAddIngredient = () => {
+        setState({
+            ...state,
+            "product_ingredients": [...state.product_ingredients, [state.product_add_ingredient,""]]
+        });
+    }
+
+    const handleDeleteIngredient = (index) => {
+        const values = [...state.product_ingredients];
+        values.splice(index, 1);
+        setState({
+            ...state,
+            "product_ingredients": values
+        });
+    }
+
+    const handleDelete = () => {
+        handleClose();
+    }
+
+    const handleFavouriteIcon = () => {
+        if (state.selected_product[0].product_favourite) {
+            return(<Tooltip title="Remove from favourite" aria-label="Remove from favourite">
+                <IconButton aria-label="Remove from favourite" className="product_icon_button" onClick={handleAddToFavourite}>
+                    <FavoriteIcon fontSize="small"/>
+                </IconButton>
+            </Tooltip>);
+        } else {
+            return(<Tooltip title="Add to favourite" aria-label="Add to favourite">
+                <IconButton aria-label="Add to favourite" className="product_icon_button" onClick={handleAddToFavourite}>
+                    <FavoriteBorderIcon fontSize="small"/>
+                </IconButton>
+            </Tooltip>);
+        }
+    }
+
+    const handleAddToFavourite = () => {
+        const product_favourite = !state.selected_product[0].product_favourite;
+        const values = [{
+            ...state.selected_product[0],
+            "product_favourite": product_favourite
+        }];
+        setState({
+            ...state,
+            "selected_product": values
+        });
+    }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        console.log("InputFields", state);
+    }
+
     if (state.mode === 'view') {
         current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
             <div className="product_image_container product_selected_element">
@@ -100,7 +215,7 @@ export default function ProductsDetails () {
             </div>
             <div className="product_buttons">
                 <Tooltip title="Close" aria-label="close">
-                    <IconButton aria-label="close" className="product_icon_button">
+                    <IconButton aria-label="close" className="product_icon_button" onClick={handleClose}>
                         <CloseIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
@@ -110,20 +225,22 @@ export default function ProductsDetails () {
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Edit" aria-label="edit">
-                    <IconButton aria-label="edit" className="product_icon_button">
+                    <IconButton aria-label="edit" className="product_icon_button" onClick={handleEdit}>
                         <EditIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
+                {handleFavouriteIcon()}
             </div>
         </div>;
     } else {
         current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
-            <form className="product_edit_form" >
+            <form className="product_edit_form" onSubmit={(event) => handleSubmit(event)}>
             <div className="product_image_container product_selected_element product_selected_element_moved">
                 <Input
                     type="file"
                     name="product_image"
                     value={state.selected_product[0].product_image}
+                    onChange={handleChangeProductId}
                 ></Input>
                 {/*<img src={state.selected_product[0].product_image} alt={state.selected_product[0].product_name} className="product_image"/>*/}
             </div>
@@ -137,6 +254,7 @@ export default function ProductsDetails () {
                                 name="product_name"
                                 className="product_name"
                                 value={state.selected_product[0].product_name}
+                                onChange={handleChangeProductId}
                         />
                         </FormControl>
                     </div>
@@ -150,6 +268,7 @@ export default function ProductsDetails () {
                                 name="product_category"
                                 value={state.selected_product[0].product_category}
                                 size="small"
+                                onChange={handleChangeProductId}
                             >
                                 <MenuItem value="Fruit">Fruit</MenuItem>
                                 <MenuItem value="Vegetables">Vegetables</MenuItem>
@@ -167,6 +286,7 @@ export default function ProductsDetails () {
                                 name="product_author"
                                 value={state.selected_product[0].product_author}
                                 size="small"
+                                onChange={handleChangeProductId}
                             >
                                 <MenuItem value="Daniel Fog">Daniel Fog</MenuItem>
                                 <MenuItem value="Sara Bedrock">Sara Bedrock</MenuItem>
@@ -194,6 +314,7 @@ export default function ProductsDetails () {
                                             <div>{nutrient.nutrient_unit}</div>
                                         </InputAdornment>,
                                     }}
+                                    onChange={event => handleChangeNutrient(index, event)}
                                 />
                             </div>
                         ))}
@@ -217,9 +338,10 @@ export default function ProductsDetails () {
                                                     <div>%</div>
                                                 </InputAdornment>,
                                         }}
+                                        onChange={event => handleChangeIngredient(event, index)}
                                     />
                                     <Tooltip title="Delete ingredient" aria-label="delete ingredient">
-                                        <IconButton aria-label="delete ingredient" className="product_icon_button">
+                                        <IconButton aria-label="delete ingredient" className="product_icon_button" onClick={() => handleDeleteIngredient(index)}>
                                             <DeleteIcon fontSize="small"/>
                                         </IconButton>
                                     </Tooltip>
@@ -233,9 +355,10 @@ export default function ProductsDetails () {
                                 variant="standard"
                                 value={state.product_add_ingredient}
                                 size="small"
+                                onChange={event => handleChangeIngredient(event)}
                             />
                             <Tooltip title="Add ingredient" aria-label="add ingredient">
-                                <IconButton aria-label="add ingredient" className="product_icon_button" disabled={state.product_add_ingredient === ""}>
+                                <IconButton aria-label="add ingredient" className="product_icon_button" onClick={handleAddIngredient} disabled={state.product_add_ingredient === ""}>
                                     <AddIcon fontSize="large"/>
                                 </IconButton>
                             </Tooltip>
@@ -243,26 +366,27 @@ export default function ProductsDetails () {
                     </div>
                 </div>
                 <div>
-                    <Button variant="text" color="inherit">Cancel</Button>
+                    <Button variant="text" color="inherit" onClick={handleClose}>Cancel</Button>
                     <Button variant="text" color="inherit" type="submit">Save</Button>
                 </div>
             </div>
             <div className="product_buttons">
                 <Tooltip title="Close" aria-label="close">
-                    <IconButton aria-label="close" className="product_icon_button">
+                    <IconButton aria-label="close" className="product_icon_button" onClick={handleClose}>
                         <CloseIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete" aria-label="delete">
-                    <IconButton aria-label="delete" className="product_icon_button">
+                    <IconButton aria-label="delete" className="product_icon_button" onClick={handleDelete}>
                         <DeleteIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Edit" aria-label="edit">
-                    <IconButton aria-label="edit" className="product_icon_button edit_mode">
+                    <IconButton aria-label="edit" className="product_icon_button edit_mode" onClick={handleEdit}>
                         <EditIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
+                {handleFavouriteIcon()}
             </div>
             </form>
         </div>;
