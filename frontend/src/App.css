@@ -282,3 +282,34 @@
         left: 15%;
     }
 }
+
+@media (min-width: 600px) {
+    .product_group_tab {
+        min-width: fit-content !important;
+    }
+}
+
+@media screen and (min-width: 760px) {
+    .toolbar_container {
+        flex-direction: row;
+    }
+    .products_list {
+        max-height: 75%;
+        justify-content: flex-start;
+    }
+    .product {
+        width: 49%;
+    }
+}
+
+@media screen and (min-width: 1160px) {
+    .product {
+        width: 32%;
+    }
+}
+
+@media screen and (min-width: 1525px) {
+    .product {
+        width: 24%;
+    }
+}
