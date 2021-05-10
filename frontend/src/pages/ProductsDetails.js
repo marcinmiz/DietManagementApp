@@ -116,5 +116,155 @@ export default function ProductsDetails () {
                 </Tooltip>
             </div>
         </div>;
+    } else {
+        current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
+            <form className="product_edit_form" >
+            <div className="product_image_container product_selected_element product_selected_element_moved">
+                <Input
+                    type="file"
+                    name="product_image"
+                    value={state.selected_product[0].product_image}
+                ></Input>
+                {/*<img src={state.selected_product[0].product_image} alt={state.selected_product[0].product_name} className="product_image"/>*/}
+            </div>
+
+            <div className="product_description product_selected_element product_selected_element_moved">
+                <div className="product_id">
+                    <div className="product_name product_selected_element">
+                        <FormControl>
+                            <InputLabel id="product_name_label" className="product_name">Product name</InputLabel>
+                            <FilledInput
+                                name="product_name"
+                                className="product_name"
+                                value={state.selected_product[0].product_name}
+                        />
+                        </FormControl>
+                    </div>
+                    <div className="product_category product_selected_element">
+                        <FormControl variant="filled">
+                            <InputLabel id="category_select_label" className="category_select">Category</InputLabel>
+                            <Select
+                                labelId="category_select_label"
+                                id="category_select"
+                                className="category_select"
+                                name="product_category"
+                                value={state.selected_product[0].product_category}
+                                size="small"
+                            >
+                                <MenuItem value="Fruit">Fruit</MenuItem>
+                                <MenuItem value="Vegetables">Vegetables</MenuItem>
+                                <MenuItem value="Dairy">Dairy</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div className="product_author product_selected_element">
+                        <FormControl variant="filled">
+                            <InputLabel id="author_select_label" className="author_select">Category</InputLabel>
+                            <Select
+                                labelId="author_select_label"
+                                id="author_select"
+                                className="author_select"
+                                name="product_author"
+                                value={state.selected_product[0].product_author}
+                                size="small"
+                            >
+                                <MenuItem value="Daniel Fog">Daniel Fog</MenuItem>
+                                <MenuItem value="Sara Bedrock">Sara Bedrock</MenuItem>
+                                <MenuItem value="Paul Weasley">Paul Weasley</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </div>
+                </div>
+                <div className="product_details product_selected_element product_details_edit">
+                    <div className="nutrients">
+                        <h4>Nutrients</h4>
+                        { state.product_nutrients.map((nutrient, index) => (
+                            <div key={index}>
+                                <TextField
+                                    name={nutrient.nutrient_name}
+                                    label={nutrient.nutrient_name}
+                                    type="number"
+                                    variant="filled"
+                                    value={nutrient.nutrient_amount}
+                                    size="small"
+                                    aria-label={nutrient.nutrient_name}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment
+                                            position="end">
+                                            <div>{nutrient.nutrient_unit}</div>
+                                        </InputAdornment>,
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    <Divider orientation="vertical" flexItem variant='middle'/>
+                    <div className="ingredients">
+                        <div id="ingredients_list">
+                            <h4>Ingredients</h4>
+                            { state.product_ingredients.map((ingredient, index) => (
+                                <div key={index} className="ingredient_edit">
+                                    <TextField
+                                        name={ingredient[0]}
+                                        label={ingredient[0]}
+                                        type="number"
+                                        variant="filled"
+                                        value={ingredient[1]}
+                                        size="small"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment
+                                                position="end">
+                                                    <div>%</div>
+                                                </InputAdornment>,
+                                        }}
+                                    />
+                                    <Tooltip title="Delete ingredient" aria-label="delete ingredient">
+                                        <IconButton aria-label="delete ingredient" className="product_icon_button">
+                                            <DeleteIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="add_ingredient">
+                            <TextField
+                                name="product_add_ingredient"
+                                label="Type ingredient name"
+                                variant="standard"
+                                value={state.product_add_ingredient}
+                                size="small"
+                            />
+                            <Tooltip title="Add ingredient" aria-label="add ingredient">
+                                <IconButton aria-label="add ingredient" className="product_icon_button"disabled={state.product_add_ingredient === ""}>
+                                    <AddIcon fontSize="large"/>
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <Button variant="text" color="inherit">Cancel</Button>
+                    <Button variant="text" color="inherit" type="submit">Save</Button>
+                </div>
+            </div>
+            <div className="product_buttons">
+                <Tooltip title="Close" aria-label="close">
+                    <IconButton aria-label="close" className="product_icon_button">
+                        <CloseIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete" aria-label="delete">
+                    <IconButton aria-label="delete" className="product_icon_button">
+                        <DeleteIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Edit" aria-label="edit">
+                    <IconButton aria-label="edit" className="product_icon_button edit_mode">
+                        <EditIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
+            </div>
+            </form>
+        </div>;
     }
 }
