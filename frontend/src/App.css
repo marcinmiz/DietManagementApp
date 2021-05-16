@@ -361,3 +361,19 @@
 .product_details_edit {
     width: 150% !important;
 }
+
+.upload_image {
+    width: 100%;
+}
+
+.upload_container {
+    display: flex;
+    width: 30%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload_container_image_added {
+    justify-content: space-between;
+}
