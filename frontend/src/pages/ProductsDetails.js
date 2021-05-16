@@ -77,6 +77,12 @@ export default function ProductsDetails (props) {
             ...state,
             "selected_product": values
         });
+        if (event.target.name === "product_name") {
+            //search products containing event.target.value in name
+            const products_existed = document.getElementsByClassName("products_existed_container")[0];
+            products_existed.style.display = "block";
+            setTimeout(() => products_existed.style.display = "none", 3000);
+        }
     };
 
     const handleEdit = () => {
@@ -254,6 +260,20 @@ export default function ProductsDetails (props) {
             </div>;
         } else {
             current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
+                <div className="products_existed_container product_selected_element_moved">
+                    <h3>Products yet existed</h3>
+                    <div className="product_existed">Cow's milk</div>
+                    <Divider variant="middle"/>
+                    <div className="product_existed">Goat's milk</div>
+                    <Divider variant="middle"/>
+                    <div className="product_existed">Almond milk</div>
+                    <Divider variant="middle"/>
+                    <div className="product_existed">Coconut milk</div>
+                    <Divider variant="middle"/>
+                    <div className="product_existed">Soy milk</div>
+                    <Divider variant="middle"/>
+                    <div className="product_existed">Oat milk</div>
+                </div>
                 <form className="product_edit_form" onSubmit={(event) => handleSubmit(event)}>
                     <UploadImages submitted={state.submitted} handleImageUploadFinished={() => handleImageUploadFinished()}/>
 

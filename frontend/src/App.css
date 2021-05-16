@@ -377,3 +377,25 @@
 .upload_container_image_added {
     justify-content: space-between;
 }
+
+.form_control {
+    min-width: 7vw !important;
+}
+
+.products_existed_container {
+    display: none;
+    position: inherit;
+    top: 0;
+    left: 0;
+    width: 35%;
+    background-color: red;
+    z-index: 100;
+    cursor: auto;
+    border-radius: 5px;
+    padding: 2%;
+    transition: display 2s ease-in-out;
+}
+
+.product_existed {
+    margin: 2% 0;
+}
