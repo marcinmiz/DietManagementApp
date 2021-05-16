@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import CategoryIcon from '@material-ui/icons/Category';
 import { MenuItem, Grid, Container, makeStyles, Tooltip} from '@material-ui/core';
 import Select from '@material-ui/core/Select';
@@ -41,6 +41,15 @@ export default function Products () {
             {product_id: 3, product_name: "Orange", product_image: orange, product_category: "Fruit", product_author: "Paul Weasley", product_favourite: false}],
     });
 
+    useEffect(
+        () => {
+            // setState({
+            //     ...state,
+            //     products: [{product_id: 4, product_name: "Yoghurt", product_image: red_apple, product_category: "Dairy", product_author: "Paul Weasley", product_favourite: true}],
+            // });
+        }, [state.products_group]
+    );
+
     const handleChange = (event) => {
         setState({
             ...state,
@@ -56,15 +65,8 @@ export default function Products () {
         });
     };
 
-    const handleProduct = (event) => {
-        let destination;
-        if (event.target.parentElement.className === document.getElementsByClassName("product").item(0).className) {
-            destination = "/products/" + event.target.parentElement.id;
-        } else if (event.target.parentElement.parentElement.className === document.getElementsByClassName("product").item(0).className) {
-            destination = "/products/" + event.target.parentElement.parentElement.id;
-        } else {
-            destination = "/products/" + event.target.id;
-        }
+    const handleProduct = (event, product_id) => {
+        let destination = "/products/" + product_id + "/view";
         history.push(destination);
     };
 
@@ -90,33 +92,36 @@ export default function Products () {
         }
         if (state.products[index].product_favourite) {
             return(
-                    <FavoriteIcon fontSize="small"/>
+                <Tooltip title="Remove from favourite" aria-label="Remove from favourite">
+                    <IconButton aria-label="Remove from favourite" className="product_icon_button" onClick={event => handleAddToFavourite(event, index, product_id)}>
+                        <FavoriteIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
             );
         } else {
             return(
-                    <FavoriteBorderIcon fontSize="small"/>
+                <Tooltip title="Add to favourite" aria-label="Add to favourite">
+                    <IconButton aria-label="Add to favourite" className="product_icon_button" onClick={event => handleAddToFavourite(event, index, product_id)}>
+                        <FavoriteBorderIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
             )
         }
     }
 
-    // const handleAddToFavourite = (product_id) => {
-    //     let index = 0, products_quantity = state.products.length;
-    //     while (index < products_quantity) {
-    //         if (state.products[index].product_id === product_id) {
-    //             break;
-    //         }
-    //         index += 1;
-    //     }
-    //     const product_favourite = !state.products[index].product_favourite;
-    //     const values = [{
-    //         ...state.products[index],
-    //         "product_favourite": product_favourite
-    //     }];
-    //     setState({
-    //         ...state,
-    //         "products": [...state.products, values]
-    //     });
-    // }
+    const handleAddToFavourite = (event, index, product_id) => {
+        event.cancelBubble = true;
+        if(event.stopPropagation) event.stopPropagation();
+        const product_favourite = !state.products[index].product_favourite;
+        const product = {
+            ...state.products[index],
+            "product_favourite": product_favourite
+        };
+        setState({
+            ...state,
+            "products": [...state.products.slice(0, index), product, ...state.products.slice(index + 1)]
+        });
+    }
 
     let tab;
 
@@ -130,7 +135,7 @@ export default function Products () {
 
     tab = <Grid container className="products_list" spacing={1}>
         { state.products.map((product, index) => (
-            <Grid item id={product.product_id} className="product" onClick={handleProduct}>
+            <Grid item key={index} id={product.product_id} className="product" onClick={event => handleProduct(event, product.product_id)}>
                 <div className="product_image_container">
                     <img src={product.product_image} alt={product.product_name} className="product_image"/>
                 </div>
@@ -159,15 +164,11 @@ export default function Products () {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Edit" aria-label="edit">
-                        <IconButton aria-label="edit" className="product_icon_button">
+                        <IconButton type="button" aria-label="edit" className="product_icon_button" onClick={(event) => handleEdit(event, product.product_id)}>
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Change favourite status" aria-label="Change favourite status">
-                        <IconButton aria-label="Change favourite status" className="product_icon_button" disabled>
-                            {handleFavouriteIcon(product.product_id)}
-                        </IconButton>
-                    </Tooltip>
+                    {handleFavouriteIcon(product.product_id)}
                 </div>
             </Grid>
         ))}
