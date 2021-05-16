@@ -1,9 +1,9 @@
-import React, {Component}  from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import Authentication from "./pages/Authentication";
 import UserDashboard from "./UserDashboard";
 
-export default class App extends Component{
+export default class App extends Component {
     constructor() {
         super();
 
@@ -13,19 +13,19 @@ export default class App extends Component{
         }
     }
 
-  render() {
-        if(this.state.loggedInStatus === "NOT_LOGGED_IN") {
-            return(
+    render() {
+        if (this.state.loggedInStatus === "NOT_LOGGED_IN") {
+            return (
                 <div className="App App_content">
                     <Authentication loggedInStatus={this.state.loggedInStatus}/>
                 </div>
             );
         } else {
-                return(
-                    <div className="App App_content">
-                        <UserDashboard props={this.props} loggedInStatus={this.state.loggedInStatus}/>
-                    </div>
-                    );
+            return (
+                <div className="App App_content">
+                    <UserDashboard props={this.props} loggedInStatus={this.state.loggedInStatus}/>
+                </div>
+            );
         }
-  }
+    }
 }

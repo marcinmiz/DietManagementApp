@@ -1,157 +1,169 @@
 package agh.edu.pl.diet.entities;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "product")
-public class Product
-{
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+public class Product {
 
-	@NotNull
-	private String title;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String title;
+    private String note;
+    private String calories;
+    //	private String publicationDate;
+//	private String language;
+    private String category;
+    private String totalFat;
+    private String totalCarbohydrate;
+    private String protein;
+    private String sodium;
+    private boolean active = true;
 
-	@NotNull
-	private String note;
+//	@Column(columnDefinition="text")
+//	private String description;
+//	private int inStockNumber;
 
-	@NotNull
-	private String calories;
+    @Transient
+    private MultipartFile bookImage;
 
-	@NotNull
-	private String totalFat;
 
-	@NotNull
-	private String totalCarbohydrate;
+//	@OneToMany(mappedBy = "product")
+//	@JsonIgnore
+//	private List<BookToCartItem> bookToCartItemList;
 
-	@NotNull
-	private String protein;
+    public Long getId() {
+        return id;
+    }
 
-	@NotNull
-	private String sodium;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	@NotNull
-	private Long userId;
+    public String getTitle() {
+        return title;
+    }
 
-	public Long getId()
-	{
-		return id;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public void setId(Long id)
-	{
-		this.id = id;
-	}
+    public String getNote() {
+        return note;
+    }
 
-	public String getTitle()
-	{
-		return title;
-	}
+    public void setNote(String note) {
+        this.note = note;
+    }
 
-	public void setTitle(String title)
-	{
-		this.title = title;
-	}
+    public String getCalories() {
+        return calories;
+    }
 
-	public String getNote()
-	{
-		return note;
-	}
+    public void setCalories(String calories) {
+        this.calories = calories;
+    }
 
-	public void setNote(String note)
-	{
-		this.note = note;
-	}
+//	public String getPublicationDate() {
+//		return publicationDate;
+//	}
+//
+//	public void setPublicationDate(String publicationDate) {
+//		this.publicationDate = publicationDate;
+//	}
+//
+//	public String getLanguage() {
+//		return language;
+//	}
+//
+//	public void setLanguage(String language) {
+//		this.language = language;
+//	}
 
-	public String getCalories() {
-		return calories;
-	}
+    public String getCategory() {
+        return category;
+    }
 
-	public void setCalories(String calories) {
-		this.calories = calories;
-	}
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
-	public String getTotalFat() {
-		return totalFat;
-	}
 
-	public void setTotalFat(String totalFat) {
-		this.totalFat = totalFat;
-	}
+    public String getTotalFat() {
+        return totalFat;
+    }
 
-	public String getTotalCarbohydrate() {
-		return totalCarbohydrate;
-	}
+    public void setTotalFat(String totalFat) {
+        this.totalFat = totalFat;
+    }
 
-	public void setTotalCarbohydrate(String totalCarbohydrate) {
-		this.totalCarbohydrate = totalCarbohydrate;
-	}
+    public String getTotalCarbohydrate() {
+        return totalCarbohydrate;
+    }
 
-	public String getProtein() {
-		return protein;
-	}
+    public void setTotalCarbohydrate(String totalCarbohydrate) {
+        this.totalCarbohydrate = totalCarbohydrate;
+    }
 
-	public void setProtein(String protein) {
-		this.protein = protein;
-	}
+    public String getProtein() {
+        return protein;
+    }
 
-	public String getSodium() {
-		return sodium;
-	}
+    public void setProtein(String protein) {
+        this.protein = protein;
+    }
 
-	public void setSodium(String sodium) {
-		this.sodium = sodium;
-	}
+    public String getSodium() {
+        return sodium;
+    }
 
-	public Long getUserId()
-	{
-		return userId;
-	}
+    public void setSodium(String sodium) {
+        this.sodium = sodium;
+    }
 
-	public void setUserId(Long userId)
-	{
-		this.userId = userId;
-	}
+    public boolean isActive() {
+        return active;
+    }
 
-	@Override
-	public String toString()
-	{
-		return "Product{" +
-				"id=" + id +
-				", title='" + title + '\'' +
-				", note='" + note + '\'' +
-				", product='" + calories + '\'' +
-				", product='" + totalFat + '\'' +
-				", product='" + totalCarbohydrate + '\'' +
-				", product='" + protein + '\'' +
-				", product='" + sodium + '\'' +
-				", userId=" + userId +
-				'}';
-	}
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
-	@Override
-	public boolean equals(Object o)
-	{
-		if(this == o) return true;
-		if(o == null || getClass() != o.getClass()) return false;
-		Product product1 = (Product) o;
-		return Objects.equals(getId(), product1.getId()) &&
-				Objects.equals(getTitle(), product1.getTitle()) &&
-				Objects.equals(getNote(), product1.getNote()) &&
-				Objects.equals(getCalories(), product1.getCalories()) &&
-				Objects.equals(getTotalFat(), product1.getTotalFat()) &&
-				Objects.equals(getTotalCarbohydrate(), product1.getTotalCarbohydrate()) &&
-				Objects.equals(getProtein(), product1.getProtein()) &&
-				Objects.equals(getSodium(), product1.getSodium()) &&
-				Objects.equals(getUserId(), product1.getUserId());
-	}
+//	public int getInStockNumber() {
+//		return inStockNumber;
+//	}
+//
+//	public void setInStockNumber(int inStockNumber) {
+//		this.inStockNumber = inStockNumber;
+//	}
 
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(getId(), getTitle(), getNote(), getCalories(), getTotalFat(), getTotalCarbohydrate(), getProtein(), getSodium(), getUserId());
-	}
+    public MultipartFile getBookImage() {
+        return bookImage;
+    }
+
+    public void setBookImage(MultipartFile bookImage) {
+        this.bookImage = bookImage;
+    }
+
+//	public List<BookToCartItem> getBookToCartItemList() {
+//		return bookToCartItemList;
+//	}
+//
+//	public void setBookToCartItemList(List<BookToCartItem> bookToCartItemList) {
+//		this.bookToCartItemList = bookToCartItemList;
+//	}
+
+
 }

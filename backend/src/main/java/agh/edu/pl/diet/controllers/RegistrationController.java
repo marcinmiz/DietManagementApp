@@ -1,6 +1,5 @@
 package agh.edu.pl.diet.controllers;
 
-import agh.edu.pl.diet.entities.Role;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,32 +11,29 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.util.Collections;
 
 @Controller
-public class RegistrationController
-{
-	@Autowired
-	private UserRepo userRepo;
+public class RegistrationController {
+    @Autowired
+    private UserRepo userRepo;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@GetMapping("/registration")
-	public String registration()
-	{
-		return "registration";
-	}
+    @GetMapping("/registration")
+    public String registration() {
+        return "registration";
+    }
 
-	@PostMapping("/registration")
-	public String addUser(String name, String username, String password)
-	{
-		User user = new User();
-		user.setName(name);
-		user.setUsername(username);
-		user.setPassword(passwordEncoder.encode(password));
-		user.setActive(true);
-		user.setRoles(Collections.singleton(Role.USER));
+    @PostMapping("/registration")
+    public String addUser(String name, String username, String password) {
+        User user = new User();
+        user.setUsername(name);
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setEnabled(true);
+        //user.setRoles(Collections.singleton(Role.USER));
 
-		userRepo.save(user);
+        userRepo.save(user);
 
-		return "redirect:/login";
-	}
+        return "redirect:/login";
+    }
 }

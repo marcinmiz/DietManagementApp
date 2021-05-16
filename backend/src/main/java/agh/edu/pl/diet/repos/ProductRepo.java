@@ -1,15 +1,8 @@
 package agh.edu.pl.diet.repos;
 
 import agh.edu.pl.diet.entities.Product;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
+public interface ProductRepo extends CrudRepository<Product, Long> {
 
-@Service
-@Repository
-public interface ProductRepo extends JpaRepository<Product, Long>
-{
-    List<Product> findByUserId(Long userId);
 }

@@ -1,14 +1,17 @@
 package agh.edu.pl.diet.config;
 
 import agh.edu.pl.diet.repos.UserRepo;
-import agh.edu.pl.diet.services.AuthProvider;
+import agh.edu.pl.diet.services.impl.AuthProvider;
+import agh.edu.pl.diet.services.impl.UserSecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -24,84 +27,107 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.Filter;
 
+
 @Configuration
 @EnableWebSecurity
 @EnableOAuth2Client
-public class SecurityConfig extends WebSecurityConfigurerAdapter
-{
-	@Autowired
-	private AuthProvider authProvider;
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private Environment env;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserSecurityService userSecurityService;
 
-	@Autowired
-	private OAuth2ClientContext oAuth2ClientContext;
+    @Autowired
+    private AuthProvider authProvider;
 
-	@Autowired
-	private UserRepo userRepo;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@Bean
-	PasswordEncoder passwordEncoder()
-	{
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		return passwordEncoder;
-	}
+    @Autowired
+    private OAuth2ClientContext oAuth2ClientContext;
 
-	@Bean
-	@ConfigurationProperties("google.client")
-	public AuthorizationCodeResourceDetails google()
-	{
-		return new AuthorizationCodeResourceDetails();
-	}
+    @Autowired
+    private UserRepo userRepo;
 
-	@Bean
-	@ConfigurationProperties("google.resource")
-	public ResourceServerProperties googleResource()
-	{
-		return new ResourceServerProperties();
-	}
+    private static final String[] PUBLIC_MATCHERS = {
+            "/css/**",
+            "/js/**",
+            "/image/**",
+            "/newUser",
+            "/forgetPassword",
+            "/fonts/**",
+            "/resources/**",
+            "/",
+            "/login**",
+            "/registration"
 
-	@Bean
-	public FilterRegistrationBean oAuth2ClientFilterRegistration(OAuth2ClientContextFilter oAuth2ClientContextFilter)
-	{
-		FilterRegistrationBean registration = new FilterRegistrationBean();
-		registration.setFilter(oAuth2ClientContextFilter);
-		registration.setOrder(-100);
-		return registration;
-	}
+    };
 
-	private Filter ssoFilter()
-	{
-		OAuth2ClientAuthenticationProcessingFilter googleFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/google");
-		OAuth2RestTemplate googleTemplate = new OAuth2RestTemplate(google(), oAuth2ClientContext);
-		googleFilter.setRestTemplate(googleTemplate);
-		CustomUserInfoTokenServices tokenServices = new CustomUserInfoTokenServices(googleResource().getUserInfoUri(), google().getClientId());
-		tokenServices.setRestTemplate(googleTemplate);
-		googleFilter.setTokenServices(tokenServices);
-		tokenServices.setUserRepo(userRepo);
-		tokenServices.setPasswordEncoder(passwordEncoder);
-		return googleFilter;
-	}
+    public SecurityConfig() {
+    }
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception
-	{
-		http
-				.authorizeRequests()
-				.antMatchers("/resources/**", "/", "/login**", "/registration").permitAll()
-				.anyRequest().authenticated()
-				.and().formLogin().loginPage("/login")
-				.defaultSuccessUrl("/products").failureUrl("/login?error").permitAll()
-				.and().logout().logoutSuccessUrl("/").permitAll();
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder;
+    }
 
-		http
-				.addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class);
-	}
+    @Bean
+    @ConfigurationProperties("google.client")
+    public AuthorizationCodeResourceDetails google() {
+        return new AuthorizationCodeResourceDetails();
+    }
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth)
-	{
-		auth.authenticationProvider(authProvider);
-	}
+    @Bean
+    @ConfigurationProperties("google.resource")
+    public ResourceServerProperties googleResource() {
+        return new ResourceServerProperties();
+    }
+
+    @Bean
+    public FilterRegistrationBean oAuth2ClientFilterRegistration(OAuth2ClientContextFilter oAuth2ClientContextFilter) {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(oAuth2ClientContextFilter);
+        registration.setOrder(-100);
+        return registration;
+    }
+
+    private Filter ssoFilter() {
+        OAuth2ClientAuthenticationProcessingFilter googleFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/google");
+        OAuth2RestTemplate googleTemplate = new OAuth2RestTemplate(google(), oAuth2ClientContext);
+        googleFilter.setRestTemplate(googleTemplate);
+        CustomUserInfoTokenServices tokenServices = new CustomUserInfoTokenServices(googleResource().getUserInfoUri(), google().getClientId());
+        tokenServices.setRestTemplate(googleTemplate);
+        googleFilter.setTokenServices(tokenServices);
+        tokenServices.setUserRepo(userRepo);
+        tokenServices.setPasswordEncoder(passwordEncoder);
+        return googleFilter;
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                //.csrf().disable().cors().disable()
+                .authorizeRequests()
+                .antMatchers(PUBLIC_MATCHERS).permitAll()
+                .anyRequest().authenticated()
+                .and().formLogin().loginPage("/login")
+                .defaultSuccessUrl("/products").failureUrl("/login?error").permitAll()
+                .and().logout().logoutSuccessUrl("/").permitAll();
+
+        http
+                .addFilterBefore(ssoFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authProvider);
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userSecurityService).passwordEncoder(passwordEncoder());
+    }
 }
