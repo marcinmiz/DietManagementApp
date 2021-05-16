@@ -5,17 +5,15 @@ import ProductsDetails from "../pages/ProductsDetails";
 
 export default function PageRoutes () {
 
-    return (
+        return (
             <div>
                 <Switch>
                     <Route exact path="/now">
                         Now
                     </Route>
-                    <Route exact path="/products">
-                        <Products/>
+                    <Route exact path="/products" component={Products}>
                     </Route>
-                    <Route exact path="/products/([1-9][1-9]*)">
-                        <ProductsDetails/>
+                    <Route exact path="/products/:id/:mode" component={ProductsDetails}>
                     </Route>
                     <Route exact path="/recipes">
                         Recipes

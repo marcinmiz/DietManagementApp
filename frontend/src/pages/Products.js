@@ -123,6 +123,16 @@ export default function Products () {
         });
     }
 
+    const handleEdit = (event, product_id) => {
+        event.cancelBubble = true;
+        if(event.stopPropagation) event.stopPropagation();
+        history.push('/products/' + product_id + '/edit');
+    }
+
+    const handleAddNewProduct = () => {
+        history.push('/products/new/edit');
+    }
+
     let tab;
 
     if (state.products_group === 0) {
@@ -219,7 +229,7 @@ export default function Products () {
                                 </Select>
                             </FormControl>
                         </div>
-                        <Fab className="add_button" aria-label="add">
+                        <Fab className="add_button" aria-label="add" onClick={handleAddNewProduct}>
                             <AddIcon />
                         </Fab>
                     </div>
