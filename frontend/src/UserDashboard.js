@@ -5,9 +5,6 @@ import UserBottomNavigation from "./components/UserBottomNavigation"
 import { Container } from '@material-ui/core';
 
 export default class UserDashboard extends Component {
-    constructor(props) {
-        super(props);
-    }
 
         render() {
         return (
