@@ -1,18 +1,8 @@
 package agh.edu.pl.diet.entities;
 
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
-
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.*;
 
 @Entity
 public class Product {
@@ -20,8 +10,8 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String title;
-    private String note;
+    private String productName;
+    private String productAuthor;
     private String calories;
     //	private String publicationDate;
 //	private String language;
@@ -37,7 +27,7 @@ public class Product {
 //	private int inStockNumber;
 
     @Transient
-    private MultipartFile bookImage;
+    private MultipartFile productImage;
 
 
 //	@OneToMany(mappedBy = "product")
@@ -52,20 +42,20 @@ public class Product {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public String getNote() {
-        return note;
+    public String getProductAuthor() {
+        return productAuthor;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setProductAuthor(String productAuthor) {
+        this.productAuthor = productAuthor;
     }
 
     public String getCalories() {
@@ -149,12 +139,12 @@ public class Product {
 //		this.inStockNumber = inStockNumber;
 //	}
 
-    public MultipartFile getBookImage() {
-        return bookImage;
+    public MultipartFile getProductImage() {
+        return productImage;
     }
 
-    public void setBookImage(MultipartFile bookImage) {
-        this.bookImage = bookImage;
+    public void setProductImage(MultipartFile productImage) {
+        this.productImage = productImage;
     }
 
 //	public List<BookToCartItem> getBookToCartItemList() {

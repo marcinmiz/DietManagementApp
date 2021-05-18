@@ -1,8 +1,8 @@
 import React from "react";
 import UploadService from "../services/UploadFiles";
-import {Typography, Button} from '@material-ui/core';
+import { Typography, Button} from '@material-ui/core';
 
-export default function UploadImages({submitted}) {
+export default function UploadImages ({submitted}) {
     const [state, setState] = React.useState({
         currentFile: undefined,
         previewImage: undefined,
@@ -12,11 +12,11 @@ export default function UploadImages({submitted}) {
         imageInfos: [],
     })
 
-    React.useEffect(() => {
-            if (submitted) {
-                console.log("submitted");
-                //upload();
-            }
+    React.useEffect( () => {
+        if (submitted) {
+            console.log("submitted");
+            //upload();
+        }
         }
         , [submitted]
     )
@@ -53,54 +53,54 @@ export default function UploadImages({submitted}) {
                 });
             });
     };
-    // componentDidMount() {
-    //     UploadService.getFiles().then((response) => {
-    //         this.setState({
-    //             imageInfos: response.data,
-    //         });
-    //     });
-    // }
-    const {
-        currentFile,
-        previewImage,
-        message,
-        imageInfos,
-        isError
-    } = state;
+        // componentDidMount() {
+        //     UploadService.getFiles().then((response) => {
+        //         this.setState({
+        //             imageInfos: response.data,
+        //         });
+        //     });
+        // }
+            const {
+                currentFile,
+                previewImage,
+                message,
+                imageInfos,
+                isError
+            } = state;
 
-    return (
-        <div id="upload_container" className="upload_container product_selected_element product_selected_element_moved">
-            <label htmlFor="btn-upload">
-                <input
-                    id="btn-upload"
-                    name="btn-upload"
-                    style={{display: 'none'}}
-                    type="file"
-                    accept="image/*"
-                    onChange={selectFile}/>
-                <Button
-                    className="btn-choose"
-                    variant="outlined"
-                    component="span">
-                    Choose Image
-                </Button>
-            </label>
+            return (
+                <div id="upload_container" className="upload_container product_selected_element product_selected_element_moved">
+                    <label htmlFor="btn-upload">
+                        <input
+                            id="btn-upload"
+                            name="btn-upload"
+                            style={{display: 'none'}}
+                            type="file"
+                            accept="image/*"
+                            onChange={selectFile}/>
+                        <Button
+                            className="btn-choose"
+                            variant="outlined"
+                            component="span">
+                            Choose Image
+                        </Button>
+                    </label>
 
-            {previewImage && (
-                <div>
-                    <img className="upload_image" src={previewImage} alt=""/>
+                    {previewImage && (
+                        <div>
+                            <img className="upload_image" src={previewImage} alt=""/>
+                        </div>
+                    )}
+
+                    <div>
+                        {currentFile ? currentFile.name : null}
+                    </div>
+
+                    {message && (
+                        <Typography variant="subtitle2" className={`upload-message ${isError ? "error" : ""}`}>
+                            {message}
+                        </Typography>
+                    )}
                 </div>
-            )}
-
-            <div>
-                {currentFile ? currentFile.name : null}
-            </div>
-
-            {message && (
-                <Typography variant="subtitle2" className={`upload-message ${isError ? "error" : ""}`}>
-                    {message}
-                </Typography>
-            )}
-        </div>
-    );
+            );
 }

@@ -98,7 +98,7 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
                 //user.setUserRoles(Collections.singleton());
             }
 
-            //user.getFirstName(googleName);
+            //user.getName(googleName);
             user.setUsername(googleUsername);
             user.setGoogleName(googleName);
             user.setGoogleUsername(googleUsername);

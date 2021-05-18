@@ -114,61 +114,61 @@ export default class Authentication extends Component {
                             onChange={this.handleChange}
                             required/>
 
-                        <button className="form_button" type="submit">Register</button>
+                        <button className="form_button" type="submit">User</button>
 
                     </form>
                 </div>
             </div>
 
         } else {
-            return <div className="auth_container">
-                <div className="card auth_card">
-                    <div className="logo">
-                        DIETIX
-                    </div>
-                    <div className="tabs_area">
-                        <button
-                            type="button"
-                            className="tab first_tab current_tab"
-                            name="login_tab"
-                            onClick={this.handleTab}>
-                            Log in
-                        </button>
-                        <button
-                            type="button"
-                            className="tab last_tab"
-                            name="register_tab"
-                            onClick={this.handleTab}>
-                            Register
-                        </button>
-                    </div>
-                    <form className="form" onSubmit={this.handleSubmit}>
+          return <div className="auth_container">
+              <div className="card auth_card">
+                  <div className="logo">
+                      DIETIX
+                  </div>
+                  <div className="tabs_area">
+                      <button
+                          type="button"
+                          className="tab first_tab current_tab"
+                          name="login_tab"
+                          onClick={this.handleTab}>
+                          Log in
+                      </button>
+                      <button
+                          type="button"
+                          className="tab last_tab"
+                          name="register_tab"
+                          onClick={this.handleTab}>
+                          Register
+                      </button>
+                  </div>
+                  <form className="form" onSubmit={this.handleSubmit}>
 
-                        <label htmlFor="email">E-mail</label>
-                        <input
-                            className="input_field"
-                            id="email"
-                            type="email"
-                            name="email"
-                            value={this.state.email}
-                            onChange={this.handleChange}
-                            required/>
+                      <label htmlFor="email">E-mail</label>
+                      <input
+                          className="input_field"
+                          id="email"
+                          type="email"
+                          name="email"
+                          value={this.state.email}
+                          onChange={this.handleChange}
+                          required/>
 
-                        <label htmlFor="password">Password</label>
-                        <input
-                            className="input_field"
-                            id="password"
-                            type="password"
-                            name="password"
-                            value={this.state.password}
-                            onChange={this.handleChange}
-                            required/>
+                      <label htmlFor="password">Password</label>
+                      <input
+                          className="input_field"
+                          id="password"
+                          type="password"
+                          name="password"
+                          value={this.state.password}
+                          onChange={this.handleChange}
+                          required/>
 
-                        <button className="form_button" type="submit">Log in</button>
+                      <button className="form_button" type="submit">Log in</button>
 
-                    </form>
-                </div>
-            </div>
+                  </form>
+              </div>
+          </div>
         }
     }
 }

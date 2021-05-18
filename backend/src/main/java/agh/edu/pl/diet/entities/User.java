@@ -20,8 +20,9 @@ public class User implements UserDetails {
     private Long id;
     private String username;
     private String password;
-    private String firstName;
-    private String lastName;
+    private String passwordConfirmation;
+    private String name;
+    private String surname;
 
     @Transient
     @Column(name = "email", nullable = false, updatable = false)
@@ -70,20 +71,28 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getName() {
+        return name;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getEmail() {
