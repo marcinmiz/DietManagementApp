@@ -3,24 +3,37 @@ package agh.edu.pl.diet.entities;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "Product")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String title;
-    private String note;
-    private String calories;
+    private Long productId;
+    private String productName;
+    private Integer calories;
     //	private String publicationDate;
-//	private String language;
-    private String category;
-    private String totalFat;
-    private String totalCarbohydrate;
-    private String protein;
-    private String sodium;
-    private boolean active = true;
+    @ManyToOne(cascade= CascadeType.ALL)
+    private User owner;
+    @ManyToOne
+    private Category category;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST,
+            CascadeType.MERGE})
+    @JoinTable(
+            name = "product_nutrients",
+            joinColumns = {@JoinColumn(name = "product_id")},
+            inverseJoinColumns = {@JoinColumn(name = "nutrient_id")}
+    )
+    private Set<Nutrient> nutrients = new HashSet<>();
+
+    private boolean approvalStatus = false;
+    private Date creationDate = null;
+    private Boolean productFavourite = false;
 
 //	@Column(columnDefinition="text")
 //	private String description;
@@ -34,35 +47,28 @@ public class Product {
 //	@JsonIgnore
 //	private List<BookToCartItem> bookToCartItemList;
 
-    public Long getId() {
-        return id;
+
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
-    public String getTitle() {
-        return title;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getCalories() {
+    public Integer getCalories() {
         return calories;
     }
 
-    public void setCalories(String calories) {
+    public void setCalories(Integer calories) {
         this.calories = calories;
     }
 
@@ -82,54 +88,14 @@ public class Product {
 //		this.language = language;
 //	}
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
-
-    public String getTotalFat() {
-        return totalFat;
-    }
-
-    public void setTotalFat(String totalFat) {
-        this.totalFat = totalFat;
-    }
-
-    public String getTotalCarbohydrate() {
-        return totalCarbohydrate;
-    }
-
-    public void setTotalCarbohydrate(String totalCarbohydrate) {
-        this.totalCarbohydrate = totalCarbohydrate;
-    }
-
-    public String getProtein() {
-        return protein;
-    }
-
-    public void setProtein(String protein) {
-        this.protein = protein;
-    }
-
-    public String getSodium() {
-        return sodium;
-    }
-
-    public void setSodium(String sodium) {
-        this.sodium = sodium;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 
 //	public int getInStockNumber() {
 //		return inStockNumber;
@@ -155,5 +121,43 @@ public class Product {
 //		this.bookToCartItemList = bookToCartItemList;
 //	}
 
+    public Set<Nutrient> getNutrients() {
+        return nutrients;
+    }
 
+    public void setNutrients(Set<Nutrient> nutrients) {
+        this.nutrients = nutrients;
+    }
+
+    public boolean isApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(boolean approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Boolean getProductFavourite() {
+        return productFavourite;
+    }
+
+    public void setProductFavourite(Boolean productFavourite) {
+        this.productFavourite = productFavourite;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 }
