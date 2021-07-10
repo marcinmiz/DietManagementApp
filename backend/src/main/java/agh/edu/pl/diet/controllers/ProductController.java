@@ -1,12 +1,9 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.entities.Recipe;
 import agh.edu.pl.diet.payloads.ProductRequest;
 import agh.edu.pl.diet.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

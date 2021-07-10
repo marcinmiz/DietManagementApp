@@ -1,12 +1,9 @@
 package agh.edu.pl.diet;
 
 import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.entities.Recipe;
-import agh.edu.pl.diet.entities.RecipeProduct;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.entities.security.Role;
 import agh.edu.pl.diet.entities.security.UserRole;
-import agh.edu.pl.diet.repos.RecipeRepo;
 import agh.edu.pl.diet.services.ProductService;
 import agh.edu.pl.diet.utility.SecurityUtility;
 import agh.edu.pl.diet.services.UserService;
@@ -23,8 +20,6 @@ public class DietApplication implements CommandLineRunner {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private RecipeRepo recipeRepo;
     @Autowired
     private ProductService productService;
 
