@@ -25,6 +25,7 @@ import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import UploadImages from "../components/UploadImages";
 import {useHistory} from "react-router-dom";
+import http from "../http-common";
 
 export default function ProductsDetails(props) {
     let history = useHistory();
@@ -59,14 +60,14 @@ export default function ProductsDetails(props) {
                 product_author: "Paul Weasley",
                 product_favourite: false
             }],
-        selected_product: [{
+        selected_product: {
             product_id: 'new',
             product_name: "",
             product_image: "",
             product_category: "",
             product_author: "",
             product_favourite: false
-        }],
+        },
         product_nutrients: [{
             nutrient_name: "Calories",
             nutrient_amount: 0,
@@ -92,21 +93,30 @@ export default function ProductsDetails(props) {
             setState({
                 ...state,
                 "mode": mode,
-            })
+            });
 
             if (product_id !== 'new') {
                 //retrieve product specified by id data
+
+                http.get("/api/products/" + product_id)
+                    .then(resp => {
+                        let product = {};
+                        product.product_id = resp.data.productId;
+                        product.product_name = resp.data.productName;
+                        product.product_category = resp.data.category.categoryName;
+                        product.product_author = resp.data.owner.firstName + " " + resp.data.owner.lastName;
+                        product.product_favourite = resp.data.productFavourite;
+
+                        setState({
+                            ...state,
+                            "mode": mode,
+                            "selected_product": product,
+                        });
+                    })
+                    .catch(error => console.log(error));
+
                 setState({
                     ...state,
-                    "mode": mode,
-                    "selected_product": [{
-                        product_id: product_id,
-                        product_name: "Milk",
-                        product_image: red_apple,
-                        product_category: "Dairy",
-                        product_author: "Sara Bedrock",
-                        product_favourite: true
-                    }],
                     "product_nutrients": [{
                         nutrient_name: "Calories",
                         nutrient_amount: 20,
@@ -127,13 +137,13 @@ export default function ProductsDetails(props) {
                     "product_ingredients": [["Water", 85], ["Fructose", 10], ["Fibre and Pectin", 3.5]],
                 });
             }
-            document.getElementById(state.selected_product[0].product_id).classList.add("product_selected_moved")
+            document.getElementById(state.selected_product.product_id).classList.add("product_selected_moved")
         }, [props.match.params.id, props.match.params.mode]
     );
 
     const handleChangeProductId = (event) => {
         const values = [{
-            ...state.selected_product[0],
+            ...state.selected_product,
             [event.target.name]: event.target.value
         }];
         setState({
@@ -150,15 +160,15 @@ export default function ProductsDetails(props) {
 
     const handleEdit = () => {
         if (state.mode === "view") {
-            history.push('/products/' + state.selected_product[0].product_id + '/edit');
+            history.push('/products/' + state.selected_product.product_id + '/edit');
         } else {
-            history.push('/products/' + state.selected_product[0].product_id + '/view');
+            history.push('/products/' + state.selected_product.product_id + '/view');
         }
 
     }
 
     const handleClose = () => {
-        document.getElementById(state.selected_product[0].product_id).classList.remove("product_selected_moved");
+        document.getElementById(state.selected_product.product_id).classList.remove("product_selected_moved");
         setTimeout(() => history.push("/products"), 2000);
     }
 
@@ -208,7 +218,7 @@ export default function ProductsDetails(props) {
     }
 
     const handleFavouriteIcon = () => {
-        if (state.selected_product[0].product_favourite) {
+        if (state.selected_product.product_favourite) {
             return (<Tooltip title="Remove from favourite" aria-label="Remove from favourite">
                 <IconButton aria-label="Remove from favourite" className="product_icon_button"
                             onClick={() => handleAddToFavourite()}>
@@ -226,9 +236,9 @@ export default function ProductsDetails(props) {
     }
 
     const handleAddToFavourite = () => {
-        const product_favourite = !state.selected_product[0].product_favourite;
+        const product_favourite = !state.selected_product.product_favourite;
         const values = [{
-            ...state.selected_product[0],
+            ...state.selected_product,
             "product_favourite": product_favourite
         }];
         setState({
@@ -256,28 +266,28 @@ export default function ProductsDetails(props) {
     let current_product, tab;
 
     if (state.mode === 'view') {
-        current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
+        current_product = <div id={state.selected_product.product_id} className="product product_selected">
             <div className="product_image_container product_selected_element ">
-                <img className="product_image" src={state.selected_product[0].product_image}
-                     alt={state.selected_product[0].product_name}/>
+                <img className="product_image" src={state.selected_product.product_image}
+                     alt={state.selected_product.product_name}/>
             </div>
 
             <div className="product_description product_selected_element">
                 <div className="product_id">
                     <div className="product_name product_selected_element">
-                        {state.selected_product[0].product_name}
+                        {state.selected_product.product_name}
                     </div>
                     <div className="product_category product_selected_element">
                         <Chip
                             name="category"
                             size="small"
                             avatar={<CategoryIcon/>}
-                            label={state.selected_product[0].product_category}
+                            label={state.selected_product.product_category}
                         />
                     </div>
                     <div className="product_author product_selected_element">
                         <Avatar/>
-                        <div className="product_author_name">{state.selected_product[0].product_author}</div>
+                        <div className="product_author_name">{state.selected_product.product_author}</div>
                     </div>
                 </div>
                 <div className="product_details product_selected_element">
@@ -324,7 +334,7 @@ export default function ProductsDetails(props) {
             </div>
         </div>;
     } else {
-        current_product = <div id={state.selected_product[0].product_id} className="product product_selected">
+        current_product = <div id={state.selected_product.product_id} className="product product_selected">
             <div className="products_existed_container product_selected_element_moved">
                 <h3>Products yet existed</h3>
                 <div className="product_existed">Cow's milk</div>
@@ -351,7 +361,7 @@ export default function ProductsDetails(props) {
                                 <FilledInput
                                     name="product_name"
                                     className="product_name"
-                                    value={state.selected_product[0].product_name}
+                                    value={state.selected_product.product_name}
                                     onChange={event => handleChangeProductId(event)}
                                 />
                             </FormControl>
@@ -364,7 +374,7 @@ export default function ProductsDetails(props) {
                                     id="category_select"
                                     className="category_select"
                                     name="product_category"
-                                    value={state.selected_product[0].product_category}
+                                    value={state.selected_product.product_category}
                                     size="small"
                                     onChange={event => handleChangeProductId(event)}
                                 >
@@ -382,7 +392,7 @@ export default function ProductsDetails(props) {
                                     id="author_select"
                                     className="author_select"
                                     name="product_author"
-                                    value={state.selected_product[0].product_author}
+                                    value={state.selected_product.product_author}
                                     size="small"
                                     onChange={event => handleChangeProductId(event)}
                                 >
