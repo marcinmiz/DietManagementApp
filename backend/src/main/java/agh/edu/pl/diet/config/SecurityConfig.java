@@ -61,8 +61,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/resources/**",
             "/",
             "/login**",
-            "/registration"
-
+            "/registration",
+            "/api/products",
+            "/api/products/{id}",
+            "/api/products/new",
+            "/api/products/favourite",
+            "/api/products/add",
+            "/api/recipes",
+            "/api/recipes/new",
+            "/api/recipes/add"
     };
 
     public SecurityConfig() {
@@ -113,8 +120,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(PUBLIC_MATCHERS).permitAll()
                 .anyRequest().authenticated()
-                .and().formLogin().loginPage("/login")
-                .defaultSuccessUrl("/products").failureUrl("/login?error").permitAll()
+                .and().formLogin().loginPage("http://localhost:3000/")
+                .defaultSuccessUrl("http://localhost:3000/now").failureUrl("/login?error").permitAll()
                 .and().logout().logoutSuccessUrl("/").permitAll();
 
         http
