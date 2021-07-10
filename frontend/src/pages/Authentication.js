@@ -22,7 +22,6 @@ export default class Authentication extends Component {
 
     handleSubmit(event) {
         console.log("form submitted");
-        event.preventDefault();
     }
 
     handleChange(event) {

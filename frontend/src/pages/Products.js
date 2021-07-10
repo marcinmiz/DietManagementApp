@@ -20,6 +20,7 @@ import FilledInput from '@material-ui/core/FilledInput';
 import banana from "../images/banana.jpg"
 import orange from "../images/orange.jpg"
 import {useHistory} from "react-router-dom";
+import http from "../http-common";
 
 const useStyles = makeStyles({
     formControl: {
@@ -64,10 +65,31 @@ export default function Products() {
 
     useEffect(
         () => {
-            // setState({
-            //     ...state,
-            //     products: [{product_id: 4, product_name: "Yoghurt", product_image: red_apple, product_category: "Dairy", product_author: "Paul Weasley", product_favourite: true}],
-            // });
+            if (state.products_group === 0) {
+                //retrieve all products and set its values to product state field
+                console.log("first");
+                http.get("/api/products")
+                    .then(resp => {
+                    let table = [];
+                        for (let x in resp.data){
+                            table[x] = {};
+                            table[x].product_id = resp.data[x].productId;
+                            table[x].product_name = resp.data[x].productName;
+                            table[x].product_category = resp.data[x].category.categoryName;
+                            table[x].product_author = resp.data[x].owner.firstName + " " + resp.data[x].owner.lastName;
+                            table[x].product_favourite = resp.data[x].productFavourite;
+                        }
+                        setState({
+                            ...state,
+                            products: table,
+                        });
+                })
+                    .catch(error => console.log(error))
+            } else if (state.products_group === 1) {
+                //retrieve new products and set its values to product state field
+            } else {
+                //retrieve favourite products and set its values to product state field
+            }
         }, [state.products_group]
     );
 
@@ -130,7 +152,7 @@ export default function Products() {
                 </Tooltip>
             )
         }
-    }
+    };
 
     const handleAddToFavourite = (event, index, product_id) => {
         event.cancelBubble = true;
@@ -144,27 +166,19 @@ export default function Products() {
             ...state,
             "products": [...state.products.slice(0, index), product, ...state.products.slice(index + 1)]
         });
-    }
+    };
 
     const handleEdit = (event, product_id) => {
         event.cancelBubble = true;
         if (event.stopPropagation) event.stopPropagation();
         history.push('/products/' + product_id + '/edit');
-    }
+    };
 
     const handleAddNewProduct = () => {
         history.push('/products/new/edit');
-    }
+    };
 
     let tab;
-
-    if (state.products_group === 0) {
-        //retrieve all products and set its values to product state field
-    } else if (state.products_group === 1) {
-        //retrieve new products and set its values to product state field
-    } else {
-        //retrieve favourite products and set its values to product state field
-    }
 
     tab = <Grid container className="products_list" spacing={1}>
         {state.products.map((product, index) => (
