@@ -1,5 +1,6 @@
 package agh.edu.pl.diet.entities;
 
+import org.hibernate.annotations.Cascade;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
@@ -22,14 +23,9 @@ public class Product {
     @ManyToOne
     private Category category;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST,
-            CascadeType.MERGE})
-    @JoinTable(
-            name = "product_nutrients",
-            joinColumns = {@JoinColumn(name = "product_id")},
-            inverseJoinColumns = {@JoinColumn(name = "nutrient_id")}
-    )
-    private Set<Nutrient> nutrients = new HashSet<>();
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<ProductNutrient> nutrients = new HashSet<>();
 
     private boolean approvalStatus = false;
     private Date creationDate = null;
@@ -121,12 +117,16 @@ public class Product {
 //		this.bookToCartItemList = bookToCartItemList;
 //	}
 
-    public Set<Nutrient> getNutrients() {
+    public Set<ProductNutrient> getNutrients() {
         return nutrients;
     }
 
-    public void setNutrients(Set<Nutrient> nutrients) {
+    public void setNutrients(Set<ProductNutrient> nutrients) {
         this.nutrients = nutrients;
+    }
+
+    public void addNutrient(ProductNutrient productNutrient) {
+        nutrients.add(productNutrient);
     }
 
     public boolean isApprovalStatus() {
