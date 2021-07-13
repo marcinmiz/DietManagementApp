@@ -64,11 +64,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/registration",
             "/api/products",
             "/api/products/{id}",
-            "/api/products/new",
             "/api/products/favourite",
             "/api/products/add",
             "/api/recipes",
-            "/api/recipes/new",
             "/api/recipes/add"
     };
 
@@ -116,7 +114,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                //.csrf().disable().cors().disable()
+                .csrf().disable()
+                // .cors().disable()
                 .authorizeRequests()
                 .antMatchers(PUBLIC_MATCHERS).permitAll()
                 .anyRequest().authenticated()

@@ -1,6 +1,7 @@
 package agh.edu.pl.diet.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -16,8 +17,9 @@ public class Nutrient {
     private String nutrientName;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "nutrients")
-    private Set<Product> products = new HashSet<>();
+    @OneToMany(mappedBy = "nutrient", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<ProductNutrient> products = new HashSet<>();
 
     public Long getNutrientId() {
         return nutrientId;
@@ -35,11 +37,15 @@ public class Nutrient {
         this.nutrientName = nutrientName;
     }
 
-    public Set<Product> getProducts() {
+    public Set<ProductNutrient> getProducts() {
         return products;
     }
 
-    public void setProducts(Set<Product> products) {
+    public void setProducts(Set<ProductNutrient> products) {
         this.products = products;
+    }
+
+    public void addProduct(ProductNutrient product) {
+        products.add(product);
     }
 }
