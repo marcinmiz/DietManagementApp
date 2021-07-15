@@ -36,30 +36,7 @@ export default function ProductsDetails(props) {
         submitted: false,
         image_loaded: false,
         form_loaded: false,
-        products: [{
-            product_id: 1,
-            product_name: "Red apple",
-            product_image: red_apple,
-            product_category: "Fruit",
-            product_author: "Daniel Fog",
-            product_favourite: false
-        },
-            {
-                product_id: 2,
-                product_name: "Banana",
-                product_image: banana,
-                product_category: "Fruit",
-                product_author: "Sara Bedrock",
-                product_favourite: false
-            },
-            {
-                product_id: 3,
-                product_name: "Orange",
-                product_image: orange,
-                product_category: "Fruit",
-                product_author: "Paul Weasley",
-                product_favourite: false
-            }],
+        products: [],
         selected_product: {
             product_id: 'new',
             product_name: "",
@@ -83,6 +60,7 @@ export default function ProductsDetails(props) {
         }],
         product_ingredients: [],
         product_add_ingredient: "",
+        msg: "",
     });
 
     useEffect(
@@ -100,6 +78,7 @@ export default function ProductsDetails(props) {
 
                 http.get("/api/products/" + product_id)
                     .then(resp => {
+                        console.log(resp.data);
                         let product = {};
                         product.product_id = resp.data.productId;
                         product.product_name = resp.data.productName;
@@ -107,45 +86,40 @@ export default function ProductsDetails(props) {
                         product.product_author = resp.data.owner.firstName + " " + resp.data.owner.lastName;
                         product.product_favourite = resp.data.productFavourite;
 
+                        let productNutrients = [];
+                        productNutrients[0] = {};
+                        productNutrients[0].nutrient_name = "Calories";
+                        productNutrients[0].nutrient_amount = resp.data.calories;
+                        productNutrients[0].nutrient_unit = "kcal";
+
+                        let nutrients_quantity = state.product_nutrients.length;
+                        for (let i = 1; i < nutrients_quantity; i++) {
+                            productNutrients[i] = {};
+                            productNutrients[i].nutrient_name = resp.data.nutrients[i-1].nutrient.nutrientName;
+                            productNutrients[i].nutrient_amount = resp.data.nutrients[i-1].nutrientAmount;
+                            productNutrients[i].nutrient_unit = "mg/100g";
+                        }
+
                         setState({
                             ...state,
                             "mode": mode,
                             "selected_product": product,
+                            "product_nutrients": productNutrients,
+                            "product_ingredients": [["Water", 85], ["Fructose", 10], ["Fibre and Pectin", 3.5]],
                         });
                     })
                     .catch(error => console.log(error));
 
-                setState({
-                    ...state,
-                    "product_nutrients": [{
-                        nutrient_name: "Calories",
-                        nutrient_amount: 20,
-                        nutrient_unit: "kcal"
-                    }, {
-                        nutrient_name: "Protein",
-                        nutrient_amount: 5,
-                        nutrient_unit: "mg/100g"
-                    }, {
-                        nutrient_name: "Carbohydrates",
-                        nutrient_amount: 12,
-                        nutrient_unit: "mg/100g"
-                    }, {nutrient_name: "Fat", nutrient_amount: 2, nutrient_unit: "mg/100g"}, {
-                        nutrient_name: "Salt",
-                        nutrient_amount: 0.4,
-                        nutrient_unit: "mg/100g"
-                    }],
-                    "product_ingredients": [["Water", 85], ["Fructose", 10], ["Fibre and Pectin", 3.5]],
-                });
             }
             document.getElementById(state.selected_product.product_id).classList.add("product_selected_moved")
         }, [props.match.params.id, props.match.params.mode]
     );
 
     const handleChangeProductId = (event) => {
-        const values = [{
+        const values = {
             ...state.selected_product,
             [event.target.name]: event.target.value
-        }];
+        };
         setState({
             ...state,
             "selected_product": values
@@ -169,7 +143,7 @@ export default function ProductsDetails(props) {
 
     const handleClose = () => {
         document.getElementById(state.selected_product.product_id).classList.remove("product_selected_moved");
-        setTimeout(() => history.push("/products"), 2000);
+        setTimeout(() => history.push("/products/main"), 2000);
     }
 
     const handleChangeIngredient = (event, index) => {
@@ -190,12 +164,14 @@ export default function ProductsDetails(props) {
 
     const handleChangeNutrient = (index, event) => {
         const values = [...state.product_nutrients];
-        values[index].nutrient_amount = Number(event.target.value);
-        setState({
-            ...state,
-            "product_nutrients": values
-        });
-    }
+        if (event.target.value > 0){
+            values[index].nutrient_amount = Number(event.target.value);
+            setState({
+                ...state,
+                "product_nutrients": values
+            });
+        }
+    };
 
     const handleAddIngredient = () => {
         setState({
@@ -254,14 +230,105 @@ export default function ProductsDetails(props) {
         });
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log("InputFields", state);
-        setState({
-            ...state,
-            "submitted": true
-        });
-    }
+    const handleSave = () => {
+        let product = {};
+        let productName = state.selected_product.product_name;
+        if (productName.length < 2 || productName.length > 40) {
+            setState({
+                ...state,
+                "msg": "Product name has to have min 2 and max 40 characters"
+            });
+            return;
+        } else if (!(/^[a-zA-Z ]+$/.test(productName))) {
+            setState({
+                ...state,
+                "msg": "Product name has to contain only letters and spaces"
+            });
+            return;
+        }
+        product.productName = productName;
+
+        let calories = state.product_nutrients[0].nutrient_amount;
+        if (calories.length < 1 || calories.length > 20) {
+            setState({
+                ...state,
+                "msg": "Product calories has to have min 1 and max 20 characters"
+            });
+            return;
+        } else if (!(/^0$/.test(calories) || /^[1-9]\d*$/.test(calories))) {
+            setState({
+                ...state,
+                "msg": "Product calories has to contain only digits"
+            });
+            return;
+        } else if (calories < 0) {
+            setState({
+                ...state,
+                "msg": "Product calories has to be greater or equal 0"
+            });
+            return;
+        }
+        product.calories = calories;
+
+        let category = state.selected_product.product_category;
+        if (category === "") {
+            setState({
+                ...state,
+                "msg": "Product category has to be chosen"
+            });
+            return;
+        }
+        product.category = category;
+
+        let nutrient_amount = state.product_nutrients.length;
+
+        product.nutrients = [];
+
+        for (let i = 1; i < nutrient_amount; i++) {
+            let nutrient = state.product_nutrients[i];
+            if (nutrient.nutrient_amount.length < 1 || nutrient.nutrient_amount.length > 20) {
+                setState({
+                    ...state,
+                    "msg": "Product nutrient has to have min 1 and max 20 characters"
+                });
+                return;
+            } else if (!(/^0$/.test(nutrient.nutrient_amount) || /^[1-9]\d*$/.test(nutrient.nutrient_amount))) {
+                setState({
+                    ...state,
+                    "msg": "Product nutrient has to contain only digits"
+                });
+                return;
+            } else if (nutrient.nutrient_amount < 0) {
+                setState({
+                    ...state,
+                    "msg": "Product nutrient has to be greater or equal 0"
+                });
+                return;
+            }
+
+            // product.nutrients[i-1] = {};
+            product.nutrients[i-1] = nutrient.nutrient_name + ";" + nutrient.nutrient_amount;
+        }
+
+        console.log(product);
+        http.post("/api/products/add", product)
+            .then(resp => {
+                if (resp.data.message !== "Product has been added successfully") {
+                    setState({
+                        ...state,
+                        "msg": resp.data.message
+                    });
+                } else {
+                    setState({
+                        ...state,
+                        "submitted": true
+                    });
+
+                    history.push("/products/" + product.productName + "-added")
+                }
+            });
+
+    };
 
     let current_product, tab;
 
@@ -349,11 +416,12 @@ export default function ProductsDetails(props) {
                 <Divider variant="middle"/>
                 <div className="product_existed">Oat milk</div>
             </div>
-            <form className="product_edit_form" onSubmit={(event) => handleSubmit(event)}>
+            <form className="product_edit_form">
                 <UploadImages submitted={state.submitted}
                               handleImageUploadFinished={() => handleImageUploadFinished()}/>
 
                 <div className="product_description product_selected_element product_selected_element_moved">
+                    {state.msg}
                     <div className="product_id">
                         <div className="product_name product_selected_element">
                             <FormControl>
@@ -381,24 +449,6 @@ export default function ProductsDetails(props) {
                                     <MenuItem value="Fruit">Fruit</MenuItem>
                                     <MenuItem value="Vegetables">Vegetables</MenuItem>
                                     <MenuItem value="Dairy">Dairy</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <div className="product_author product_selected_element">
-                            <FormControl variant="filled" className="form_control">
-                                <InputLabel id="author_select_label" className="author_select">Author</InputLabel>
-                                <Select
-                                    labelId="author_select_label"
-                                    id="author_select"
-                                    className="author_select"
-                                    name="product_author"
-                                    value={state.selected_product.product_author}
-                                    size="small"
-                                    onChange={event => handleChangeProductId(event)}
-                                >
-                                    <MenuItem value="Daniel Fog">Daniel Fog</MenuItem>
-                                    <MenuItem value="Sara Bedrock">Sara Bedrock</MenuItem>
-                                    <MenuItem value="Paul Weasley">Paul Weasley</MenuItem>
                                 </Select>
                             </FormControl>
                         </div>
@@ -478,7 +528,7 @@ export default function ProductsDetails(props) {
                     </div>
                     <div>
                         <Button variant="text" color="inherit" onClick={() => handleClose()}>Cancel</Button>
-                        <Button variant="text" color="inherit" type="submit">Save</Button>
+                        <Button variant="text" color="inherit" type="button" onClick = {() => handleSave()}>Save</Button>
                     </div>
                 </div>
                 <div className="product_buttons">
