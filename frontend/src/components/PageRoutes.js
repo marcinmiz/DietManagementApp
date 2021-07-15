@@ -11,7 +11,7 @@ export default function PageRoutes() {
                 <Route exact path="/now">
                     Now
                 </Route>
-                <Route exact path="/products" component={Products}>
+                <Route exact path="/products/:msg" component={Products}>
                 </Route>
                 <Route exact path="/products/:id/:mode" component={ProductsDetails}>
                 </Route>

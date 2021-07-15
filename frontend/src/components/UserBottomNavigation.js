@@ -19,7 +19,12 @@ export default function UserBottomNavigation() {
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        let destination = "/" + newValue
+        let destination;
+        if (newValue === "products") {
+            destination = "/products/main";
+        } else {
+            destination = "/" + newValue;
+        }
         history.push(destination);
     };
 
