@@ -28,7 +28,7 @@ const useStyles = makeStyles({
     },
 });
 
-export default function Products() {
+export default function Products(props) {
     let history = useHistory();
 
     const classes = useStyles();
@@ -37,30 +37,8 @@ export default function Products() {
         search: '',
         category: '',
         products_group: 0,//0: all, 1: new, 2: favourite
-        products: [{
-            product_id: 1,
-            product_name: "Red apple",
-            product_image: red_apple,
-            product_category: "Fruit",
-            product_author: "Daniel Fog",
-            product_favourite: false
-        },
-            {
-                product_id: 2,
-                product_name: "Banana",
-                product_image: banana,
-                product_category: "Fruit",
-                product_author: "Sara Bedrock",
-                product_favourite: false
-            },
-            {
-                product_id: 3,
-                product_name: "Orange",
-                product_image: orange,
-                product_category: "Fruit",
-                product_author: "Paul Weasley",
-                product_favourite: false
-            }],
+        products: [],
+        msg: "",
     });
 
     useEffect(
@@ -83,6 +61,23 @@ export default function Products() {
                             ...state,
                             products: table,
                         });
+
+                        if ((/^[a-zA-Z]+(-)[a-zA-Z]+$/.test(props.match.params.msg))) {
+                            let parts = props.match.params.msg.split("-");
+                            let msg_container = document.getElementsByClassName("msg").item(0);
+                            switch (parts[1]) {
+                                case "added":
+                                    msg_container.innerHTML = "Product " + parts[0] + " has been successfully added";
+                                    break;
+                                case "edited":
+                                    msg_container.innerHTML = "Product " + parts[0] + "  has been successfully edited";
+                                    break;
+                                case "removed":
+                                    msg_container.innerHTML = "Product  " + parts[0] + " has been successfully removed";
+                                    break;
+                            }
+                        }
+
                 })
                     .catch(error => console.log(error))
             } else if (state.products_group === 1) {
@@ -90,7 +85,7 @@ export default function Products() {
             } else {
                 //retrieve favourite products and set its values to product state field
             }
-        }, [state.products_group]
+        }, [state.products_group, props.match.params.msg]
     );
 
     const handleChange = (event) => {
@@ -272,6 +267,7 @@ export default function Products() {
                         <AddIcon/>
                     </Fab>
                 </div>
+                <div className="msg"></div>
                 {tab}
             </div>
         </Container>
