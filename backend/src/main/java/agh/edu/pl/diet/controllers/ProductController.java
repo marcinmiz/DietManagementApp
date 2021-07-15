@@ -1,7 +1,9 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.payloads.ProductRequest;
+import agh.edu.pl.diet.payloads.request.ProductRequest;
+import agh.edu.pl.diet.payloads.request.ProductRequest;
+import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +35,7 @@ public class ProductController {
     }
 
     @PostMapping("/add")
-    public Product addNewProduct(@RequestBody ProductRequest productRequest) {
+    public ResponseMessage addNewProduct(@RequestBody ProductRequest productRequest) {
         return productService.addNewProduct(productRequest);
     }
 
