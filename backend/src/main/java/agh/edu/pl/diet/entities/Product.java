@@ -27,7 +27,7 @@ public class Product {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<ProductNutrient> nutrients = new HashSet<>();
 
-    private boolean approvalStatus = false;
+    private String approvalStatus = "pending";
     private Date creationDate = null;
     private Boolean productFavourite = false;
 
@@ -129,11 +129,11 @@ public class Product {
         nutrients.add(productNutrient);
     }
 
-    public boolean isApprovalStatus() {
+    public String isApprovalStatus() {
         return approvalStatus;
     }
 
-    public void setApprovalStatus(boolean approvalStatus) {
+    public void setApprovalStatus(String approvalStatus) {
         this.approvalStatus = approvalStatus;
     }
 
