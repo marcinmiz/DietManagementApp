@@ -255,7 +255,7 @@ export default function ProductsDetails(props) {
                 "msg": "Product calories has to have min 1 and max 20 characters"
             });
             return;
-        } else if (!(/^0$/.test(calories) || /^[1-9]\d*$/.test(calories))) {
+        } else if (!(/^0$/.test(calories) || /^(-)?[1-9]\d*$/.test(calories))) {
             setState({
                 ...state,
                 "msg": "Product calories has to contain only digits"
@@ -292,7 +292,7 @@ export default function ProductsDetails(props) {
                     "msg": "Product nutrient has to have min 1 and max 20 characters"
                 });
                 return;
-            } else if (!(/^0$/.test(nutrient.nutrient_amount) || /^[1-9]\d*$/.test(nutrient.nutrient_amount))) {
+            } else if (!(/^0$/.test(nutrient.nutrient_amount) || /^(-)?[1-9]\d*$/.test(nutrient.nutrient_amount))) {
                 setState({
                     ...state,
                     "msg": "Product nutrient has to contain only digits"
@@ -306,27 +306,46 @@ export default function ProductsDetails(props) {
                 return;
             }
 
-            // product.nutrients[i-1] = {};
             product.nutrients[i-1] = nutrient.nutrient_name + ";" + nutrient.nutrient_amount;
         }
 
         console.log(product);
-        http.post("/api/products/add", product)
-            .then(resp => {
-                if (resp.data.message !== "Product has been added successfully") {
-                    setState({
-                        ...state,
-                        "msg": resp.data.message
-                    });
-                } else {
-                    setState({
-                        ...state,
-                        "submitted": true
-                    });
 
-                    history.push("/products/" + product.productName + "-added")
-                }
-            });
+        if (state.selected_product.product_id === "new") {
+            http.post("/api/products/add", product)
+                .then(resp => {
+                    if (resp.data.message !== "Product " + state.selected_product.product_name + " has been added successfully") {
+                        setState({
+                            ...state,
+                            "msg": resp.data.message
+                        });
+                    } else {
+                        setState({
+                            ...state,
+                            "submitted": true
+                        });
+
+                        history.push("/products/" + product.productName + "-added")
+                    }
+                });
+        } else {
+            http.put("/api/products/update/" + state.selected_product.product_id, product)
+                .then(resp => {
+                    if (resp.data.message !== "Product " + state.selected_product.product_name + " has been updated successfully") {
+                        setState({
+                            ...state,
+                            "msg": resp.data.message
+                        });
+                    } else {
+                        setState({
+                            ...state,
+                            "submitted": true
+                        });
+
+                        history.push("/products/" + product.productName + "-updated")
+                    }
+                });
+        }
 
     };
 

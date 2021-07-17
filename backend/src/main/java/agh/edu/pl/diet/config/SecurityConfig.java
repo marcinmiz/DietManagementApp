@@ -66,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/products/{id}",
             "/api/products/favourite",
             "/api/products/add",
-            "/api/products/edit/{id}",
+            "/api/products/update/{id}",
             "/api/products/remove/{id}",
             "/api/recipes",
             "/api/recipes/add"

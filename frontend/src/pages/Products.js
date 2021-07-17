@@ -73,9 +73,9 @@ export default function Products(props) {
                                     msg_container.style.display = "block";
                                     msg_container.innerHTML = "Product " + parts[0] + " has been successfully added";
                                     break;
-                                case "edited":
+                                case "updated":
                                     msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product " + parts[0] + "  has been successfully edited";
+                                    msg_container.innerHTML = "Product " + parts[0] + "  has been successfully updated";
                                     break;
                                 case "removed":
                                     msg_container.style.display = "block";
