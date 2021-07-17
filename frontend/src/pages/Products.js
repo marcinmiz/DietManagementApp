@@ -39,10 +39,14 @@ export default function Products(props) {
         products_group: 0,//0: all, 1: new, 2: favourite
         products: [],
         msg: "",
+        loaded: false
     });
 
     useEffect(
         () => {
+            let msg_container = document.getElementsByClassName("msg").item(0);
+            msg_container.style.display = "none";
+
             if (state.products_group === 0) {
                 //retrieve all products and set its values to product state field
                 console.log("first");
@@ -64,20 +68,23 @@ export default function Products(props) {
 
                         if ((/^[a-zA-Z]+(-)[a-zA-Z]+$/.test(props.match.params.msg))) {
                             let parts = props.match.params.msg.split("-");
-                            let msg_container = document.getElementsByClassName("msg").item(0);
                             switch (parts[1]) {
                                 case "added":
+                                    msg_container.style.display = "block";
                                     msg_container.innerHTML = "Product " + parts[0] + " has been successfully added";
                                     break;
                                 case "edited":
+                                    msg_container.style.display = "block";
                                     msg_container.innerHTML = "Product " + parts[0] + "  has been successfully edited";
                                     break;
                                 case "removed":
+                                    msg_container.style.display = "block";
                                     msg_container.innerHTML = "Product  " + parts[0] + " has been successfully removed";
                                     break;
                             }
                         }
-
+                        state.loaded = true;
+                        document.getElementsByClassName("loading").item(0).setAttribute("hidden", true);
                 })
                     .catch(error => console.log(error))
             } else if (state.products_group === 1) {
@@ -175,48 +182,53 @@ export default function Products(props) {
 
     let tab;
 
-    tab = <Grid container className="products_list" spacing={1}>
-        {state.products.map((product, index) => (
-            <Grid item key={index} id={product.product_id} className="product"
-                  onClick={event => handleProduct(event, product.product_id)}>
-                <div className="product_image_container">
-                    <img src={product.product_image} alt={product.product_name} className="product_image"/>
-                </div>
-                <div className="product_description">
-                    <div className="product_name">
-                        {product.product_name}
-                    </div>
-                    <div className="product_category">
-                        <Chip
-                            name="category"
-                            size="small"
-                            avatar={<CategoryIcon/>}
-                            label={product.product_category}
-                            onClick={handleCategory}
-                        />
-                    </div>
-                    <div className="product_author" onClick={handleAuthor}>
-                        <Avatar/>
-                        <div className="product_author_name">{product.product_author}</div>
-                    </div>
-                </div>
-                <div className="product_buttons">
-                    <Tooltip title="Delete" aria-label="delete">
-                        <IconButton aria-label="delete" className="product_icon_button">
-                            <DeleteIcon fontSize="small"/>
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Edit" aria-label="edit">
-                        <IconButton type="button" aria-label="edit" className="product_icon_button"
-                                    onClick={(event) => handleEdit(event, product.product_id)}>
-                            <EditIcon fontSize="small"/>
-                        </IconButton>
-                    </Tooltip>
-                    {handleFavouriteIcon(product.product_id)}
-                </div>
-            </Grid>
-        ))}
-    </Grid>;
+    tab = <div>
+            <div className="loading">Loading</div>
+            <div>
+                <Grid container className="products_list" spacing={1}>
+                        {state.products.map((product, index) => (
+                            <Grid item key={index} id={product.product_id} className="product"
+                                  onClick={event => handleProduct(event, product.product_id)}>
+                                <div className="product_image_container">
+                                    <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                                </div>
+                                <div className="product_description">
+                                    <div className="product_name">
+                                        {product.product_name}
+                                    </div>
+                                    <div className="product_category">
+                                        <Chip
+                                            name="category"
+                                            size="small"
+                                            avatar={<CategoryIcon/>}
+                                            label={product.product_category}
+                                            onClick={handleCategory}
+                                        />
+                                    </div>
+                                    <div className="product_author" onClick={handleAuthor}>
+                                        <Avatar/>
+                                        <div className="product_author_name">{product.product_author}</div>
+                                    </div>
+                                </div>
+                                <div className="product_buttons">
+                                    <Tooltip title="Delete" aria-label="delete">
+                                        <IconButton aria-label="delete" className="product_icon_button">
+                                            <DeleteIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Edit" aria-label="edit">
+                                        <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                                    onClick={(event) => handleEdit(event, product.product_id)}>
+                                            <EditIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    {handleFavouriteIcon(product.product_id)}
+                                </div>
+                            </Grid>
+                        ))}
+                </Grid>
+            </div>
+    </div>;
 
     return (
         <Container id="main_container" maxWidth="lg">
