@@ -29,7 +29,6 @@ public class ProductServiceImpl implements ProductService {
     private UserRepo userRepo;
 
     private ResponseMessage verify(String mode, String type, Object item) {
-        System.out.println("type " + type);
         switch (type) {
             case "name":
                 String name = String.valueOf(item);
@@ -200,6 +199,88 @@ public class ProductServiceImpl implements ProductService {
         }
         productRepo.save(product);
         return new ResponseMessage("Product " + productName + " has been added successfully");
+    }
+
+    @Override
+    public ResponseMessage updateProduct(Long productId, ProductRequest productRequest) {
+
+        String productName = "";
+        Optional<Product> product = productRepo.findById(productId);
+        if (product.isPresent()) {
+            Product updatedProduct = product.get();
+            productName = productRequest.getProductName();
+
+            ResponseMessage responseMessage = verify("update", "name", productName);
+            if (responseMessage.getMessage().equals("Product name is valid")){
+                updatedProduct.setProductName(productName);
+            } else {
+                return responseMessage;
+            }
+
+            Integer calories = productRequest.getCalories();
+
+            ResponseMessage responseMessage2 = verify("update", "calories", calories);
+
+            if (responseMessage2.getMessage().equals("Product calories are valid")) {
+                updatedProduct.setCalories(calories);
+            } else {
+                return responseMessage2;
+            }
+
+            String categoryName = productRequest.getCategory();
+
+            ResponseMessage responseMessage3 = verify("update", "category", categoryName);
+
+            if (responseMessage3.getMessage().equals("Product category is valid")) {
+                updatedProduct.setCategory(categoryRepo.findByCategoryName(categoryName));
+            } else {
+                return responseMessage3;
+            }
+
+            List<String> nutrients = productRequest.getNutrients();
+
+            ResponseMessage responseMessage4 = verify("update", "list", nutrients);
+
+            if (!(responseMessage4.getMessage().equals("Product nutrients are valid"))) {
+                return responseMessage4;
+            }
+
+            for (String nutrientStatement: nutrients) {
+
+                ResponseMessage responseMessage5 = verify("update", "nutrientStatement", nutrientStatement);
+
+                if (!(responseMessage5.getMessage().equals("Product nutrient statement is valid"))) {
+                    return responseMessage5;
+                }
+                String[] parts = nutrientStatement.split(";");
+                String nutrientName = parts[0];
+                Double nutrientAmount = Double.valueOf(parts[1]);
+
+                ResponseMessage responseMessage6 = verify("update", "nutrientName", nutrientName);
+
+                if (!(responseMessage6.getMessage().equals("Product nutrient name is valid"))) {
+                    return responseMessage6;
+                }
+
+                ResponseMessage responseMessage7 = verify("update", "nutrientAmount", nutrientAmount);
+
+                if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
+                    return responseMessage7;
+                }
+
+                ProductNutrient productNutrient = updatedProduct.getNutrients().stream().filter(pn -> pn.getNutrient().getNutrientName().equals(nutrientName)).findFirst().orElse(null);
+
+                if (productNutrient != null) {
+                    productNutrient.setNutrientAmount(nutrientAmount);
+                } else {
+                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
+                }
+            }
+            productRepo.save(updatedProduct);
+
+            return new ResponseMessage("Product " + productName + " has been updated successfully");
+        }
+        return new ResponseMessage("Product " + productName + " has not been found");
     }
 
     //    public Product save(Product product) {

@@ -39,6 +39,11 @@ public class ProductController {
         return productService.addNewProduct(productRequest);
     }
 
+    @PutMapping("/edit/{id}")
+    public ResponseMessage updateProduct(@PathVariable("id") Long productId, @RequestBody ProductRequest productRequest) {
+        return productService.updateProduct(productId, productRequest);
+    }
+
 //    @RequestMapping(value = "/new/edit", method = RequestMethod.GET)
 //    public String addProduct(Model model) {
 //        Product product = new Product();

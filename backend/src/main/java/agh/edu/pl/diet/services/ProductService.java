@@ -15,6 +15,8 @@ public interface ProductService {
 
     ResponseMessage addNewProduct(ProductRequest productRequest);
 
+    ResponseMessage updateProduct(Long productId, ProductRequest productRequest);
+
 //    Product save(Product product);
 //
 //    List<Product> findAll();
