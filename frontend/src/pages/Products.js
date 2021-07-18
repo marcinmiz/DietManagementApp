@@ -180,6 +180,27 @@ export default function Products(props) {
         history.push('/products/new/edit');
     };
 
+    const handleRemove = (event, index) => {
+        event.cancelBubble = true;
+        if (event.stopPropagation) event.stopPropagation();
+        const product_id = state.products[index].product_id;
+        const product_name = state.products[index].product_name;
+
+        http.delete("/api/products/remove/" + product_id)
+            .then(resp => {
+                if (resp.data.message !== "Product " + product_name + " has been removed successfully") {
+                    setState({
+                        ...state,
+                        "msg": resp.data.message
+                    });
+                } else {
+
+                    history.push("/products/" + product_name + "-removed")
+                }
+            })
+            .catch(error => console.log(error));
+    };
+
     let tab;
 
     tab = <div>
@@ -212,7 +233,8 @@ export default function Products(props) {
                                 </div>
                                 <div className="product_buttons">
                                     <Tooltip title="Delete" aria-label="delete">
-                                        <IconButton aria-label="delete" className="product_icon_button">
+                                        <IconButton aria-label="delete" className="product_icon_button"
+                                                    onClick={event => handleRemove(event, index)}>
                                             <DeleteIcon fontSize="small"/>
                                         </IconButton>
                                     </Tooltip>

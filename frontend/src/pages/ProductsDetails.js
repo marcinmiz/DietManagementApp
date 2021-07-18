@@ -189,9 +189,26 @@ export default function ProductsDetails(props) {
         });
     }
 
-    const handleDelete = () => {
+    const handleRemove = () => {
+        http.delete("/api/products/remove/" + state.selected_product.product_id)
+            .then(resp => {
+                if (resp.data.message !== "Product " + state.selected_product.product_name + " has been removed successfully") {
+                    setState({
+                        ...state,
+                        "msg": resp.data.message
+                    });
+                } else {
+                    setState({
+                        ...state,
+                        "submitted": true
+                    });
+
+                    history.push("/products/" + state.selected_product.product_name + "-removed")
+                }
+            })
+            .catch(error => console.log(error));
         handleClose();
-    }
+    };
 
     const handleFavouriteIcon = () => {
         if (state.selected_product.product_favourite) {
@@ -327,7 +344,8 @@ export default function ProductsDetails(props) {
 
                         history.push("/products/" + product.productName + "-added")
                     }
-                });
+                })
+                .catch(error => console.log(error));
         } else {
             http.put("/api/products/update/" + state.selected_product.product_id, product)
                 .then(resp => {
@@ -344,7 +362,8 @@ export default function ProductsDetails(props) {
 
                         history.push("/products/" + product.productName + "-updated")
                     }
-                });
+                })
+                .catch(error => console.log(error));
         }
 
     };
@@ -406,8 +425,8 @@ export default function ProductsDetails(props) {
                         <CloseIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
-                <Tooltip title="Delete" aria-label="delete">
-                    <IconButton aria-label="delete" className="product_icon_button" onClick={handleDelete}>
+                <Tooltip title="Remove" aria-label="remove">
+                    <IconButton aria-label="remove" className="product_icon_button" onClick={handleRemove}>
                         <DeleteIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
@@ -556,8 +575,8 @@ export default function ProductsDetails(props) {
                             <CloseIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete" aria-label="delete">
-                        <IconButton aria-label="delete" className="product_icon_button" onClick={() => handleDelete()}>
+                    <Tooltip title="Remove" aria-label="remove">
+                        <IconButton aria-label="remove" className="product_icon_button" onClick={() => handleRemove()}>
                             <DeleteIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
@@ -605,8 +624,8 @@ export default function ProductsDetails(props) {
                     </div>
                 </div>
                 <div className="product_buttons">
-                    <Tooltip title="Delete" aria-label="delete">
-                        <IconButton aria-label="delete" className="product_icon_button">
+                    <Tooltip title="Remove" aria-label="remove">
+                        <IconButton aria-label="remove" className="product_icon_button">
                             <DeleteIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
