@@ -283,6 +283,18 @@ public class ProductServiceImpl implements ProductService {
         return new ResponseMessage("Product " + productName + " has not been found");
     }
 
+    @Override
+    public ResponseMessage removeProduct(Long productId) {
+
+        Optional<Product> product = productRepo.findById(productId);
+        if (product.isPresent()) {
+            Product removedProduct = product.get();
+            productRepo.delete(removedProduct);
+            return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
+        }
+            return new ResponseMessage("Product id " + productId + " has not been found");
+    }
+
     //    public Product save(Product product) {
 //        return productRepo.save(product);
 //    }

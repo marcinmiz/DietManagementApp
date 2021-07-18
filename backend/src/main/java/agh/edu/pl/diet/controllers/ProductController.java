@@ -44,6 +44,11 @@ public class ProductController {
         return productService.updateProduct(productId, productRequest);
     }
 
+    @DeleteMapping("/remove/{id}")
+    public ResponseMessage removeProduct(@PathVariable("id") Long productId) {
+        return productService.removeProduct(productId);
+    }
+
 //    @RequestMapping(value = "/new/edit", method = RequestMethod.GET)
 //    public String addProduct(Model model) {
 //        Product product = new Product();

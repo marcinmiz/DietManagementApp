@@ -18,7 +18,7 @@ public class Product {
     private String productName;
     private Integer calories;
     //	private String publicationDate;
-    @ManyToOne(cascade= CascadeType.ALL)
+    @ManyToOne
     private User owner;
     @ManyToOne
     private Category category;
