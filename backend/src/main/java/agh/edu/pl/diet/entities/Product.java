@@ -1,7 +1,6 @@
 package agh.edu.pl.diet.entities;
 
 import org.hibernate.annotations.Cascade;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -36,7 +35,7 @@ public class Product {
 //	private int inStockNumber;
 
     @Transient
-    private MultipartFile productImage;
+    private String productImage;
 
 
 //	@OneToMany(mappedBy = "product")
@@ -101,11 +100,11 @@ public class Product {
 //		this.inStockNumber = inStockNumber;
 //	}
 
-    public MultipartFile getProductImage() {
+    public String getProductImage() {
         return productImage;
     }
 
-    public void setProductImage(MultipartFile productImage) {
+    public void setProductImage(String productImage) {
         this.productImage = productImage;
     }
 
