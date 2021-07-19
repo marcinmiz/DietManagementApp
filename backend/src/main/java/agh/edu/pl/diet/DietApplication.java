@@ -1,19 +1,12 @@
 package agh.edu.pl.diet;
 
-import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.entities.User;
-import agh.edu.pl.diet.entities.security.Role;
-import agh.edu.pl.diet.entities.security.UserRole;
+import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.ProductService;
-import agh.edu.pl.diet.utility.SecurityUtility;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @SpringBootApplication
 public class DietApplication implements CommandLineRunner {
@@ -22,6 +15,8 @@ public class DietApplication implements CommandLineRunner {
     private UserService userService;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private ImageService imageService;
 
     public static void main(String[] args) {
         SpringApplication.run(DietApplication.class, args);
@@ -29,6 +24,7 @@ public class DietApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+//        imageService.init();
 //        User user1 = new User();
 //        user1.setUsername("admin");
 //        user1.setPassword(SecurityUtility.passwordEncoder().encode("admin"));
