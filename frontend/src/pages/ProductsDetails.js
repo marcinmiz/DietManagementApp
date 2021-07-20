@@ -1,9 +1,6 @@
 import React, {useEffect} from 'react'
 import CategoryIcon from '@material-ui/icons/Category';
 import {MenuItem, Container, Tooltip, Divider, Grid} from '@material-ui/core';
-import red_apple from "../images/red_apple.jpg"
-import banana from "../images/banana.jpg"
-import orange from "../images/orange.jpg"
 import Avatar from '@material-ui/core/Avatar';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
@@ -34,8 +31,6 @@ export default function ProductsDetails(props) {
         products_group: 0,//0: all, 1: new, 2: favourite
         mode: 'view',
         submitted: false,
-        image_loaded: false,
-        form_loaded: false,
         products: [],
         selected_product: {
             product_id: 'new',
@@ -85,6 +80,7 @@ export default function ProductsDetails(props) {
                         product.product_category = resp.data.category.categoryName;
                         product.product_author = resp.data.owner.firstName + " " + resp.data.owner.lastName;
                         product.product_favourite = resp.data.productFavourite;
+                        product.product_image = resp.data.productImage;
 
                         let productNutrients = [];
                         productNutrients[0] = {};
@@ -111,7 +107,8 @@ export default function ProductsDetails(props) {
                     .catch(error => console.log(error));
 
             }
-            document.getElementById(state.selected_product.product_id).classList.add("product_selected_moved")
+
+                    document.getElementById(state.selected_product.product_id).classList.add("product_selected_moved")
         }, [props.match.params.id, props.match.params.mode]
     );
 
@@ -198,10 +195,6 @@ export default function ProductsDetails(props) {
                         "msg": resp.data.message
                     });
                 } else {
-                    setState({
-                        ...state,
-                        "submitted": true
-                    });
 
                     history.push("/products/" + state.selected_product.product_name + "-removed")
                 }
@@ -239,13 +232,6 @@ export default function ProductsDetails(props) {
             "selected_product": values
         });
     }
-
-    const handleImageUploadFinished = () => {
-        setState({
-            ...state,
-            "image_loaded": true
-        });
-    };
 
     const handleSave = () => {
         let product = {};
@@ -455,8 +441,7 @@ export default function ProductsDetails(props) {
                 <div className="product_existed">Oat milk</div>
             </div>
             <form className="product_edit_form">
-                <UploadImages submitted={state.submitted}
-                              handleImageUploadFinished={() => handleImageUploadFinished()}/>
+                <UploadImages submitted={state.submitted} currentImage={state.selected_product.product_image} type="product" id={state.selected_product.product_id}/>
 
                 <div className="product_description product_selected_element product_selected_element_moved">
                     {state.msg}

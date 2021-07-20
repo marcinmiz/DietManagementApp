@@ -6,7 +6,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import red_apple from "../images/red_apple.jpg"
 import Avatar from '@material-ui/core/Avatar';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
@@ -17,8 +16,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FilledInput from '@material-ui/core/FilledInput';
-import banana from "../images/banana.jpg"
-import orange from "../images/orange.jpg"
 import {useHistory} from "react-router-dom";
 import http from "../http-common";
 
@@ -60,6 +57,7 @@ export default function Products(props) {
                             table[x].product_category = resp.data[x].category.categoryName;
                             table[x].product_author = resp.data[x].owner.firstName + " " + resp.data[x].owner.lastName;
                             table[x].product_favourite = resp.data[x].productFavourite;
+                            table[x].product_image = resp.data[x].productImage;
                         }
                         setState({
                             ...state,
