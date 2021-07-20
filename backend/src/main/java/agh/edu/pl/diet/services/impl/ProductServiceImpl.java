@@ -1,6 +1,6 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.entities.Category;
+import agh.edu.pl.diet.controllers.ImageController;
 import agh.edu.pl.diet.entities.Nutrient;
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.ProductNutrient;
@@ -13,11 +13,19 @@ import agh.edu.pl.diet.repos.UserRepo;
 import agh.edu.pl.diet.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+
+    private final Path root = Paths.get("images/products");
 
     @Autowired
     private ProductRepo productRepo;
@@ -112,16 +120,40 @@ public class ProductServiceImpl implements ProductService {
         return new ResponseMessage("Invalid type");
     }
 
+    private String getImageURL(Long productId) {
+        String filename = "product" + productId + ".jpg";
+        Path file = root.resolve(filename);
+        String url = "";
+        try {
+            List<String> list2 = Files.walk(this.root, 1).filter(path -> !path.equals(this.root) && path.getFileName().toString().equals(filename)).map(this.root::relativize).map(path -> path.getFileName().toString()).collect(Collectors.toList());
+            if (!list2.isEmpty()) {
+                url = MvcUriComponentsBuilder
+                        .fromMethodName(ImageController.class, "getFile", file.getFileName().toString()).build().toString();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
     @Override
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
         productRepo.findAll().forEach(list::add);
+        for (Product product:list) {
+            String url = getImageURL(product.getProductId());
+            product.setProductImage(url);
+        }
         return list;
     }
 
     @Override
-    public Product getProduct(Long product_id) {
-        return productRepo.findById(product_id).get();
+    public Product getProduct(Long productId) {
+        String url = getImageURL(productId);
+        Product product = productRepo.findById(productId).get();
+        product.setProductImage(url);
+        return product;
     }
 
     @Override

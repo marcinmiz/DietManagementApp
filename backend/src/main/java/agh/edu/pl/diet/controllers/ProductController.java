@@ -2,19 +2,10 @@ package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
-import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -30,8 +21,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable("id") Long product_id) {
-        return productService.getProduct(product_id);
+    public Product getProduct(@PathVariable("id") Long productId) {
+        return productService.getProduct(productId);
     }
 
     @PostMapping("/add")
