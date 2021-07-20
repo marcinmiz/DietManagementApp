@@ -372,7 +372,7 @@
     display: flex;
     width: 30%;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
 }
 
