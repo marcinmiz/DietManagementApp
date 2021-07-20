@@ -18,30 +18,19 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
-    private String username;
-    private String password;
+    private boolean enabled;
     private String firstName;
-    private String lastName;
-
-    @Transient
-    @Column(name = "email", nullable = false, updatable = false)
-    private String email;
-    private String phone;
-    private boolean enabled = true;
-
     private String googleName;
     private String googleUsername;
+    private String lastName;
+    private String password;
+    private int phone;
+    private String username;
 
-//	@OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
-//	private ShoppingCart shoppingCart;
-
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-//	private List<UserShipping> userShippingList;
+//    @Transient
+//    @Column(name = "email", nullable = false, updatable = false)
+//    private String email;
 //
-//
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-//	private List<UserPayment> userPaymentList;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
@@ -54,20 +43,8 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getFirstName() {
@@ -76,42 +53,6 @@ public class User implements UserDetails {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
     }
 
     public String getGoogleName() {
@@ -130,26 +71,57 @@ public class User implements UserDetails {
         this.googleUsername = googleUsername;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
 
-//	public List<UserShipping> getUserShippingList() {
-//		return userShippingList;
-//	}
-//	public void setUserShippingList(List<UserShipping> userShippingList) {
-//		this.userShippingList = userShippingList;
-//	}
-//	public List<UserPayment> getUserPaymentList() {
-//		return userPaymentList;
-//	}
-//	public void setUserPaymentList(List<UserPayment> userPaymentList) {
-//		this.userPaymentList = userPaymentList;
-//	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-    //	public ShoppingCart getShoppingCart() {
-//		return shoppingCart;
-//	}
-//	public void setShoppingCart(ShoppingCart shoppingCart) {
-//		this.shoppingCart = shoppingCart;
-//	}
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getPhone() {
+        return phone;
+    }
+
+    public void setPhone(int phone) {
+        this.phone = phone;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
+//
+
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorites = new HashSet<>();
