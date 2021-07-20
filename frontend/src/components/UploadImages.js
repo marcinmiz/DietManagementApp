@@ -2,23 +2,28 @@ import React from "react";
 import UploadService from "../services/UploadFiles";
 import {Typography, Button} from '@material-ui/core';
 
-export default function UploadImages({submitted}) {
+export default function UploadImages({currentImage, submitted, type, id}) {
     const [state, setState] = React.useState({
         currentFile: undefined,
         previewImage: undefined,
 
         message: "",
         isError: false,
-        imageInfos: [],
     })
 
     React.useEffect(() => {
-            if (submitted) {
-                console.log("submitted");
-                //upload();
+        if (currentImage !== "") {
+            setState({
+                ...state,
+                previewImage: currentImage
+            });
+
+        }
+            if (submitted && currentFile) {
+                upload();
             }
         }
-        , [submitted]
+        , [currentImage, submitted]
     )
 
     function selectFile(event) {
@@ -32,17 +37,11 @@ export default function UploadImages({submitted}) {
 
     function upload() {
 
-        UploadService.upload(state.currentFile)
+        UploadService.upload(state.currentFile, type, id)
             .then((response) => {
                 setState({
                     message: response.data.message,
                     isError: false
-                });
-                return UploadService.getFiles();
-            })
-            .then((files) => {
-                setState({
-                    imageInfos: files.data,
                 });
             })
             .catch((err) => {
@@ -53,23 +52,26 @@ export default function UploadImages({submitted}) {
                 });
             });
     };
-    // componentDidMount() {
-    //     UploadService.getFiles().then((response) => {
-    //         this.setState({
-    //             imageInfos: response.data,
-    //         });
-    //     });
-    // }
     const {
         currentFile,
         previewImage,
         message,
-        imageInfos,
         isError
     } = state;
 
     return (
         <div id="upload_container" className="upload_container product_selected_element product_selected_element_moved">
+
+            {previewImage && (
+                <div>
+                    <img className="upload_image" src={previewImage} alt=""/>
+                </div>
+            )}
+
+            <div>
+                {currentFile ? currentFile.name : null}
+            </div>
+
             <label htmlFor="btn-upload">
                 <input
                     id="btn-upload"
@@ -85,16 +87,6 @@ export default function UploadImages({submitted}) {
                     Choose Image
                 </Button>
             </label>
-
-            {previewImage && (
-                <div>
-                    <img className="upload_image" src={previewImage} alt=""/>
-                </div>
-            )}
-
-            <div>
-                {currentFile ? currentFile.name : null}
-            </div>
 
             {message && (
                 <Typography variant="subtitle2" className={`upload-message ${isError ? "error" : ""}`}>
