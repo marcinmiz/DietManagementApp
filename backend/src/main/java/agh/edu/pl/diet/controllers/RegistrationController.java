@@ -8,8 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.Collections;
-
 @Controller
 public class RegistrationController {
     @Autowired
@@ -24,11 +22,14 @@ public class RegistrationController {
     }
 
     @PostMapping("/registration")
-    public String addUser(String name, String username, String password) {
+    public String addUser(String name, String surname, String username, String password, String passwordConfirmation, String email) {
         User user = new User();
-        user.setUsername(name);
+        user.setName(name);
+        user.setSurname(surname);
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordConfirmation(passwordConfirmation);
+        user.setEmail(email);
         user.setEnabled(true);
         //user.setRoles(Collections.singleton(Role.USER));
 

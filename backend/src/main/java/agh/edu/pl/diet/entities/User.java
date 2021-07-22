@@ -19,18 +19,19 @@ public class User implements UserDetails {
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
     private boolean enabled;
-    private String firstName;
+    private String name;
     private String googleName;
     private String googleUsername;
-    private String lastName;
+    private String surname;
     private String password;
-    private int phone;
+    private String passwordConfirmation;
+//    private int phone;
     private String username;
 
-//    @Transient
-//    @Column(name = "email", nullable = false, updatable = false)
-//    private String email;
-//
+    @Transient
+    @Column(name = "email", nullable = false, updatable = false)
+    private String email;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
@@ -47,13 +48,55 @@ public class User implements UserDetails {
         this.enabled = enabled;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        this.name = name;
     }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
+    }
+
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+//    public int getPhone() {
+//        return phone;
+//    }
+//
+//    public void setPhone(int phone) {
+//        this.phone = phone;
+//    }
+
 
     public String getGoogleName() {
         return googleName;
@@ -71,31 +114,6 @@ public class User implements UserDetails {
         this.googleUsername = googleUsername;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getPhone() {
-        return phone;
-    }
-
-    public void setPhone(int phone) {
-        this.phone = phone;
-    }
-
     @Override
     public String getUsername() {
         return username;
@@ -104,15 +122,6 @@ public class User implements UserDetails {
     public void setUsername(String username) {
         this.username = username;
     }
-
-//    public String getEmail() {
-//        return email;
-//    }
-//
-//    public void setEmail(String email) {
-//        this.email = email;
-//    }
-//
 
     public Set<UserRole> getUserRoles() {
         return userRoles;
