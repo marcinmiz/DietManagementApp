@@ -2,6 +2,7 @@ package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
+import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public interface ProductService {
     ResponseMessage updateProduct(Long productId, ProductRequest productRequest);
 
     ResponseMessage removeProduct(Long productId);
+
+    List<Product> searchProducts(ProductSearchRequest productSearchRequest);
 
     //    Product save(Product product);
 //

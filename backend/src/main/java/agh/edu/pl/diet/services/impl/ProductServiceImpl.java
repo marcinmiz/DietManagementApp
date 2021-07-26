@@ -1,10 +1,12 @@
 package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.controllers.ImageController;
+import agh.edu.pl.diet.entities.Category;
 import agh.edu.pl.diet.entities.Nutrient;
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.ProductNutrient;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
+import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.CategoryRepo;
 import agh.edu.pl.diet.repos.NutrientRepo;
@@ -325,6 +327,29 @@ public class ProductServiceImpl implements ProductService {
             return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
         }
             return new ResponseMessage("Product id " + productId + " has not been found");
+    }
+
+    @Override
+    public List<Product> searchProducts(ProductSearchRequest productSearchRequest) {
+
+        String category = productSearchRequest.getCategory();
+        String phrase = productSearchRequest.getPhrase();
+
+        List<Product> products = getAllProducts();
+
+        if (!category.equals("")) {
+            List<Category> categories = new ArrayList<>();
+            categoryRepo.findAll().forEach(categories::add);
+            if (categories.stream().map(Category::getCategoryName).filter(n -> n.equalsIgnoreCase(category)).findFirst().orElse(null) == null) {
+                return new ArrayList<>();
+            }
+            products = products.stream().filter(product -> product.getCategory().getCategoryName().equalsIgnoreCase(category)).collect(Collectors.toList());
+        }
+
+        if (!phrase.equals("")) {
+            products = products.stream().filter(product -> product.getProductName().toLowerCase().contains(phrase.toLowerCase())).collect(Collectors.toList());
+        }
+        return products;
     }
 
     //    public Product save(Product product) {
