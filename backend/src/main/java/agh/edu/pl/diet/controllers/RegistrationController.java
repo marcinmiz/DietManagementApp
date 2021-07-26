@@ -1,14 +1,17 @@
 package agh.edu.pl.diet.controllers;
 
+import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.payloads.request.ProductRequest;
+import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
+@RequestMapping("/api/registration")
 public class RegistrationController {
     @Autowired
     private UserRepo userRepo;
@@ -16,9 +19,22 @@ public class RegistrationController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/{id}")
+    public Product getRegistration(@PathVariable("id") Long product_id) {
+        return userService.save();
+    }
+
     @GetMapping("/registration")
     public String registration() {
         return "registration";
+    }
+
+    @PostMapping("/add")
+    public ResponseMessage addNewProduct(@RequestBody ProductRequest productRequest) {
+        return userService.getCreateUser();
     }
 
     @PostMapping("/registration")
