@@ -21,15 +21,13 @@ import AddIcon from '@material-ui/icons/Add';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import UploadImages from "../components/UploadImages";
-import {useHistory} from "react-router-dom";
 import http from "../http-common";
 
 export default function ProductsDetails(props) {
-    let history = useHistory();
 
     const [state, setState] = React.useState({
         products_group: 0,//0: all, 1: new, 2: favourite
-        mode: 'view',
+        mode: '',
         submitted: false,
         products: [],
         selected_product: {
@@ -56,63 +54,132 @@ export default function ProductsDetails(props) {
         product_ingredients: [],
         product_add_ingredient: "",
         msg: "",
+        existed_products: [],
+        categories: [],
     });
 
-    useEffect(
+        useEffect(
         () => {
+
             const product_id = props.match.params.id;
             const mode = props.match.params.mode;
+            let categoriesTable = [];
 
-            setState({
-                ...state,
-                "mode": mode,
-            });
+            http.get("/api/categories")
+                .then(resp => {
+
+                    for (let x in resp.data){
+                        categoriesTable[x] = {};
+                        categoriesTable[x].category_id = resp.data[x].categoryId;
+                        categoriesTable[x].category_name = resp.data[x].categoryName;
+                    }
+                    setState({
+                        ...state,
+                        "categories": categoriesTable,
+                    });
+
+                })
+                .catch(error => console.log(error));
+
+            state.mode = mode;
 
             if (product_id !== 'new') {
                 //retrieve product specified by id data
-
                 http.get("/api/products/" + product_id)
-                    .then(resp => {
-                        console.log(resp.data);
+                    .then(response => {
+                        let data = response.data;
+                        console.log(data);
                         let product = {};
-                        product.product_id = resp.data.productId;
-                        product.product_name = resp.data.productName;
-                        product.product_category = resp.data.category.categoryName;
-                        product.product_author = resp.data.owner.firstName + " " + resp.data.owner.lastName;
-                        product.product_favourite = resp.data.productFavourite;
-                        product.product_image = resp.data.productImage;
+                        product.product_id = data.productId;
+                        product.product_name = data.productName;
+                        product.product_category = data.category.categoryName;
+                        product.product_author = data.owner.firstName + " " + data.owner.lastName;
+                        product.product_favourite = data.productFavourite;
+                        product.product_image = data.productImage;
 
                         let productNutrients = [];
                         productNutrients[0] = {};
                         productNutrients[0].nutrient_name = "Calories";
-                        productNutrients[0].nutrient_amount = resp.data.calories;
+                        productNutrients[0].nutrient_amount = data.calories;
                         productNutrients[0].nutrient_unit = "kcal";
 
                         let nutrients_quantity = state.product_nutrients.length;
                         for (let i = 1; i < nutrients_quantity; i++) {
                             productNutrients[i] = {};
-                            productNutrients[i].nutrient_name = resp.data.nutrients[i-1].nutrient.nutrientName;
-                            productNutrients[i].nutrient_amount = resp.data.nutrients[i-1].nutrientAmount;
+                            productNutrients[i].nutrient_name = data.nutrients[i-1].nutrient.nutrientName;
+                            productNutrients[i].nutrient_amount = data.nutrients[i-1].nutrientAmount;
                             productNutrients[i].nutrient_unit = "mg/100g";
                         }
 
                         setState({
                             ...state,
                             "mode": mode,
+                            "categories": categoriesTable,
                             "selected_product": product,
                             "product_nutrients": productNutrients,
-                            "product_ingredients": [["Water", 85], ["Fructose", 10], ["Fibre and Pectin", 3.5]],
+                            // "product_ingredients": [["Water", 85], ["Fructose", 10], ["Fibre and Pectin", 3.5]],
                         });
+
                     })
                     .catch(error => console.log(error));
 
             }
+            document.getElementById("product" + state.selected_product.product_id).classList.add("product_selected_moved");
 
-                    document.getElementById(state.selected_product.product_id).classList.add("product_selected_moved")
-        }, [props.match.params.id, props.match.params.mode]
+            if (mode === "edit") {
+                const products_existed = document.getElementsByClassName("products_existed_container")[0];
+                products_existed.style.display = "block";
+
+                document.getElementById("product_name_value").addEventListener('focus', () => {
+                    products_existed.style.display = "block";
+                });
+                document.getElementById("product_name_value").addEventListener('blur', () => {
+                    products_existed.style.display = "none";
+                });
+            }
+        }, [props.match.params.mode, props.match.params.id]
+    );
+
+    useEffect(
+        () => {
+            const products_existed = document.getElementsByClassName("products_existed_container")[0];
+            const name_input = document.getElementById("product_name_value");
+
+            if (state.mode === "edit" && document.activeElement === name_input) {
+                products_existed.style.display = "block";
+            }
+
+            if (state.selected_product.product_name !== undefined && state.selected_product.product_name !== "") {
+                let search_parameters = {};
+                search_parameters.phrase = state.selected_product.product_name;
+                search_parameters.category = "";
+
+                http.post("/api/products/search", search_parameters)
+                    .then(resp => {
+                        let search = [];
+                        for (let x in resp.data){
+                            search[x] = resp.data[x].productName;
+                        }
+
+                        setState({
+                            ...state,
+                            existed_products: search,
+                        });
+
+                        if (search.length <= 0) {
+                            products_existed.style.display = "none";
+                        }
+
+                    })
+                    .catch(error => console.log(error))
+            } else {
+                products_existed.style.display = "none";
+            }
+        }, [state.selected_product.product_name]
     );
 
     const handleChangeProductId = (event) => {
+
         const values = {
             ...state.selected_product,
             [event.target.name]: event.target.value
@@ -121,26 +188,20 @@ export default function ProductsDetails(props) {
             ...state,
             "selected_product": values
         });
-        if (event.target.name === "product_name") {
-            //search products containing event.target.value in name
-            const products_existed = document.getElementsByClassName("products_existed_container")[0];
-            products_existed.style.display = "block";
-            setTimeout(() => products_existed.style.display = "none", 3000);
-        }
     };
 
     const handleEdit = () => {
         if (state.mode === "view") {
-            history.push('/products/' + state.selected_product.product_id + '/edit');
+            props.history.push('/products/product-'+state.selected_product.product_id);
         } else {
-            history.push('/products/' + state.selected_product.product_id + '/view');
+            props.history.push('/products/' + state.selected_product.product_id + '/view');
         }
 
     }
 
     const handleClose = () => {
-        document.getElementById(state.selected_product.product_id).classList.remove("product_selected_moved");
-        setTimeout(() => history.push("/products/main"), 2000);
+        document.getElementById("product" + state.selected_product.product_id).classList.remove("product_selected_moved");
+        setTimeout(() => props.history.push("/products/main"), 2000);
     }
 
     const handleChangeIngredient = (event, index) => {
@@ -196,7 +257,7 @@ export default function ProductsDetails(props) {
                     });
                 } else {
 
-                    history.push("/products/" + state.selected_product.product_name + "-removed")
+                    props.history.push("/products/" + state.selected_product.product_name + "-removed")
                 }
             })
             .catch(error => console.log(error));
@@ -328,7 +389,7 @@ export default function ProductsDetails(props) {
                             "submitted": true
                         });
 
-                        history.push("/products/" + product.productName + "-added")
+                        props.history.push("/products/" + product.productName + "-added")
                     }
                 })
                 .catch(error => console.log(error));
@@ -346,7 +407,7 @@ export default function ProductsDetails(props) {
                             "submitted": true
                         });
 
-                        history.push("/products/" + product.productName + "-updated")
+                        props.history.push("/products/" + product.productName + "-updated")
                     }
                 })
                 .catch(error => console.log(error));
@@ -357,7 +418,7 @@ export default function ProductsDetails(props) {
     let current_product, tab;
 
     if (state.mode === 'view') {
-        current_product = <div id={state.selected_product.product_id} className="product product_selected">
+        current_product = <div id={"product" + state.selected_product.product_id} className="product product_selected">
             <div className="product_image_container product_selected_element ">
                 <img className="product_image" src={state.selected_product.product_image}
                      alt={state.selected_product.product_name}/>
@@ -425,21 +486,7 @@ export default function ProductsDetails(props) {
             </div>
         </div>;
     } else {
-        current_product = <div id={state.selected_product.product_id} className="product product_selected">
-            <div className="products_existed_container product_selected_element_moved">
-                <h3>Products yet existed</h3>
-                <div className="product_existed">Cow's milk</div>
-                <Divider variant="middle"/>
-                <div className="product_existed">Goat's milk</div>
-                <Divider variant="middle"/>
-                <div className="product_existed">Almond milk</div>
-                <Divider variant="middle"/>
-                <div className="product_existed">Coconut milk</div>
-                <Divider variant="middle"/>
-                <div className="product_existed">Soy milk</div>
-                <Divider variant="middle"/>
-                <div className="product_existed">Oat milk</div>
-            </div>
+        current_product = <div id={"product" + state.selected_product.product_id} className="product product_selected">
             <form className="product_edit_form">
                 <UploadImages submitted={state.submitted} currentImage={state.selected_product.product_image} type="product" id={state.selected_product.product_id}/>
 
@@ -452,6 +499,7 @@ export default function ProductsDetails(props) {
                                 <FilledInput
                                     name="product_name"
                                     className="product_name"
+                                    id="product_name_value"
                                     value={state.selected_product.product_name}
                                     onChange={event => handleChangeProductId(event)}
                                 />
@@ -469,9 +517,9 @@ export default function ProductsDetails(props) {
                                     size="small"
                                     onChange={event => handleChangeProductId(event)}
                                 >
-                                    <MenuItem value="Fruit">Fruit</MenuItem>
-                                    <MenuItem value="Vegetables">Vegetables</MenuItem>
-                                    <MenuItem value="Dairy">Dairy</MenuItem>
+                                    {state.categories.map((category, index) => (
+                                    <MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </div>
@@ -630,6 +678,15 @@ export default function ProductsDetails(props) {
 
     return (
         <Container maxWidth="xl">
+            <div className="products_existed_container product_selected_element_moved">
+                <h3>Products yet existed</h3>
+                {state.existed_products.map((product, index) => (
+                    <div key={index}>
+                        <div  className="product_existed">{product}</div>
+                        <Divider variant="middle"/>
+                    </div>
+                ))}
+            </div>
             {current_product}
             <div className="page_container background_blur">
                 <h2>Products</h2>
@@ -665,9 +722,9 @@ export default function ProductsDetails(props) {
                                 name="category"
                                 value={state.category}
                             >
-                                <MenuItem value="Fruit">Fruit</MenuItem>
-                                <MenuItem value="Vegetables">Vegetables</MenuItem>
-                                <MenuItem value="Dairy">Dairy</MenuItem>
+                                {state.categories.map((category, index) => (
+                                    <MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </div>
