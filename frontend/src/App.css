@@ -386,16 +386,17 @@
 
 .products_existed_container {
     display: none;
-    position: inherit;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 35%;
+    width: 15%;
     background-color: red;
     z-index: 100;
     cursor: auto;
     border-radius: 5px;
     padding: 2%;
     transition: display 2s ease-in-out;
+    font-size: 1.5em;
 }
 
 .product_existed {

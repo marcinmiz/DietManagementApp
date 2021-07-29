@@ -4,10 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter} from 'react-router-dom'
+import { createBrowserHistory } from "history";
 
+const history = createBrowserHistory({ forceRefresh: true });
 ReactDOM.render(
     <React.StrictMode>
-        <BrowserRouter>
+        <BrowserRouter history={history}>
             <App/>
         </BrowserRouter>
     </React.StrictMode>,
