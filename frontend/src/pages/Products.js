@@ -16,7 +16,6 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FilledInput from '@material-ui/core/FilledInput';
-import {useHistory} from "react-router-dom";
 import http from "../http-common";
 
 const useStyles = makeStyles({
@@ -26,7 +25,6 @@ const useStyles = makeStyles({
 });
 
 export default function Products(props) {
-    let history = useHistory();
 
     const classes = useStyles();
 
@@ -35,21 +33,47 @@ export default function Products(props) {
         category: '',
         products_group: 0,//0: all, 1: new, 2: favourite
         products: [],
+        categories: [],
         msg: "",
         loaded: false
     });
 
     useEffect(
         () => {
+            if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
+                console.log(props.match.params.msg);
+                let parts = props.match.params.msg.split('-');
+                props.history.push('/products/' + parts[1] + '/edit');
+            }
+            state.loaded = false;
+            document.getElementsByClassName("loading").item(0).innerHTML = "Loading";
+            document.getElementsByClassName("loading").item(0).removeAttribute("hidden");
             let msg_container = document.getElementsByClassName("msg").item(0);
             msg_container.style.display = "none";
+            let categoriesTable = [];
+
+            http.get("/api/categories")
+                .then(resp => {
+                    for (let x in resp.data){
+                        categoriesTable[x] = {};
+                        categoriesTable[x].category_id = resp.data[x].categoryId;
+                        categoriesTable[x].category_name = resp.data[x].categoryName;
+                    }
+                })
+                .catch(error => console.log(error));
 
             if (state.products_group === 0) {
                 //retrieve all products and set its values to product state field
                 console.log("first");
-                http.get("/api/products")
+
+                let search_parameters = {};
+                search_parameters.phrase = state.search;
+                search_parameters.category = state.category;
+                console.log(search_parameters);
+                http.post("/api/products/search", search_parameters)
                     .then(resp => {
-                    let table = [];
+                        console.log(resp.data);
+                        let table = [];
                         for (let x in resp.data){
                             table[x] = {};
                             table[x].product_id = resp.data[x].productId;
@@ -62,6 +86,7 @@ export default function Products(props) {
                         setState({
                             ...state,
                             products: table,
+                            categories: categoriesTable,
                         });
 
                         if ((/^[a-zA-Z]+(-)[a-zA-Z]+$/.test(props.match.params.msg))) {
@@ -82,7 +107,11 @@ export default function Products(props) {
                             }
                         }
                         state.loaded = true;
-                        document.getElementsByClassName("loading").item(0).setAttribute("hidden", true);
+                        if (table.length === 0) {
+                            document.getElementsByClassName("loading").item(0).innerHTML = "No products found";
+                        } else {
+                            document.getElementsByClassName("loading").item(0).setAttribute("hidden", true);
+                        }
                 })
                     .catch(error => console.log(error))
             } else if (state.products_group === 1) {
@@ -90,7 +119,7 @@ export default function Products(props) {
             } else {
                 //retrieve favourite products and set its values to product state field
             }
-        }, [state.products_group, props.match.params.msg]
+        }, [state.products_group, props.match.params.msg, state.search, state.category]
     );
 
     const handleChange = (event) => {
@@ -98,7 +127,6 @@ export default function Products(props) {
             ...state,
             [event.target.name]: event.target.value,
         });
-
     };
 
     const handleTab = (event, newValue) => {
@@ -110,7 +138,7 @@ export default function Products(props) {
 
     const handleProduct = (event, product_id) => {
         let destination = "/products/" + product_id + "/view";
-        history.push(destination);
+        props.history.push(destination);
     };
 
     const handleCategory = (event) => {
@@ -171,11 +199,11 @@ export default function Products(props) {
     const handleEdit = (event, product_id) => {
         event.cancelBubble = true;
         if (event.stopPropagation) event.stopPropagation();
-        history.push('/products/' + product_id + '/edit');
+        props.history.push('/products/' + product_id + '/edit');
     };
 
     const handleAddNewProduct = () => {
-        history.push('/products/new/edit');
+        props.history.push('/products/new/edit');
     };
 
     const handleRemove = (event, index) => {
@@ -193,7 +221,7 @@ export default function Products(props) {
                     });
                 } else {
 
-                    history.push("/products/" + product_name + "-removed")
+                    props.history.push("/products/" + product_name + "-removed")
                 }
             })
             .catch(error => console.log(error));
@@ -201,7 +229,7 @@ export default function Products(props) {
 
     let tab;
 
-    tab = <div>
+    tab = <div id="tab">
             <div className="loading">Loading</div>
             <div>
                 <Grid container className="products_list" spacing={1}>
@@ -289,9 +317,9 @@ export default function Products(props) {
                                 value={state.category}
                                 onChange={handleChange}
                             >
-                                <MenuItem value="Fruit">Fruit</MenuItem>
-                                <MenuItem value="Vegetables">Vegetables</MenuItem>
-                                <MenuItem value="Dairy">Dairy</MenuItem>
+                                {state.categories.map((category, index) => (
+                                    <MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>
+                                 ))}
                             </Select>
                         </FormControl>
                     </div>
