@@ -1,6 +1,5 @@
 package agh.edu.pl.diet.controllers;
 
-import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -23,18 +22,18 @@ public class RegistrationController {
     private UserService userService;
 
     @GetMapping("/{id}")
-    public Product getRegistration(@PathVariable("id") Long product_id) {
+    public User getRegistration(@PathVariable("id") Long user_id) {
         return userService.save();
     }
 
-    @GetMapping("/registration")
-    public String registration() {
-        return "registration";
-    }
+//    @GetMapping("/registration")
+//    public String registration() {
+//        return "registration";
+//    }
 
     @PostMapping("/add")
-    public ResponseMessage addNewProduct(@RequestBody ProductRequest productRequest) {
-        return userService.getCreateUser();
+    public ResponseMessage addNewUser(@RequestBody ProductRequest userRequest) {
+        return userService.getCreateUser(userRequest);
     }
 
     @PostMapping("/registration")
