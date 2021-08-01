@@ -298,6 +298,13 @@
         max-height: 75%;
         justify-content: flex-start;
     }
+    .unconfirmed_products_list {
+        max-height: 75% !important;
+    }
+
+    .unconfirmed_product {
+        flex-direction: row !important;
+    }
 
     .product {
         width: 49%;
@@ -416,4 +423,47 @@
     left: 50%;
     top: 60%;
     font-size: 1.2em;
+}
+
+.unconfirmed_products_list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    max-height: 56%;
+}
+
+.unconfirmed_product {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem !important;
+}
+
+.pending_product {
+    color: yellow;
+}
+
+.rejected_product {
+    color: red;
+}
+
+.assessment_details {
+    display: flex;
+    min-width: 40%;
+    justify-content: space-around;
+}
+
+.reject_explanation, .product_status, .assessment_date {
+    height: 23vh;
+
+}
+
+.unconfirmed_header {
+    font-size: 1.2em;
+    margin-bottom: 5%;
+}
+
+.unconfirmed_body {
+    margin-top: 10%;
 }
