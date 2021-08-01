@@ -26,8 +26,12 @@ public class Product {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<ProductNutrient> nutrients = new HashSet<>();
 
+    private String creationDate = null;
+
     private String approvalStatus = "pending";
-    private Date creationDate = null;
+    private String assessmentDate = null;
+    private String rejectExplanation = "";
+
     private Boolean productFavourite = false;
 
 //	@Column(columnDefinition="text")
@@ -128,19 +132,11 @@ public class Product {
         nutrients.add(productNutrient);
     }
 
-    public String isApprovalStatus() {
-        return approvalStatus;
-    }
-
-    public void setApprovalStatus(String approvalStatus) {
-        this.approvalStatus = approvalStatus;
-    }
-
-    public Date getCreationDate() {
+    public String getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -158,5 +154,29 @@ public class Product {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
+    public String getRejectExplanation() {
+        return rejectExplanation;
+    }
+
+    public void setRejectExplanation(String rejectExplanation) {
+        this.rejectExplanation = rejectExplanation;
+    }
+
+    public String getAssessmentDate() {
+        return assessmentDate;
+    }
+
+    public void setAssessmentDate(String assessmentDate) {
+        this.assessmentDate = assessmentDate;
     }
 }

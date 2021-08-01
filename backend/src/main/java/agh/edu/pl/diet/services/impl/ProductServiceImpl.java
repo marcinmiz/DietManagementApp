@@ -227,12 +227,20 @@ public class ProductServiceImpl implements ProductService {
             productNutrient.setNutrientAmount(nutrientAmount);
             productNutrient.setProduct(product);
             product.addNutrient(productNutrient);
-            //change to logged in user id
-            product.setOwner(userRepo.findById(1L).get());
-            product.setCreationDate(new Date());
         }
+
+        //change to logged in user id
+        product.setOwner(userRepo.findById(1L).get());
+        String creationDate = new Date().toInstant().toString();
+        product.setCreationDate(creationDate);
+
         productRepo.save(product);
-        return new ResponseMessage("Product " + productName + " has been added successfully");
+        Product lastAddedProduct = getAllProducts().stream().filter(p -> p.getCreationDate().equals(creationDate)).findFirst().orElse(null);
+        if (lastAddedProduct != null) {
+            return new ResponseMessage(lastAddedProduct.getProductId() + " Product " + productName + " has been added successfully");
+        } else {
+            return new ResponseMessage("Product " + productName + " has not been found");
+        }
     }
 
     @Override
