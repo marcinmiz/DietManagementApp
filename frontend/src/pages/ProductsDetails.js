@@ -26,7 +26,7 @@ import http from "../http-common";
 export default function ProductsDetails(props) {
 
     const [state, setState] = React.useState({
-        products_group: 0,//0: all, 1: new, 2: favourite
+        products_group: 0,//0: all, 1: unconfirmed, 2: new
         mode: '',
         submitted: false,
         products: [],
@@ -36,7 +36,7 @@ export default function ProductsDetails(props) {
             product_image: "",
             product_category: "",
             product_author: "",
-            product_favourite: false
+            // product_favourite: false
         },
         product_nutrients: [{
             nutrient_name: "Calories",
@@ -94,7 +94,7 @@ export default function ProductsDetails(props) {
                         product.product_name = data.productName;
                         product.product_category = data.category.categoryName;
                         product.product_author = data.owner.firstName + " " + data.owner.lastName;
-                        product.product_favourite = data.productFavourite;
+                        // product.product_favourite = data.productFavourite;
                         product.product_image = data.productImage;
 
                         let productNutrients = [];
@@ -257,42 +257,42 @@ export default function ProductsDetails(props) {
                     });
                 } else {
 
-                    props.history.push("/products/" + state.selected_product.product_name + "-removed")
+                    props.history.push("/products/" + state.selected_product.product_name.replace(" ", "_") + "-removed")
                 }
             })
             .catch(error => console.log(error));
         handleClose();
     };
 
-    const handleFavouriteIcon = () => {
-        if (state.selected_product.product_favourite) {
-            return (<Tooltip title="Remove from favourite" aria-label="Remove from favourite">
-                <IconButton aria-label="Remove from favourite" className="product_icon_button"
-                            onClick={() => handleAddToFavourite()}>
-                    <FavoriteIcon fontSize="small"/>
-                </IconButton>
-            </Tooltip>);
-        } else {
-            return (<Tooltip title="Add to favourite" aria-label="Add to favourite">
-                <IconButton aria-label="Add to favourite" className="product_icon_button"
-                            onClick={() => handleAddToFavourite()}>
-                    <FavoriteBorderIcon fontSize="small"/>
-                </IconButton>
-            </Tooltip>);
-        }
-    }
-
-    const handleAddToFavourite = () => {
-        const product_favourite = !state.selected_product.product_favourite;
-        const values = [{
-            ...state.selected_product,
-            "product_favourite": product_favourite
-        }];
-        setState({
-            ...state,
-            "selected_product": values
-        });
-    }
+    // const handleFavouriteIcon = () => {
+    //     if (state.selected_product.product_favourite) {
+    //         return (<Tooltip title="Remove from favourite" aria-label="Remove from favourite">
+    //             <IconButton aria-label="Remove from favourite" className="product_icon_button"
+    //                         onClick={() => handleAddToFavourite()}>
+    //                 <FavoriteIcon fontSize="small"/>
+    //             </IconButton>
+    //         </Tooltip>);
+    //     } else {
+    //         return (<Tooltip title="Add to favourite" aria-label="Add to favourite">
+    //             <IconButton aria-label="Add to favourite" className="product_icon_button"
+    //                         onClick={() => handleAddToFavourite()}>
+    //                 <FavoriteBorderIcon fontSize="small"/>
+    //             </IconButton>
+    //         </Tooltip>);
+    //     }
+    // }
+    //
+    // const handleAddToFavourite = () => {
+    //     const product_favourite = !state.selected_product.product_favourite;
+    //     const values = [{
+    //         ...state.selected_product,
+    //         "product_favourite": product_favourite
+    //     }];
+    //     setState({
+    //         ...state,
+    //         "selected_product": values
+    //     });
+    // }
 
     const handleSave = () => {
         let product = {};
@@ -378,18 +378,22 @@ export default function ProductsDetails(props) {
         if (state.selected_product.product_id === "new") {
             http.post("/api/products/add", product)
                 .then(resp => {
-                    if (resp.data.message !== "Product " + state.selected_product.product_name + " has been added successfully") {
+                    let product_id = resp.data.message.split(" ")[0];
+
+                    if (resp.data.message !== product_id + " Product " + state.selected_product.product_name + " has been added successfully") {
                         setState({
                             ...state,
                             "msg": resp.data.message
                         });
                     } else {
+                        let selected_product = {... state.selected_product, "product_id": product_id};
                         setState({
                             ...state,
-                            "submitted": true
+                            "submitted": true,
+                            "selected_product": selected_product
                         });
 
-                        props.history.push("/products/" + product.productName + "-added")
+                        props.history.push("/products/" + product.productName.replace(" ", "_") + "-added")
                     }
                 })
                 .catch(error => console.log(error));
@@ -407,7 +411,7 @@ export default function ProductsDetails(props) {
                             "submitted": true
                         });
 
-                        props.history.push("/products/" + product.productName + "-updated")
+                        props.history.push("/products/" + product.productName.replace(" ", "_") + "-updated")
                     }
                 })
                 .catch(error => console.log(error));
@@ -482,7 +486,7 @@ export default function ProductsDetails(props) {
                         <EditIcon fontSize="small"/>
                     </IconButton>
                 </Tooltip>
-                {handleFavouriteIcon()}
+                {/*{handleFavouriteIcon()}*/}
             </div>
         </div>;
     } else {
@@ -619,7 +623,7 @@ export default function ProductsDetails(props) {
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
-                    {handleFavouriteIcon()}
+                    {/*{handleFavouriteIcon()}*/}
                 </div>
             </form>
         </div>;
@@ -628,9 +632,9 @@ export default function ProductsDetails(props) {
     if (state.products_group === 0) {
         //retrieve all products and set its values to product state field
     } else if (state.products_group === 1) {
-        //retrieve new products and set its values to product state field
+        //retrieve unconfirmed products and set its values to product state field
     } else {
-        //retrieve favourite products and set its values to product state field
+        //retrieve new products and set its values to product state field
     }
 
     tab = <Grid container className="products_list" spacing={1}>
@@ -667,10 +671,10 @@ export default function ProductsDetails(props) {
                             <EditIcon fontSize="small"/>
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Change favourite status" aria-label="Change favourite status">
-                        <IconButton aria-label="Change favourite status" className="product_icon_button" disabled>
-                        </IconButton>
-                    </Tooltip>
+                    {/*<Tooltip title="Change favourite status" aria-label="Change favourite status">*/}
+                        {/*<IconButton aria-label="Change favourite status" className="product_icon_button" disabled>*/}
+                        {/*</IconButton>*/}
+                    {/*</Tooltip>*/}
                 </div>
             </Grid>
         ))}
@@ -699,8 +703,8 @@ export default function ProductsDetails(props) {
                         aria-label="product groups buttons"
                     >
                         <Tab className="product_group_tab" label="All"/>
+                        <Tab className="product_group_tab" label="Unconfirmed"/>
                         <Tab className="product_group_tab" label="New"/>
-                        <Tab className="product_group_tab" label="Favourite"/>
                     </Tabs>
                     <div>
                         <FormControl variant="filled" className="form_control">
@@ -732,7 +736,7 @@ export default function ProductsDetails(props) {
                         <AddIcon/>
                     </Fab>
                 </div>
-                <div className="products_list" spacing={3}>
+                <div className="products_list">
                     {tab}
                 </div>
             </div>
