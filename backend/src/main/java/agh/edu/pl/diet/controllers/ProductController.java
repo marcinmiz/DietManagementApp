@@ -29,8 +29,13 @@ public class ProductController {
     }
 
     @PostMapping("/add")
-    public ResponseMessage addNewProduct(@RequestBody ProductRequest productRequest) {
-        return productService.addNewProduct(productRequest);
+    public ResponseEntity<ResponseMessage> addNewProduct(@RequestBody ProductRequest productRequest) {
+        ResponseMessage message = productService.addNewProduct(productRequest);
+        if (message.getMessage().endsWith(" has been added successfully")) {
+            return ResponseEntity.status(HttpStatus.OK).body(message);
+        } else {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+        }
     }
 
     @PutMapping("/update/{id}")

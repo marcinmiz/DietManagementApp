@@ -42,13 +42,13 @@ public class ImageServiceImpl implements ImageService {
                     break;
                 case "recipe":
                     String recipeImageName = "recipe" + id + ".jpg";
-                    Path path2 = this.productsRoot.resolve(recipeImageName);
+                    Path path2 = this.recipesRoot.resolve(recipeImageName);
                     Files.deleteIfExists(path2);
                     Files.copy(image.getInputStream(), path2);
                     break;
                 case "avatar":
                     String avatarImageName = "avatar" + id + ".jpg";
-                    Path path3 = this.productsRoot.resolve(avatarImageName);
+                    Path path3 = this.avatarsRoot.resolve(avatarImageName);
                     Files.deleteIfExists(path3);
                     Files.copy(image.getInputStream(), path3);
                     break;
