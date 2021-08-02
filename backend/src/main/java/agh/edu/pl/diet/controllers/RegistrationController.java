@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/registration")
+@RequestMapping("/api/")
 public class RegistrationController {
     @Autowired
     private UserRepo userRepo;
@@ -21,7 +21,7 @@ public class RegistrationController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/registration/{id}")
     public User getRegistration(@PathVariable("id") Long user_id) {
         return userService.save();
     }
@@ -31,7 +31,7 @@ public class RegistrationController {
 //        return "registration";
 //    }
 
-    @PostMapping("/add")
+    @PostMapping("/registration/add")
     public ResponseMessage addNewUser(@RequestBody ProductRequest userRequest) {
         return userService.getCreateUser(userRequest);
     }
@@ -51,5 +51,19 @@ public class RegistrationController {
         userRepo.save(user);
 
         return "redirect:/login";
+    }
+
+    @PostMapping("/login")
+    public String loginUser(String username, String password, String email) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        // user.setEnabled(true);
+        //user.setRoles(Collections.singleton(Role.USER));
+
+        userRepo.save(user);
+
+        return "redirect:/new";
     }
 }
