@@ -2,19 +2,11 @@ package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
-import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -65,7 +57,7 @@ public class ProductController {
 //
 //        try {
 //            byte[] bytes = prductImage.getBytes();
-//            String name = product.getId() + ".png";
+//            String name = product.getUserId() + ".png";
 //            BufferedOutputStream stream = new BufferedOutputStream(
 //                    new FileOutputStream(new File("frontend/src/images/" + name)));
 //            stream.write(bytes);
@@ -102,7 +94,7 @@ public class ProductController {
 //        if (!productImage.isEmpty()) {
 //            try {
 //                byte[] bytes = productImage.getBytes();
-//                String name = product.getId() + ".png";
+//                String name = product.getUserId() + ".png";
 //
 //                Files.delete(Paths.get("frontend/src/images/" + name));
 //
@@ -115,7 +107,7 @@ public class ProductController {
 //            }
 //        }
 //
-//        return "redirect:/product/productInfo?id=" + product.getId();
+//        return "redirect:/product/productInfo?id=" + product.getUserId();
 //    }
 //
 //    @RequestMapping("/productList")

@@ -45,7 +45,7 @@ public class RegistrationController {
         user.setPassword(passwordEncoder.encode(password));
         user.setPasswordConfirmation(passwordConfirmation);
         user.setEmail(email);
-        user.setEnabled(true);
+       // user.setEnabled(true);
         //user.setRoles(Collections.singleton(Role.USER));
 
         userRepo.save(user);

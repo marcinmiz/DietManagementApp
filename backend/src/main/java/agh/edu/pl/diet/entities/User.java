@@ -16,16 +16,12 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false, updatable = false)
-    private Long id;
-    private boolean enabled;
+    @Column(name = "userId", nullable = false, updatable = false)
+    private Long userId;
     private String name;
-    private String googleName;
-    private String googleUsername;
     private String surname;
     private String password;
     private String passwordConfirmation;
-//    private int phone;
     private String username;
 
     @Transient
@@ -36,16 +32,12 @@ public class User implements UserDetails {
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -87,31 +79,6 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-//    public int getPhone() {
-//        return phone;
-//    }
-//
-//    public void setPhone(int phone) {
-//        this.phone = phone;
-//    }
-
-
-    public String getGoogleName() {
-        return googleName;
-    }
-
-    public void setGoogleName(String googleName) {
-        this.googleName = googleName;
-    }
-
-    public String getGoogleUsername() {
-        return googleUsername;
-    }
-
-    public void setGoogleUsername(String googleUsername) {
-        this.googleUsername = googleUsername;
     }
 
     @Override
@@ -159,8 +126,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return false;
     }
-
 
 }

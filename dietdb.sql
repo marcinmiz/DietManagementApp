@@ -233,7 +233,7 @@ INSERT INTO `role` (`role_id`, `name`) VALUES
 --
 
 CREATE TABLE `user` (
-  `id` bigint(20) NOT NULL,
+  `userId` bigint(20) NOT NULL,
   `enabled` bit(1) NOT NULL,
   `first_name` varchar(255) COLLATE utf8_polish_ci DEFAULT NULL,
   `google_name` varchar(255) COLLATE utf8_polish_ci DEFAULT NULL,
@@ -248,7 +248,7 @@ CREATE TABLE `user` (
 -- Zrzut danych tabeli `user`
 --
 
-INSERT INTO `user` (`id`, `enabled`, `first_name`, `google_name`, `google_username`, `last_name`, `password`, `phone`, `username`) VALUES
+INSERT INTO `user` (`userId`, `enabled`, `first_name`, `google_name`, `google_username`, `last_name`, `password`, `phone`, `username`) VALUES
 (1, b'0', 'Max', NULL, NULL, 'Maximowicz', '1234', NULL, 'Max');
 
 -- --------------------------------------------------------
@@ -290,7 +290,7 @@ ALTER TABLE `nutrient`
 -- Indeksy dla tabeli `password_reset_token`
 --
 ALTER TABLE `password_reset_token`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`userId`),
   ADD KEY `FK5lwtbncug84d4ero33v3cfxvl` (`user_id`);
 
 --
@@ -333,7 +333,7 @@ ALTER TABLE `role`
 -- Indeksy dla tabeli `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`userId`);
 
 --
 -- Indeksy dla tabeli `user_role`
