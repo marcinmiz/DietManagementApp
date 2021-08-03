@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 public interface UserRepo extends CrudRepository<User, Long> {
     User findByUsername(String username);
 
-    //User findByName(String email);
-    User findByGoogleUsername(String googleUsername);
-
-    User findByGoogleName(String googleName);
+    User findByName(String email);
+//    User findByGoogleUsername(String googleUsername);
+//
+//    User findByGoogleName(String googleName);
 }

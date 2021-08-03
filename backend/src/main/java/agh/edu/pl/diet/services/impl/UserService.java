@@ -16,9 +16,9 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User userFindByUsername = userRepo.findByUsername(username);
-        //User userFindByName = userRepo.findByName(username);
-        User userFindByGoogleUsername = userRepo.findByGoogleUsername(username);
-        User userFindByGoogleName = userRepo.findByGoogleName(username);
+        User userFindByName = userRepo.findByName(username);
+//        User userFindByGoogleUsername = userRepo.findByGoogleUsername(username);
+//        User userFindByGoogleName = userRepo.findByGoogleName(username);
 
         if (userFindByUsername != null) {
             return userFindByUsername;
@@ -29,13 +29,13 @@ public class UserService implements UserDetailsService {
 //			return userFindByName;
 //		}
 
-        if (userFindByGoogleUsername != null) {
-            return userFindByGoogleUsername;
-        }
-
-        if (userFindByGoogleName != null) {
-            return userFindByGoogleName;
-        }
+//        if (userFindByGoogleUsername != null) {
+//            return userFindByGoogleUsername;
+//        }
+//
+//        if (userFindByGoogleName != null) {
+//            return userFindByGoogleName;
+//        }
 
         return null;
     }

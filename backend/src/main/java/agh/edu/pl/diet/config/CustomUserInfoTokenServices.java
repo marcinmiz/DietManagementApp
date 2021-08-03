@@ -1,6 +1,5 @@
 package agh.edu.pl.diet.config;
 
-import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.repos.UserRepo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,33 +84,33 @@ public class CustomUserInfoTokenServices implements ResourceServerTokenServices 
     public OAuth2Authentication loadAuthentication(String accessToken)
             throws AuthenticationException, InvalidTokenException {
         Map<String, Object> map = getMap(this.userInfoEndpointUrl, accessToken);
-
-        if (map.containsKey("sub")) {
-            String googleName = (String) map.get("name");
-            String googleUsername = (String) map.get("email");
-
-            User user = userRepo.findByGoogleUsername(googleUsername);
-
-            if (user == null) {
-                user = new User();
-                user.setEnabled(true);
-                //user.setUserRoles(Collections.singleton());
-            }
+//
+//        if (map.containsKey("sub")) {
+//            String googleName = (String) map.get("name");
+//            String googleUsername = (String) map.get("email");
+//
+//            User user = userRepo.findByGoogleUsername(googleUsername);
+//
+//            if (user == null) {
+//                user = new User();
+//             //   user.setEnabled(true);
+//                //user.setUserRoles(Collections.singleton());
+            //}
 
             //user.getFirstName(googleName);
-            user.setUsername(googleUsername);
-            user.setGoogleName(googleName);
-            user.setGoogleUsername(googleUsername);
+         //   user.setUsername(googleUsername);
+//            user.setGoogleName(googleName);
+//            user.setGoogleUsername(googleUsername);
 
-            user.setPassword(passwordEncoder.encode("oauth2user"));
-
-            userRepo.save(user);
-        }
-
-        if (map.containsKey("error")) {
-            this.logger.debug("userinfo returned error: " + map.get("error"));
-            throw new InvalidTokenException(accessToken);
-        }
+//            user.setPassword(passwordEncoder.encode("oauth2user"));
+//
+//            userRepo.save(user);
+////        }
+//
+//        if (map.containsKey("error")) {
+//            this.logger.debug("userinfo returned error: " + map.get("error"));
+//            throw new InvalidTokenException(accessToken);
+//        }
         return extractAuthentication(map);
     }
 

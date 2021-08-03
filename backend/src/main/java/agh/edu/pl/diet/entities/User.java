@@ -16,74 +16,52 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false, updatable = false)
-    private Long id;
-    private String username;
+    @Column(name = "userId", nullable = false, updatable = false)
+    private Long userId;
+    private String name;
+    private String surname;
     private String password;
-    private String firstName;
-    private String lastName;
+    private String passwordConfirmation;
+    private String username;
 
     @Transient
     @Column(name = "email", nullable = false, updatable = false)
     private String email;
-    private String phone;
-    private boolean enabled = true;
-
-    private String googleName;
-    private String googleUsername;
-
-//	@OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
-//	private ShoppingCart shoppingCart;
-
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-//	private List<UserShipping> userShippingList;
-//
-//
-//	@OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-//	private List<UserPayment> userPaymentList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSurname() {
+        return surname;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 
     public String getEmail() {
@@ -94,16 +72,22 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Set<UserRole> getUserRoles() {
@@ -114,42 +98,6 @@ public class User implements UserDetails {
         this.userRoles = userRoles;
     }
 
-    public String getGoogleName() {
-        return googleName;
-    }
-
-    public void setGoogleName(String googleName) {
-        this.googleName = googleName;
-    }
-
-    public String getGoogleUsername() {
-        return googleUsername;
-    }
-
-    public void setGoogleUsername(String googleUsername) {
-        this.googleUsername = googleUsername;
-    }
-
-
-//	public List<UserShipping> getUserShippingList() {
-//		return userShippingList;
-//	}
-//	public void setUserShippingList(List<UserShipping> userShippingList) {
-//		this.userShippingList = userShippingList;
-//	}
-//	public List<UserPayment> getUserPaymentList() {
-//		return userPaymentList;
-//	}
-//	public void setUserPaymentList(List<UserPayment> userPaymentList) {
-//		this.userPaymentList = userPaymentList;
-//	}
-
-    //	public ShoppingCart getShoppingCart() {
-//		return shoppingCart;
-//	}
-//	public void setShoppingCart(ShoppingCart shoppingCart) {
-//		this.shoppingCart = shoppingCart;
-//	}
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorites = new HashSet<>();
@@ -178,8 +126,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return false;
     }
-
 
 }
