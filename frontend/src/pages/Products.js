@@ -50,7 +50,6 @@ export default function Products(props) {
 
     useEffect(
         () => {
-            console.log(props);
             if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
                 let parts = props.match.params.msg.split('-');
                 props.history.push('/products/' + parts[1] + '/edit');
@@ -81,7 +80,6 @@ export default function Products(props) {
                     .then(resp => {
                         let table = [];
                         if (state.products_group === 0) {
-                            console.log("first");
 
                             for (let x in resp.data) {
                                 if (resp.data[x].approvalStatus === "accepted") {
@@ -91,7 +89,6 @@ export default function Products(props) {
 
                         } else if (state.products_group === 1) {
                             //retrieve unconfirmed products and set its values to product state field
-                            console.log("second");
 
                             for (let x in resp.data) {
                                 if (props.admin === true && props.adminMode === true) {
@@ -107,7 +104,6 @@ export default function Products(props) {
 
                         } else {
                             //retrieve new products and set its values to product state field
-                            console.log("third");
 
                             for (let x in resp.data) {
                                 if (props.admin === true && props.adminMode === true) {
@@ -115,7 +111,13 @@ export default function Products(props) {
                                         table[x] = createProduct(resp.data, x);
                                     }
                                 } else {
-                                    console.log("user new products");
+                                    let lastWeekBefore = new Date();
+                                    lastWeekBefore.setDate(lastWeekBefore.getDate() - 7);
+                                    let creationDate = new Date(resp.data[x].creationDate);
+
+                                    if (creationDate >= lastWeekBefore && resp.data[x].approvalStatus === "accepted") {
+                                        table[x] = createProduct(resp.data, x);
+                                    }
                                 }
                             }
 
