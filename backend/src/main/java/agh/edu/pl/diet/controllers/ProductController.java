@@ -1,6 +1,7 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
+import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -52,6 +53,15 @@ public class ProductController {
     public ResponseEntity<List<Product>> searchProducts(@RequestBody ProductSearchRequest productSearchRequest) {
         List<Product> products = productService.searchProducts(productSearchRequest);
         return ResponseEntity.status(HttpStatus.OK).body(products);
+    }
+
+    @PostMapping("/assess")
+    public ResponseEntity<ResponseMessage> assessProduct(@RequestBody ProductAssessRequest productAssessRequest) {
+        ResponseMessage responseMessage = productService.assessProduct(productAssessRequest);
+        if (!responseMessage.getMessage().endsWith("has been accepted") && !responseMessage.getMessage().endsWith("has been rejected")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
 //    @RequestMapping(value = "/new/edit", method = RequestMethod.GET)

@@ -5,6 +5,7 @@ import agh.edu.pl.diet.entities.Category;
 import agh.edu.pl.diet.entities.Nutrient;
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.ProductNutrient;
+import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -358,6 +359,45 @@ public class ProductServiceImpl implements ProductService {
             products = products.stream().filter(product -> product.getProductName().toLowerCase().contains(phrase.toLowerCase())).collect(Collectors.toList());
         }
         return products;
+    }
+
+    @Override
+    public ResponseMessage assessProduct(ProductAssessRequest productAssessRequest) {
+        Product assessedProduct = productRepo.findById(productAssessRequest.getProductId()).orElse(null);
+
+        if (assessedProduct != null) {
+
+            if (!assessedProduct.getApprovalStatus().equals("pending")) {
+                return new ResponseMessage("Product has been assessed yet");
+            }
+
+            String assessment = productAssessRequest.getAssessment();
+            String rejectExplanation = productAssessRequest.getRejectExplanation();
+            String assessmentDate = new Date().toInstant().toString();
+            assessedProduct.setAssessmentDate(assessmentDate);
+
+            switch (assessment) {
+                case "accept":
+                    assessedProduct.setApprovalStatus("accepted");
+                    if (rejectExplanation != null) {
+                        return new ResponseMessage("Rejection explanation is only required for product rejection");
+                    }
+                    productRepo.save(assessedProduct);
+                    return new ResponseMessage("Product " + assessedProduct.getProductName() + " has been accepted");
+                case "reject":
+                    assessedProduct.setApprovalStatus("rejected");
+                    if (rejectExplanation == null || rejectExplanation.equals("")) {
+                        return new ResponseMessage("Rejection explanation is required for product rejection");
+                    }
+                    assessedProduct.setRejectExplanation(rejectExplanation);
+                    productRepo.save(assessedProduct);
+                    return new ResponseMessage("Product " + assessedProduct.getProductName() + " has been rejected");
+                default:
+                    return new ResponseMessage("Wrong assessment");
+            }
+        }
+            return new ResponseMessage("Proper product has not been found");
+
     }
 
     //    public Product save(Product product) {
