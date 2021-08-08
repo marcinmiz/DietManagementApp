@@ -1,18 +1,11 @@
 package agh.edu.pl.diet.entities;
 
-import agh.edu.pl.diet.entities.security.UserRole;
-import agh.edu.pl.diet.entities.security.Authority;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class User implements UserDetails {
+@Table(name = "user")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,21 +16,16 @@ public class User implements UserDetails {
     private String password;
     private String passwordConfirmation;
     private String username;
+    private Set<Role> roles;
 
-    @Transient
-    @Column(name = "email", nullable = false, updatable = false)
-    private String email;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Set<UserRole> userRoles = new HashSet<>();
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserId(Long id) {
+        this.userId = id;
     }
 
     public String getName() {
@@ -56,32 +44,6 @@ public class User implements UserDetails {
         this.surname = surname;
     }
 
-    public String getPasswordConfirmation() {
-        return passwordConfirmation;
-    }
-
-    public void setPasswordConfirmation(String passwordConfirmation) {
-        this.passwordConfirmation = passwordConfirmation;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
     public String getUsername() {
         return username;
     }
@@ -90,43 +52,31 @@ public class User implements UserDetails {
         this.username = username;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
+    public String getPassword() {
+        return password;
     }
 
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorites = new HashSet<>();
-        userRoles.forEach(ur -> authorites.add(new Authority(ur.getRole().getName())));
-
-        return authorites;
+    @Transient
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        // TODO Auto-generated method stub
-        return true;
+    public void setPasswordConfirmation(String passwordConfirm) {
+        this.passwordConfirmation = passwordConfirm;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        // TODO Auto-generated method stub
-        return true;
+    @ManyToMany
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        // TODO Auto-generated method stub
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
 }

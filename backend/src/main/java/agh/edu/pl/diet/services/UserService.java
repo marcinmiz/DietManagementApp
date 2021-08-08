@@ -1,29 +1,20 @@
 package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.User;
-import agh.edu.pl.diet.entities.security.UserRole;
-import agh.edu.pl.diet.payloads.request.ProductRequest;
-import agh.edu.pl.diet.payloads.response.ResponseMessage;
-
-import java.util.Set;
 
 
 public interface UserService {
-    User getCreateUser(User user, Set<UserRole> userRoles) throws Exception;
+//    User getCreateUser(User user, Set<UserRole> userRoles) throws Exception;
 
-    User save(User user);
+    void save(User user);
 
-    ResponseMessage getCreateUser(ProductRequest userRequest);
+    User findByUsername(String username);
 
-    User save();
+    User findByName(String email);
 
-    //   List<Product> getAllProducts();
+//    ResponseMessage getCreateUser(ProductRequest userRequest);
 //
-//    Product getProduct(Long product_id);
-//
-//    ResponseMessage addNewProduct(ProductRequest productRequest);
-//
-//    ResponseMessage updateProduct(Long productId, ProductRequest productRequest);
-//
-//    ResponseMessage removeProduct(Long productId);
+//    ResponseMessage addNewUser(UserRequest userRequest);
+
+
 }
