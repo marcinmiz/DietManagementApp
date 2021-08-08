@@ -1,9 +1,12 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {Switch, Route, Redirect} from 'react-router-dom'
 import Products from "../pages/Products";
 import ProductsDetails from "../pages/ProductsDetails";
 
-export default function PageRoutes() {
+export default function PageRoutes(props) {
+
+    let admin = props.admin;
+    let adminMode = props.adminMode;
 
     return (
         <div>
@@ -11,7 +14,7 @@ export default function PageRoutes() {
                 <Route exact path="/now">
                     Now
                 </Route>
-                <Route exact path="/products/:msg" component={Products}>
+                <Route exact path="/products/:msg" render={(props) => <Products admin={admin} adminMode={adminMode} {...props} /> }>
                 </Route>
                 <Route exact path="/products/:id/:mode" component={ProductsDetails}>
                 </Route>

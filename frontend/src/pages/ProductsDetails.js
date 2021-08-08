@@ -60,7 +60,6 @@ export default function ProductsDetails(props) {
 
         useEffect(
         () => {
-
             const product_id = props.match.params.id;
             const mode = props.match.params.mode;
             let categoriesTable = [];

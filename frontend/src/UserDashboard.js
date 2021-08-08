@@ -9,9 +9,9 @@ export default class UserDashboard extends Component {
     render() {
         return (
             <Container maxWidth="false">
-                <AppBar/>
+                <AppBar admin={this.props.admin} adminMode={this.props.adminMode} handleAdminMode={this.props.handleAdminMode}/>
                 <main>
-                    <PageRoutes/>
+                    <PageRoutes admin={this.props.admin} adminMode={this.props.adminMode}/>
                 </main>
                 <UserBottomNavigation/>
             </Container>

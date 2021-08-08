@@ -17,10 +17,16 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FilledInput from '@material-ui/core/FilledInput';
 import http from "../http-common";
+import Button from "@material-ui/core/Button";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const useStyles = makeStyles({
     formControl: {
         minWidth: 110,
+    },
+    paper: {
+        width: '80%',
+        maxHeight: 435,
     },
 });
 
@@ -35,13 +41,17 @@ export default function Products(props) {
         products: [],
         categories: [],
         msg: "",
-        loaded: false
+        loaded: false,
+        open_confirmation_popup: false,
+        complement: "",
+        confirmation_product_id: null,
+        confirmation_product_name: null,
     });
 
     useEffect(
         () => {
+            console.log(props);
             if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
-                console.log(props.match.params.msg);
                 let parts = props.match.params.msg.split('-');
                 props.history.push('/products/' + parts[1] + '/edit');
             }
@@ -67,25 +77,15 @@ export default function Products(props) {
                 let search_parameters = {};
                 search_parameters.phrase = state.search;
                 search_parameters.category = state.category;
-                console.log(search_parameters);
                 http.post("/api/products/search", search_parameters)
                     .then(resp => {
-                        console.log(resp.data);
                         let table = [];
                         if (state.products_group === 0) {
                             console.log("first");
 
                             for (let x in resp.data) {
                                 if (resp.data[x].approvalStatus === "accepted") {
-                                    table[x] = {};
-                                    table[x].product_id = resp.data[x].productId;
-                                    table[x].product_name = resp.data[x].productName;
-                                    table[x].product_category = resp.data[x].category.categoryName;
-                                    table[x].product_author = resp.data[x].owner.firstName + " " + resp.data[x].owner.lastName;
-                                    table[x].product_favourite = resp.data[x].productFavourite;
-                                    table[x].product_image = resp.data[x].productImage;
-                                    let creationDate = new Date(resp.data[x].creationDate)
-                                    table[x].creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
+                                    table[x] = createProduct(resp.data, x);
                                 }
                             }
 
@@ -94,21 +94,13 @@ export default function Products(props) {
                             console.log("second");
 
                             for (let x in resp.data) {
-                                if (resp.data[x].approvalStatus !== "accepted") {
-                                    table[x] = {};
-                                    table[x].product_id = resp.data[x].productId;
-                                    table[x].product_name = resp.data[x].productName;
-                                    table[x].product_category = resp.data[x].category.categoryName;
-                                    table[x].product_author = resp.data[x].owner.firstName + " " + resp.data[x].owner.lastName;
-                                    table[x].product_favourite = resp.data[x].productFavourite;
-                                    table[x].product_image = resp.data[x].productImage;
-                                    let creationDate = new Date(resp.data[x].creationDate);
-                                    table[x].creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
-                                    table[x].approval_status = resp.data[x].approvalStatus;
-                                    if (resp.data[x].assessmentDate !== null) {
-                                        let assessmentDate = new Date(resp.data[x].assessmentDate);
-                                        table[x].assessment_date = assessmentDate.toLocaleDateString() + " " + assessmentDate.toLocaleTimeString();
-                                        table[x].reject_explanation = resp.data[x].rejectExplanation;
+                                if (props.admin === true && props.adminMode === true) {
+                                    if (resp.data[x].approvalStatus === "pending") {
+                                        table[x] = createProduct(resp.data, x);
+                                    }
+                                } else {
+                                    if (resp.data[x].approvalStatus !== "accepted") {
+                                        table[x] = createProduct(resp.data, x);
                                     }
                                 }
                             }
@@ -116,6 +108,16 @@ export default function Products(props) {
                         } else {
                             //retrieve new products and set its values to product state field
                             console.log("third");
+
+                            for (let x in resp.data) {
+                                if (props.admin === true && props.adminMode === true) {
+                                    if (resp.data[x].approvalStatus === "rejected") {
+                                        table[x] = createProduct(resp.data, x);
+                                    }
+                                } else {
+                                    console.log("user new products");
+                                }
+                            }
 
                         }
                         setState({
@@ -129,15 +131,23 @@ export default function Products(props) {
                             switch (parts[1]) {
                                 case "added":
                                     msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + " has been successfully added";
+                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + " has been added";
                                     break;
                                 case "updated":
                                     msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + "  has been successfully updated";
+                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + "  has been updated";
                                     break;
                                 case "removed":
                                     msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been successfully removed";
+                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been removed";
+                                    break;
+                                case "accepted":
+                                    msg_container.style.display = "block";
+                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been accepted";
+                                    break;
+                                case "rejected":
+                                    msg_container.style.display = "block";
+                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been rejected";
                                     break;
                             }
                             setTimeout(() => props.history.push("/products/main"), 3000);
@@ -151,8 +161,27 @@ export default function Products(props) {
                 })
                     .catch(error => console.log(error))
 
-        }, [state.products_group, props.match.params.msg, state.search, state.category]
+        }, [state.products_group, props.match.params.msg, state.search, state.category, props.adminMode]
     );
+
+    const createProduct = (data, x) => {
+        let product = {};
+        product.product_id = data[x].productId;
+        product.product_name = data[x].productName;
+        product.product_category = data[x].category.categoryName;
+        product.product_author = data[x].owner.firstName + " " + data[x].owner.lastName;
+        product.product_favourite = data[x].productFavourite;
+        product.product_image = data[x].productImage;
+        let creationDate = new Date(data[x].creationDate);
+        product.creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
+        product.approval_status = data[x].approvalStatus;
+        if (product.assessmentDate !== null) {
+            let assessmentDate = new Date(data[x].assessmentDate);
+            product.assessment_date = assessmentDate.toLocaleDateString() + " " + assessmentDate.toLocaleTimeString();
+            product.reject_explanation = data[x].rejectExplanation;
+        }
+        return product;
+    };
 
     const handleChange = (event) => {
         setState({
@@ -259,12 +288,137 @@ export default function Products(props) {
             .catch(error => console.log(error));
     };
 
+    const handleAssess = (event, product_id, product_name) => {
+        // event.cancelBubble = true;
+        // if (event.stopPropagation) event.stopPropagation();
+        const name = event.target.innerText;
+        setState({
+            ...state,
+            complement: name === "REJECT" ? "reject this product" : "accept this product",
+            open_confirmation_popup: true,
+            confirmation_product_id: product_id,
+            confirmation_product_name: product_name
+        });
+    };
+
+    const handleCloseConfirmationPopup = () => {
+        setState({
+            ...state,
+            open_confirmation_popup: false,
+        });
+
+    };
+
     let tab;
 
-    switch (state.products_group) {
-        case 0:
-        case 2:
-            tab = <div className="products_list">
+    if (props.admin === true && props.adminMode === true) {
+        tab = <div className="unconfirmed_products_list">
+            {state.products.map((product, index) => (
+                <div key={index}>
+                    <div id={"product" + product.product_id} className="unconfirmed_product">
+                        <div className="product" onClick={event => handleProduct(event, product.product_id)}>
+                            <div className="product_image_container">
+                                <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                            </div>
+                            <div className="product_description">
+                                <div className="product_name">
+                                    {product.product_name}
+                                </div>
+                                <div className="product_category">
+                                    <Chip
+                                        name="category"
+                                        size="small"
+                                        avatar={<CategoryIcon/>}
+                                        label={product.product_category}
+                                        onClick={handleCategory}
+                                    />
+                                </div>
+                                <div className="product_author" onClick={handleAuthor}>
+                                    <Avatar/>
+                                    <div className="product_author_name">{product.product_author}</div>
+                                </div>
+                                <div>
+                                    Creation date:
+                                </div>
+                                <div>
+                                    {product.creation_date}
+                                </div>
+                            </div>
+                            <div className="product_buttons">
+                                <Tooltip title="Delete" aria-label="delete">
+                                    <IconButton aria-label="delete" className="product_icon_button"
+                                                onClick={event => handleRemove(event, index)}>
+                                        <DeleteIcon fontSize="small"/>
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Edit" aria-label="edit">
+                                    <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                                onClick={(event) => handleEdit(event, product.product_id)}>
+                                        <EditIcon fontSize="small"/>
+                                    </IconButton>
+                                </Tooltip>
+                                {/*{handleFavouriteIcon(product.product_id)}*/}
+                            </div>
+                        </div>
+                        <div className="product_status">
+                            <div className="unconfirmed_header">Status</div>
+                            <Divider variant="fullWidth"/>
+                            <div className={product.approval_status === "accepted"?"accepted_product unconfirmed_body":(product.approval_status === "pending"?"pending_product unconfirmed_body":"rejected_product unconfirmed_body")}>
+                                {product.approval_status.toUpperCase()}
+                            </div>
+                        </div>
+                        {product.approval_status === "pending"
+                            ?
+                            <div className="assessment_details">
+                                <div>
+                                    <Button name="accept" variant="contained" className="accept_button" onClick={(event) => handleAssess(event, product.product_id, product.product_name)}>Accept</Button>
+                                </div>
+                                <div>
+                                    <Button name="reject" variant="contained" className="reject_button" onClick={event => handleAssess(event, product.product_id, product.product_name)}>Reject</Button>
+                                </div>
+
+                            </div>
+                            :
+                            <div className="assessment_details">
+                                <div className="assessment_date">
+                                    <div className="unconfirmed_header">Assessment Date</div>
+                                    <Divider variant="fullWidth"/>
+                                    <div className="unconfirmed_body">{product.assessment_date}</div>
+                                </div>
+                                {product.approval_status !== "accepted"
+                                    ?
+                                    <div className="reject_explanation">
+                                        <div className="unconfirmed_header">Rejection explanation</div>
+                                        <Divider variant="fullWidth"/>
+                                        <div className="unconfirmed_body">{product.reject_explanation}</div>
+                                    </div>
+                                    :
+                                    null}
+                            </div>
+                        }
+                    </div>
+                    <Divider variant="middle"/>
+                </div>
+            ))}
+                    <ConfirmationDialog
+                        classes={{
+                            paper: classes.paper,
+                        }}
+                        id="confirmation_popup"
+                        open={state.open_confirmation_popup}
+                        onClose={handleCloseConfirmationPopup}
+                        complement = {state.complement}
+                        productId = {state.confirmation_product_id}
+                        productName = {state.confirmation_product_name}
+                        history = {props.history}
+                    />
+        </div>;
+
+} else {
+        switch (state.products_group) {
+            case 0:
+            case 2:
+                tab = <div className="products_list">
                     <Grid container>
                         {state.products.map((product, index) => (
                             <Grid item key={index} id={"product" + product.product_id} className="product"
@@ -314,11 +468,11 @@ export default function Products(props) {
                             </Grid>
                         ))}
                     </Grid>
-            </div>;
-            break;
-        case 1:
-            tab = <div className="unconfirmed_products_list">
-                {state.products.map((product, index) => (
+                </div>;
+                break;
+            case 1:
+                tab = <div className="unconfirmed_products_list">
+                    {state.products.map((product, index) => (
                         <div key={index}>
                             <div id={"product" + product.product_id} className="unconfirmed_product">
                                 <div className="product" onClick={event => handleProduct(event, product.product_id)}>
@@ -372,32 +526,34 @@ export default function Products(props) {
                                         {product.approval_status.toUpperCase()}
                                     </div>
                                 </div>
-                                    {product.approval_status === "pending"
-                                        ?
-                                        <div className="assessment_details">
-                                            This product has not been assessed yet
+                                {product.approval_status === "pending"
+                                    ?
+                                    <div className="assessment_details">
+                                        This product has not been assessed yet
+                                    </div>
+                                    :
+                                    <div className="assessment_details">
+                                        <div className="assessment_date">
+                                            <div className="unconfirmed_header">Assessment Date</div>
+                                            <Divider variant="fullWidth"/>
+                                            <div className="unconfirmed_body">{product.assessment_date}</div>
                                         </div>
-                                        :
-                                        <div className="assessment_details">
-                                            <div className="assessment_date">
-                                                <div className="unconfirmed_header">Assessment Date</div>
-                                                <Divider variant="fullWidth"/>
-                                                <div className="unconfirmed_body">{product.assessment_date}</div>
-                                            </div>
-                                            <div className="reject_explanation">
-                                                <div className="unconfirmed_header">Rejection explanation</div>
-                                                <Divider variant="fullWidth"/>
-                                                <div className="unconfirmed_body">{product.reject_explanation}</div>
-                                            </div>
+                                        <div className="reject_explanation">
+                                            <div className="unconfirmed_header">Rejection explanation</div>
+                                            <Divider variant="fullWidth"/>
+                                            <div className="unconfirmed_body">{product.reject_explanation}</div>
                                         </div>
-                                    }
+                                    </div>
+                                }
                             </div>
                             <Divider variant="middle"/>
                         </div>
-                        ))}
+                    ))}
 
-            </div>;
-            break;
+                </div>;
+                break;
+        }
+
     }
 
     return (
@@ -405,18 +561,34 @@ export default function Products(props) {
             <div className="page_container">
                 <h2>Products</h2>
                 <div className="toolbar_container">
-                    <Tabs
-                        name="products_group"
-                        value={state.products_group}
-                        indicatorColor="primary"
-                        textColor="inherit"
-                        onChange={handleTab}
-                        aria-label="product groups buttons"
-                    >
-                        <Tab className="product_group_tab" label="All"/>
-                        <Tab className="product_group_tab" label="Unconfirmed"/>
-                        <Tab className="product_group_tab" label="New"/>
-                    </Tabs>
+
+                        {props.admin === true && props.adminMode === true ?
+                            <Tabs
+                                name="products_group"
+                                value={state.products_group}
+                                indicatorColor="primary"
+                                textColor="inherit"
+                                onChange={handleTab}
+                                aria-label="product groups buttons"
+                            >
+                            <Tab className="product_group_tab" label="Accepted"/>
+                            <Tab className="product_group_tab" label="Pending"/>
+                            <Tab className="product_group_tab" label="Rejected"/>
+                            </Tabs>
+                            :
+                            <Tabs
+                                name="products_group"
+                                value={state.products_group}
+                                indicatorColor="primary"
+                                textColor="inherit"
+                                onChange={handleTab}
+                                aria-label="product groups buttons"
+                            >
+                                <Tab className="product_group_tab" label="All"/>
+                                <Tab className="product_group_tab" label="Unconfirmed"/>
+                                <Tab className="product_group_tab" label="New"/>
+                            </Tabs>
+                        }
                     <div>
                         <FormControl variant="filled">
                             <InputLabel htmlFor="search" className="search_input">Search</InputLabel>

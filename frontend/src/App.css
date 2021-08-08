@@ -440,12 +440,16 @@
     margin: 0.5rem !important;
 }
 
+.accepted_product {
+    color: green !important;
+}
+
 .pending_product {
-    color: yellow;
+    color: yellow !important;
 }
 
 .rejected_product {
-    color: red;
+    color: red !important;
 }
 
 .assessment_details {
@@ -466,4 +470,27 @@
 
 .unconfirmed_body {
     margin-top: 10%;
+}
+
+.accept_button {
+    background-color: green !important;
+    color: white !important;
+}
+
+.reject_button {
+    background-color: red !important;
+    color: white !important;
+}
+
+.confirmation_el {
+    text-align: center;
+}
+
+.reject_explanation_textarea {
+    border-radius: 10px !important;
+    background-color: #efefef;
+}
+
+.reject_explanation_textarea:focus {
+    background-color: #dedede;
 }

@@ -8,9 +8,21 @@ export default class App extends Component {
         super();
 
         this.state = {
-            loggedInStatus: "NOT_LOGGED_IN",
-            user: {}
+            loggedInStatus: "LOGGED_IN",
+            user: {},
+            admin: true,
+            adminMode: true
         }
+
+        this.handleAdminMode = this.handleAdminMode.bind(this);
+    }
+
+    handleAdminMode() {
+        let newAdminMode = !this.state.adminMode;
+        this.setState({
+            ...this.state,
+            adminMode: newAdminMode
+        });
     }
 
     render() {
@@ -23,7 +35,7 @@ export default class App extends Component {
         } else {
             return (
                 <div className="App App_content">
-                    <UserDashboard props={this.props} loggedInStatus={this.state.loggedInStatus}/>
+                    <UserDashboard props={this.props} loggedInStatus={this.state.loggedInStatus} admin={this.state.admin} adminMode={this.state.adminMode} handleAdminMode={this.handleAdminMode}/>
                 </div>
             );
         }
