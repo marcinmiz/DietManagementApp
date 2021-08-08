@@ -25,11 +25,5 @@ public interface ProductService {
 
     ResponseMessage assessProduct(ProductAssessRequest productAssessRequest);
 
-    //    Product save(Product product);
-//
-//    List<Product> findAll();
-//
-//    Product findOne(Long id);
-//
     void removeOne(Long id);
 }
