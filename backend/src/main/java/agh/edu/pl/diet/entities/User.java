@@ -13,7 +13,9 @@ public class User {
     private Long userId;
     private String name;
     private String surname;
+    @JsonIgnore
     private String password;
+    @JsonIgnore
     private String passwordConfirmation;
     private String username;
     private Set<Role> roles;

@@ -61,9 +61,24 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public Resource load(String filename) {
+    public Resource load(String type, String filename) {
         try {
-            Path file = productsRoot.resolve(filename);
+            Path file;
+
+            switch (type) {
+                case "product":
+                    file = productsRoot.resolve(filename);
+                    break;
+                case "recipe":
+                    file = recipesRoot.resolve(filename);
+                    break;
+                case "avatar":
+                    file = avatarsRoot.resolve(filename);
+                    break;
+                default:
+                    throw new RuntimeException("Wrong image type");
+            }
+
             Resource resource = new UrlResource(file.toUri());
 
             if (resource.exists() || resource.isReadable()) {

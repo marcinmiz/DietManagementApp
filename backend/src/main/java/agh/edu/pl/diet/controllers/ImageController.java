@@ -39,10 +39,10 @@ public class ImageController {
         }
     }
 
-    @GetMapping("/get/{filename:.+}")
+    @GetMapping("/get/{type}/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = imageService.load(filename);
+    public ResponseEntity<Resource> getFile(@PathVariable String type, @PathVariable String filename) {
+        Resource file = imageService.load(type, filename);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }

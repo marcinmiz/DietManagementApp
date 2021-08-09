@@ -8,6 +8,6 @@ public interface ImageService {
 
     void save(MultipartFile file, String type, Long id);
 
-    Resource load(String filename);
+    Resource load(String type, String filename);
 
 }

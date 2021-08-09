@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
             List<String> list2 = Files.walk(this.root, 1).filter(path -> !path.equals(this.root) && path.getFileName().toString().equals(filename)).map(this.root::relativize).map(path -> path.getFileName().toString()).collect(Collectors.toList());
             if (!list2.isEmpty()) {
                 url = MvcUriComponentsBuilder
-                        .fromMethodName(ImageController.class, "getFile", file.getFileName().toString()).build().toString();
+                        .fromMethodName(ImageController.class, "getFile", "product", file.getFileName().toString()).build().toString();
             }
         } catch (IOException e) {
             e.printStackTrace();
