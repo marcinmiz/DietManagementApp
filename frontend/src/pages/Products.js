@@ -171,7 +171,7 @@ export default function Products(props) {
         product.product_id = data[x].productId;
         product.product_name = data[x].productName;
         product.product_category = data[x].category.categoryName;
-        product.product_author = data[x].owner.firstName + " " + data[x].owner.lastName;
+        product.product_author = data[x].owner.name + " " + data[x].owner.surname;
         product.product_favourite = data[x].productFavourite;
         product.product_image = data[x].productImage;
         let creationDate = new Date(data[x].creationDate);
