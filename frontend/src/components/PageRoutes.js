@@ -2,6 +2,7 @@ import React, {useEffect} from 'react'
 import {Switch, Route, Redirect} from 'react-router-dom'
 import Products from "../pages/Products";
 import ProductsDetails from "../pages/ProductsDetails";
+import Recipes from "../pages/Recipes";
 
 export default function PageRoutes(props) {
 
@@ -18,8 +19,7 @@ export default function PageRoutes(props) {
                 </Route>
                 <Route exact path="/products/:id/:mode" component={ProductsDetails}>
                 </Route>
-                <Route exact path="/recipes">
-                    Recipes
+                <Route exact path="/recipes/:msg?" render={(props) => <Recipes admin={admin} adminMode={adminMode} {...props} /> }>
                 </Route>
                 <Route exact path="/programmes">
                     Dietary Programmes
