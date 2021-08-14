@@ -151,18 +151,34 @@
 }
 
 .product, .recipe {
-    display: flex;
-    justify-content: space-between;
     background-color: lightslategrey;
     border-radius: 10px;
     margin: 0.1rem !important;
-    height: 23vh;
+    padding: 0.5rem;
+    min-height: 22vh;
+    min-width: 55vh;
     cursor: pointer;
 }
 
+.recipe_header {
+    display: flex;
+}
+
+.product_content, .recipe_content {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2%;
+}
+
 .product_name, .recipe_name {
+    margin-left: auto;
+    margin-right: auto;
     width: max-content;
-    color: inherit !important;
+    color: inherit;
+}
+
+.creation_date, .recipe_ratings_header {
+    font-size: 0.7rem;
 }
 
 .product_description, .recipe_description {
@@ -231,11 +247,22 @@
     margin-left: 0.5rem;
 }
 
+.recipe_actions {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.recipe_ratings {
+    display: block;
+}
+
 .product_buttons, .recipe_buttons {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    flex-direction: column;
 }
 
 .product_icon_button, .recipe_icon_button {
@@ -313,13 +340,13 @@
 
 @media screen and (min-width: 1160px) {
     .product, .recipe {
-        width: 32%;
+        width: 35%;
     }
 }
 
 @media screen and (min-width: 1525px) {
     .product, .recipe {
-        width: 24%;
+        width: 27%;
     }
 }
 
@@ -492,4 +519,9 @@
 
 .reject_explanation_textarea:focus {
     background-color: #dedede;
+}
+
+.shared_button {
+    background-color: #434952 !important;
+    color: #b8b8b8 !important;
 }

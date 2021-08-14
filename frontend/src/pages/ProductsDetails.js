@@ -92,7 +92,7 @@ export default function ProductsDetails(props) {
                         product.product_id = data.productId;
                         product.product_name = data.productName;
                         product.product_category = data.category.categoryName;
-                        product.product_author = data.owner.firstName + " " + data.owner.lastName;
+                        product.product_author = data.owner.name + " " + data.owner.surname;
                         // product.product_favourite = data.productFavourite;
                         product.product_image = data.productImage;
 

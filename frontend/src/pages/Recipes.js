@@ -1,27 +1,28 @@
 import React, {useEffect} from 'react'
-import {Container, Divider, Grid, MenuItem, Tooltip, makeStyles} from "@material-ui/core";
+import {Container, Divider, Grid, makeStyles, Tooltip} from "@material-ui/core";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from '@material-ui/core/InputLabel';
 import FilledInput from '@material-ui/core/FilledInput';
-import Select from "@material-ui/core/Select/Select";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from '@material-ui/icons/Add';
 import Avatar from '@material-ui/core/Avatar';
-import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import Button from "@material-ui/core/Button";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import http from "../http-common";
+import Rating from '@material-ui/lab/Rating';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 const useStyles = makeStyles({
     paper: {
         width: '80%',
         maxHeight: 435,
-    },
+    }
 });
 
 export default function Recipes(props) {
@@ -31,7 +32,8 @@ export default function Recipes(props) {
     const [state, setState] = React.useState({
         search: '',
         recipes_group: 0,//0: personal, 1: shared, 2: unconfirmed
-        recipes: [{"recipe_id": 1, "recipe_name": "Salmon with green beans and bacon", "recipe_author": "Steve Kaminski", "recipe_image": "http://localhost:8097/api/images/get/recipe/recipe1.jpg", "creation_date": "7.08.2021 21:11:14", "assessment_date": "9.08.2021 21:11:14", "rejectExplanation": "", "approval_status": "accepted", "ingredients": [{"ingredient_name": "salmon fillet", "ingredient_quantity": 4, "ingredient_unit": "pcs"}, {"ingredient_name": "green beans", "ingredient_quantity": 450, "ingredient_unit": "g"}, {"ingredient_name": "butter", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "smoked bacon", "ingredient_quantity": 2, "ingredient_unit": "slices"}, {"ingredient_name": "breadcrumbs", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "olive oil", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}, {"ingredient_name": "water", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}], "steps": [{"step_number": 1, "step_name": "Cut each salmon fillet into 4 pieces and place them in ovenproof dish lined with parchment. Pour it some olive oil. Leave it for several minutes, then roast at 160 Celsius degrees for 15 minutes."}, {"step_number": 2, "step_name": "Cube smoked bacon and fry it up on the frying pan."}, {"step_number": 3, "step_name": "Blanch green beans, then strain it and add to smoked bacon. Stop frying after 1 minute."}, {"step_number": 4, "step_name": "Add butter to green beans and fry it for a few minutes."}, {"step_number": 5, "step_name": "Before you finish frying sprinkle its content with breadcrumbs. Serve with roasted salmon. You might append boiled rice."}]}],
+        recipes: [{"recipe_id": 1, "recipe_name": "Salmon with green beans and bacon", "recipe_author": "John Smith", "recipe_favourite": false, "recipe_shared": false, "recipe_image": "http://localhost:8097/api/images/get/recipe/recipe1.jpg", "creation_date": "7.08.2021 21:11:14", "assessment_date": "9.08.2021 21:11:14", "rejectExplanation": "", "approval_status": "accepted", "ratings": [{"rating_author": "John Smith", "rating_value": 0.2}, {"rating_author": "Derek Johnson", "rating_value": 3.5}, {"rating_author": "Kate Bell", "rating_value": 2.0}, {"rating_author": "Jessica Wells", "rating_value": 5.0}], "ingredients": [{"ingredient_name": "salmon fillet", "ingredient_quantity": 4, "ingredient_unit": "pcs"}, {"ingredient_name": "green beans", "ingredient_quantity": 450, "ingredient_unit": "g"}, {"ingredient_name": "butter", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "smoked bacon", "ingredient_quantity": 2, "ingredient_unit": "slices"}, {"ingredient_name": "breadcrumbs", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "olive oil", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}, {"ingredient_name": "water", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}], "steps": [{"step_number": 1, "step_name": "Cut each salmon fillet into 4 pieces and place them in ovenproof dish lined with parchment. Pour it some olive oil. Leave it for several minutes, then roast at 160 Celsius degrees for 15 minutes."}, {"step_number": 2, "step_name": "Cube smoked bacon and fry it up on the frying pan."}, {"step_number": 3, "step_name": "Blanch green beans, then strain it and add to smoked bacon. Stop frying after 1 minute."}, {"step_number": 4, "step_name": "Add butter to green beans and fry it for a few minutes."}, {"step_number": 5, "step_name": "Before you finish frying sprinkle its content with breadcrumbs. Serve with roasted salmon. You might append boiled rice."}]}],
+        hover_rating: -1,
         msg: "",
         loaded: false,
         open_confirmation_popup: false,
@@ -39,6 +41,12 @@ export default function Recipes(props) {
         confirmation_recipe_id: null,
         confirmation_recipe_name: null,
     });
+
+    useEffect(
+        () => {
+            console.log(state.msg)
+        }, [state.msg]
+    );
 
     const handleTab = (event, newValue) => {
         setState({
@@ -60,8 +68,6 @@ export default function Recipes(props) {
     };
 
     const handleAuthor = (event) => {
-        event.cancelBubble = true;
-        if (event.stopPropagation) event.stopPropagation();
         console.info("Author");
     };
 
@@ -114,6 +120,96 @@ export default function Recipes(props) {
             ...state,
             open_confirmation_popup: false,
         });
+
+    };
+
+    const handleFavouriteIcon = (index) => {
+        if (state.recipes[index].recipe_favourite) {
+            return (
+                <Tooltip title="Remove from favourite" aria-label="Remove from favourite">
+                    <IconButton aria-label="Remove from favourite" className="recipe_icon_button"
+                                onClick={event => handleAddToFavourite(event, index)}>
+                        <FavoriteIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
+            );
+        } else {
+            return (
+                <Tooltip title="Add to favourite" aria-label="Add to favourite">
+                    <IconButton aria-label="Add to favourite" className="recipe_icon_button"
+                                onClick={event => handleAddToFavourite(event, index)}>
+                        <FavoriteBorderIcon fontSize="small"/>
+                    </IconButton>
+                </Tooltip>
+            )
+        }
+    };
+
+    const handleAddToFavourite = (event, index) => {
+        event.cancelBubble = true;
+        if (event.stopPropagation) event.stopPropagation();
+        const recipe_favourite = !state.recipes[index].recipe_favourite;
+        const recipe = {
+            ...state.recipes[index],
+            "recipe_favourite": recipe_favourite
+        };
+        setState({
+            ...state,
+            "recipes": [...state.recipes.slice(0, index), recipe, ...state.recipes.slice(index + 1)]
+        });
+    };
+
+    const handleShare = (event, index) => {
+        event.cancelBubble = true;
+        if (event.stopPropagation) event.stopPropagation();
+        console.log("share");
+
+        const current_recipe_shared = !state.recipes[index].recipe_shared;
+
+        const recipe = {
+            ...state.recipes[index],
+            "recipe_shared": current_recipe_shared
+        };
+
+        setState({
+            ...state,
+            "recipes": [...state.recipes.slice(0, index), recipe, ...state.recipes.slice(index + 1)],
+            "msg": current_recipe_shared ? "Recipe " + state.recipes[index].recipe_name + " has been shared" : "Recipe " + state.recipes[index].recipe_name + " has been cancelled sharing"
+        });
+
+        setTimeout(() => {
+            setState({
+                ...state,
+                "msg": ""
+            });
+        }, 3000);
+    };
+
+    const handleGeneralRating = (index) => {
+        let ratings = state.recipes[index].ratings;
+        let average_rating = ratings.flatMap(rating => rating.rating_value).reduce((r1, r2) => r1 + r2) / ratings.length;
+        return Math.round(average_rating * 1000) / 1000;
+    };
+
+    const handlePersonalRating = (index) => {
+        return state.recipes[index].ratings.find(rating => rating.rating_author === "John Smith").rating_value;
+    };
+
+    const handlePersonalRatingEdit = (event, index, newValue) => {
+        console.log(newValue);
+        state.recipes[index].ratings.find(rating => rating.rating_author === "John Smith").rating_value = newValue;
+
+        setState({
+            ...state,
+            "msg": "Recipe " + state.recipes[index].recipe_name + " has been rated"
+        });
+
+        setTimeout(() => {
+            setState({
+                ...state,
+                "msg": ""
+            });
+        }, 3000);
 
     };
 
@@ -230,50 +326,67 @@ export default function Recipes(props) {
                 tab = <div className="recipes_list">
                     <Grid container>
                         {state.recipes.map((recipe, index) => (
-                            <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe"
-                                  onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                            <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe">
                                 {console.log("personal or shared" + recipe)}
-                                <div className="recipe_image_container">
-                                    <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
-                                </div>
-                                <div className="recipe_description">
-                                    <div className="recipe_name">
+                                <div className="recipe_header">
+                                    <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                         {recipe.recipe_name}
                                     </div>
-                                    {/*<div className="recipe_category">*/}
-                                        {/*<Chip*/}
-                                            {/*name="category"*/}
-                                            {/*size="small"*/}
-                                            {/*avatar={<CategoryIcon/>}*/}
-                                            {/*label={recipe.recipe_category}*/}
-                                            {/*onClick={handleCategory}*/}
-                                        {/*/>*/}
-                                    {/*</div>*/}
-                                    <div className="recipe_author" onClick={handleAuthor}>
-                                        <Avatar/>
-                                        <div className="recipe_author_name">{recipe.recipe_author}</div>
-                                    </div>
-                                    <div>
-                                        Creation date:
-                                    </div>
-                                    <div>
-                                        {recipe.creation_date}
+                                    <div className="recipe_buttons">
+                                        <Tooltip title="Delete" aria-label="delete">
+                                            <IconButton aria-label="delete" className="recipe_icon_button"
+                                                        onClick={event => handleRemove(event, index)}>
+                                                <DeleteIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Edit" aria-label="edit">
+                                            <IconButton type="button" aria-label="edit" className="recipe_icon_button"
+                                                        onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                                <EditIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        {handleFavouriteIcon(index)}
                                     </div>
                                 </div>
-                                <div className="product_buttons">
-                                    <Tooltip title="Delete" aria-label="delete">
-                                        <IconButton aria-label="delete" className="recipe_icon_button"
-                                                    onClick={event => handleRemove(event, index)}>
-                                            <DeleteIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Edit" aria-label="edit">
-                                        <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                    onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                            <EditIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    {/*{handleFavouriteIcon(product.product_id)}*/}
+                                <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                    {"created " + recipe.creation_date}
+                                </div>
+
+                                <div className="recipe_content">
+                                    <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                        <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                    </div>
+                                    <div className="recipe_description">
+                                        {/*<div className="recipe_category">*/}
+                                            {/*<Chip*/}
+                                                {/*name="category"*/}
+                                                {/*size="small"*/}
+                                                {/*avatar={<CategoryIcon/>}*/}
+                                                {/*label={recipe.recipe_category}*/}
+                                                {/*onClick={handleCategory}*/}
+                                            {/*/>*/}
+                                        {/*</div>*/}
+                                        <div className="recipe_author" onClick={handleAuthor}>
+                                            <Avatar/>
+                                            <div className="recipe_author_name">{recipe.recipe_author}</div>
+                                        </div>
+                                        <div className="recipe_actions">
+                                            <div className="recipe_ratings_header">
+                                                <div className="recipe_ratings">
+                                                    General: {handleGeneralRating(index)} ({state.recipes[index].ratings.length} ratings)
+                                                </div>
+                                                    <Rating name="read-only" value={handleGeneralRating(index)} precision={0.1} readOnly/>
+                                                <div className="recipe_ratings_header">
+                                                    Personal rating
+                                                </div>
+                                                <Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : handlePersonalRating(index)} aria-label="rate" placement="top">
+                                                    <Rating name="half-rating" value={handlePersonalRating(index)} precision={0.1} onChange={(event, newValue) => handlePersonalRatingEdit(event, index, newValue)} onChangeActive={(event, newHover) => setState({...state, "hover_rating": newHover})}/>
+                                                </Tooltip>
+                                            </div>
+                                            {state.recipes[index].recipe_shared ? <Tooltip title="Cancel sharing" aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </Grid>
                         ))}
@@ -293,6 +406,7 @@ export default function Recipes(props) {
                                         <div className="recipe_name">
                                             {recipe.recipe_name}
                                         </div>
+
                                         {/*<div className="recipe_category">*/}
                                             {/*<Chip*/}
                                                 {/*name="category"*/}
@@ -431,7 +545,7 @@ export default function Recipes(props) {
                         <AddIcon/>
                     </Fab>
                 </div>
-                <div className="msg"></div>
+                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
                 <div className="loading">Loading</div>
                 {tab}
             </div>
