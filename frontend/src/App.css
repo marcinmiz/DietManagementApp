@@ -160,7 +160,7 @@
     cursor: pointer;
 }
 
-.recipe_header {
+.product_header, .recipe_header {
     display: flex;
 }
 

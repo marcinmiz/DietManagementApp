@@ -220,49 +220,49 @@ export default function Recipes(props) {
             {state.recipes.map((recipe, index) => (
                 <div key={index}>
                     <div id={"recipe" + recipe.recipe_id} className="unconfirmed_recipe">
-                        <div className="recipe" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                            {console.log("unconfirmed " + recipe)}
-                            <div className="recipe_image_container">
-                                <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
-                            </div>
-                            <div className="recipe_description">
-                                <div className="recipe_name">
+                        <div className="recipe">
+                            <div className="recipe_header">
+                                <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                     {recipe.recipe_name}
                                 </div>
-                                {/*<div className="recipe_category">*/}
-                                    {/*<Chip*/}
-                                        {/*name="category"*/}
-                                        {/*size="small"*/}
-                                        {/*avatar={<CategoryIcon/>}*/}
-                                        {/*label={recipe.recipe_category}*/}
-                                        {/*onClick={handleRecipe}*/}
-                                    {/*/>*/}
-                                {/*</div>*/}
-                                <div className="recipe_author" onClick={handleAuthor}>
-                                    <Avatar/>
-                                    <div className="recipe_author_name">{recipe.recipe_author}</div>
-                                </div>
-                                <div>
-                                    Creation date:
-                                </div>
-                                <div>
-                                    {recipe.creation_date}
+                                <div className="recipe_buttons">
+                                    <Tooltip title="Remove" aria-label="remove">
+                                        <IconButton aria-label="remove" className="recipe_icon_button"
+                                                    onClick={event => handleRemove(event, index)}>
+                                            <DeleteIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Edit" aria-label="edit">
+                                        <IconButton type="button" aria-label="edit" className="recipe_icon_button"
+                                                    onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                            <EditIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
                                 </div>
                             </div>
-                            <div className="recipe_buttons">
-                                <Tooltip title="Delete" aria-label="delete">
-                                    <IconButton aria-label="delete" className="recipe_icon_button"
-                                                onClick={event => handleRemove(event, index)}>
-                                        <DeleteIcon fontSize="small"/>
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Edit" aria-label="edit">
-                                    <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                        <EditIcon fontSize="small"/>
-                                    </IconButton>
-                                </Tooltip>
-                                {/*{handleFavouriteIcon(product.product_id)}*/}
+                            <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                {"created " + recipe.creation_date}
+                            </div>
+
+                            <div className="recipe_content">
+                                <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                    <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                </div>
+                                <div className="recipe_description">
+                                    {/*<div className="recipe_category">*/}
+                                    {/*<Chip*/}
+                                    {/*name="category"*/}
+                                    {/*size="small"*/}
+                                    {/*avatar={<CategoryIcon/>}*/}
+                                    {/*label={recipe.recipe_category}*/}
+                                    {/*onClick={handleCategory}*/}
+                                    {/*/>*/}
+                                    {/*</div>*/}
+                                    <div className="recipe_author" onClick={handleAuthor}>
+                                        <Avatar/>
+                                        <div className="recipe_author_name">{recipe.recipe_author}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="recipe_status">
@@ -327,14 +327,13 @@ export default function Recipes(props) {
                     <Grid container>
                         {state.recipes.map((recipe, index) => (
                             <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe">
-                                {console.log("personal or shared" + recipe)}
                                 <div className="recipe_header">
                                     <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                         {recipe.recipe_name}
                                     </div>
                                     <div className="recipe_buttons">
-                                        <Tooltip title="Delete" aria-label="delete">
-                                            <IconButton aria-label="delete" className="recipe_icon_button"
+                                        <Tooltip title="Remove" aria-label="remove">
+                                            <IconButton aria-label="remove" className="recipe_icon_button"
                                                         onClick={event => handleRemove(event, index)}>
                                                 <DeleteIcon fontSize="small"/>
                                             </IconButton>
@@ -398,51 +397,52 @@ export default function Recipes(props) {
                     {state.recipes.map((recipe, index) => (
                         <div key={index}>
                             <div id={"recipe" + recipe.recipe_id} className="unconfirmed_recipe">
-                                <div className="recipe" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                    <div className="recipe_image_container">
-                                        <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
-                                    </div>
-                                    <div className="recipe_description">
-                                        <div className="recipe_name">
+                                <div className="recipe">
+                                    <div className="recipe_header">
+                                        <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                             {recipe.recipe_name}
                                         </div>
-
-                                        {/*<div className="recipe_category">*/}
-                                            {/*<Chip*/}
-                                                {/*name="category"*/}
-                                                {/*size="small"*/}
-                                                {/*avatar={<CategoryIcon/>}*/}
-                                                {/*label={recipe.recipe_category}*/}
-                                                {/*onClick={handleCategory}*/}
-                                            {/*/>*/}
-                                        {/*</div>*/}
-                                        <div className="recipe_author" onClick={handleAuthor}>
-                                            <Avatar/>
-                                            <div className="recipe_author_name">{recipe.recipe_author}</div>
-                                        </div>
-                                        <div>
-                                            Creation date:
-                                        </div>
-                                        <div>
-                                            {recipe.creation_date}
+                                        <div className="recipe_buttons">
+                                            <Tooltip title="Remove" aria-label="remove">
+                                                <IconButton aria-label="remove" className="recipe_icon_button"
+                                                            onClick={event => handleRemove(event, index)}>
+                                                    <DeleteIcon fontSize="small"/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Edit" aria-label="edit">
+                                                <IconButton type="button" aria-label="edit" className="recipe_icon_button"
+                                                            onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                                    <EditIcon fontSize="small"/>
+                                                </IconButton>
+                                            </Tooltip>
                                         </div>
                                     </div>
-                                    <div className="recipe_buttons">
-                                        <Tooltip title="Delete" aria-label="delete">
-                                            <IconButton aria-label="delete" className="recipe_icon_button"
-                                                        onClick={event => handleRemove(event, index)}>
-                                                <DeleteIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Edit" aria-label="edit">
-                                            <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                        onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                                <EditIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        {/*{handleFavouriteIcon(product.product_id)}*/}
+                                    <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                        {"created " + recipe.creation_date}
+                                    </div>
+
+                                    <div className="recipe_content">
+                                        <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                            <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                        </div>
+                                        <div className="recipe_description">
+                                            {/*<div className="recipe_category">*/}
+                                            {/*<Chip*/}
+                                            {/*name="category"*/}
+                                            {/*size="small"*/}
+                                            {/*avatar={<CategoryIcon/>}*/}
+                                            {/*label={recipe.recipe_category}*/}
+                                            {/*onClick={handleCategory}*/}
+                                            {/*/>*/}
+                                            {/*</div>*/}
+                                            <div className="recipe_author" onClick={handleAuthor}>
+                                                <Avatar/>
+                                                <div className="recipe_author_name">{recipe.recipe_author}</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
                                 <div className="recipe_status">
                                     <div className="unconfirmed_header">Status</div>
                                     <Divider variant="fullWidth"/>
