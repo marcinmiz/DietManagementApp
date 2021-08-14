@@ -1,18 +1,39 @@
 package agh.edu.pl.diet.payloads.request;
 
+import agh.edu.pl.diet.entities.User;
+
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 
 public class RecipeRequest {
 
     @NotBlank
-    private String productName;
+    private String recipeName;
     @NotBlank
-    private Integer calories;
+    private String product;
     @NotBlank
-    private String category;
-    @NotBlank
-    private List<String> nutrients;
+    private User owner;
 
+    public String getRecipeName() {
+        return recipeName;
+    }
 
+    public void setRecipeName(String recipeName) {
+        this.recipeName = recipeName;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public void setProduct(String product) {
+        this.product = product;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 }

@@ -1,6 +1,5 @@
 package agh.edu.pl.diet.services;
 
-import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.entities.Recipes;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public interface RecipeService {
 
-    List<Product> getAllRecipes();
+    List<Recipes> getAllRecipes();
 
     Recipes getRecipes(Long recipe_id);
 

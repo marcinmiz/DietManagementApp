@@ -22,6 +22,12 @@ public class Recipes {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<RecipeProduct> recipes = new HashSet<>();
 
+    @Transient
+    private String recipeImage;
+
+    private String creationDate = null;
+
+
     public Long getRecipeId() {
         return recipeId;
     }
@@ -52,5 +58,20 @@ public class Recipes {
 
     public void setRecipes(Set<RecipeProduct> recipes) {
         this.recipes = recipes;
+    }
+
+    public void setRecipeImage(String url) {
+    }
+
+    public String getRecipeImage() {
+        return recipeImage;
+    }
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 }

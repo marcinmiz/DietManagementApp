@@ -1,10 +1,10 @@
 package agh.edu.pl.diet.controllers;
 
-import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.payloads.request.ProductRequest;
-import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
+import agh.edu.pl.diet.entities.Recipes;
+import agh.edu.pl.diet.payloads.request.RecipeRequest;
+import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.services.ProductService;
+import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,21 +17,21 @@ import java.util.List;
 public class RecipeController {
 
     @Autowired
-    private ProductService productService;
+    private RecipeService recipeService;
 
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public List<Recipes> getAllRecipes() {
+        return recipeService.getAllRecipes();
     }
 
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable("id") Long productId) {
-        return productService.getProduct(productId);
+    public Recipes getRecipe(@PathVariable("id") Long recipeId) {
+        return recipeService.getRecipes(recipeId);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ResponseMessage> addNewProduct(@RequestBody ProductRequest productRequest) {
-        ResponseMessage message = productService.addNewProduct(productRequest);
+    public ResponseEntity<ResponseMessage> addNewRecipes(@RequestBody RecipeRequest recipeRequest) {
+        ResponseMessage message = recipeService.addNewRecipes(recipeRequest);
         if (message.getMessage().endsWith(" has been added successfully")) {
             return ResponseEntity.status(HttpStatus.OK).body(message);
         } else {
@@ -40,19 +40,19 @@ public class RecipeController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseMessage updateProduct(@PathVariable("id") Long productId, @RequestBody ProductRequest productRequest) {
-        return productService.updateProduct(productId, productRequest);
+    public ResponseMessage updateRecipes(@PathVariable("id") Long recipeId, @RequestBody RecipeRequest recipeRequest) {
+        return recipeService.updateRecipes(recipeId, recipeRequest);
     }
 
     @DeleteMapping("/remove/{id}")
-    public ResponseMessage removeProduct(@PathVariable("id") Long productId) {
-        return productService.removeProduct(productId);
+    public ResponseMessage removeRecipes(@PathVariable("id") Long recipeId) {
+        return recipeService.removeRecipes(recipeId);
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestBody ProductSearchRequest productSearchRequest) {
-        List<Product> products = productService.searchProducts(productSearchRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(products);
+    public ResponseEntity<List<Recipes>> searchRecipes(@RequestBody RecipeSearchRequest recipeSearchRequest) {
+        List<Recipes> recipes = recipeService.searchRecipes(recipeSearchRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(recipes);
     }
 
 }

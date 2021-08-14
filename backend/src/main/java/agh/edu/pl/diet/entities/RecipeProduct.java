@@ -33,6 +33,9 @@ public class RecipeProduct {
     @NotNull
     private String unit;
 
+    @NotNull
+    private Double productAmount;
+
     public Long getId() {
         return id;
     }
@@ -71,5 +74,13 @@ public class RecipeProduct {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public Double getProductAmount() {
+        return productAmount;
+    }
+
+    public void setProductAmount(Double productAmount) {
+        this.productAmount = productAmount;
     }
 }
