@@ -7,7 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "recipe_product")
+@Table(name = "Recipe_product")
 public class RecipeProduct {
 
     @JsonIgnore

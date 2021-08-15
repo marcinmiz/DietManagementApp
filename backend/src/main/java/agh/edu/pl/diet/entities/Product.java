@@ -3,7 +3,6 @@ package agh.edu.pl.diet.entities;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -94,15 +93,6 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
-
-
-//	public int getInStockNumber() {
-//		return inStockNumber;
-//	}
-//
-//	public void setInStockNumber(int inStockNumber) {
-//		this.inStockNumber = inStockNumber;
-//	}
 
     public String getProductImage() {
         return productImage;
