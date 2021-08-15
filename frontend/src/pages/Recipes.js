@@ -17,6 +17,9 @@ import http from "../http-common";
 import Rating from '@material-ui/lab/Rating';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+import SuitableRecipeModal from "../components/SuitableRecipeModal";
+import CheckIcon from '@material-ui/icons/Check';
+import ClearIcon from '@material-ui/icons/Clear';
 
 const useStyles = makeStyles({
     paper: {
@@ -40,12 +43,16 @@ export default function Recipes(props) {
         complement: "",
         confirmation_recipe_id: null,
         confirmation_recipe_name: null,
+        open_preference_suitability_popup: false,
+        open_recipe_details_popup: false
     });
 
     useEffect(
         () => {
-            console.log(state.msg)
-        }, [state.msg]
+            console.log(props.match.params.type)
+            console.log(props.match.params.recipe_id)
+
+        }, [state.msg, props.match.params.type, props.match.params.recipe_id]
     );
 
     const handleTab = (event, newValue) => {
@@ -63,8 +70,10 @@ export default function Recipes(props) {
     };
 
     const handleRecipe = (event, recipe_id) => {
-        let destination = "/products/" + recipe_id + "/view";
-        props.history.push(destination);
+        console.log(event);
+        console.log("recipe");
+        // let destination = "/products/" + recipe_id + "/view";
+        // props.history.push(destination);
     };
 
     const handleAuthor = (event) => {
@@ -213,6 +222,27 @@ export default function Recipes(props) {
 
     };
 
+    const handleOpenPreferenceSuitabilityPopup = (event) => {
+        event.cancelBubble = true;
+        if (event.stopPropagation) event.stopPropagation();
+        console.log(event);
+        setState({
+            ...state,
+            open_preference_suitability_popup: true,
+        });
+        console.log(state.open_preference_suitability_popup);
+    };
+
+    const handleClosePreferenceSuitabilityPopup = (event) => {
+        console.log(event);
+        setState({
+            ...state,
+            open_preference_suitability_popup: false,
+        });
+        console.log(state.open_preference_suitability_popup);
+
+    };
+
     let tab = null;
 
     if (props.admin === true && props.adminMode === true) {
@@ -305,6 +335,7 @@ export default function Recipes(props) {
                     <Divider variant="middle"/>
                 </div>
             ))}
+
             <ConfirmationDialog
                 classes={{
                     paper: classes.paper,
@@ -328,8 +359,19 @@ export default function Recipes(props) {
                         {state.recipes.map((recipe, index) => (
                             <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe">
                                 <div className="recipe_header">
+                                    <div className="check_icons" onClick={handleOpenPreferenceSuitabilityPopup}>
+                                        <div className="check_passed">
+                                            3 <CheckIcon fontSize="small"/>
+                                        </div>
+                                        <div className="check_failed">
+                                            2 <ClearIcon fontSize="small"/>
+                                        </div>
+                                    </div>
                                     <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                         {recipe.recipe_name}
+                                        <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                            {"created " + recipe.creation_date}
+                                        </div>
                                     </div>
                                     <div className="recipe_buttons">
                                         <Tooltip title="Remove" aria-label="remove">
@@ -346,9 +388,6 @@ export default function Recipes(props) {
                                         </Tooltip>
                                         {handleFavouriteIcon(index)}
                                     </div>
-                                </div>
-                                <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                    {"created " + recipe.creation_date}
                                 </div>
 
                                 <div className="recipe_content">
@@ -383,13 +422,20 @@ export default function Recipes(props) {
                                                 </Tooltip>
                                             </div>
                                             {state.recipes[index].recipe_shared ? <Tooltip title="Cancel sharing" aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}
+
                                         </div>
                                     </div>
 
                                 </div>
+
                             </Grid>
                         ))}
                     </Grid>
+
+                    <SuitableRecipeModal
+                        open={state.open_preference_suitability_popup}
+                        onClose={handleClosePreferenceSuitabilityPopup}
+                    />
                 </div>;
                 break;
             case 2:

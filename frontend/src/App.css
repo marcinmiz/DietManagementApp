@@ -198,11 +198,13 @@
 .product_image_container, .recipe_image_container {
     display: flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .product_image, .recipe_image {
     width: 9rem;
     border-radius: 100%;
+    cursor: pointer;
 }
 
 .product_category {
@@ -524,4 +526,23 @@
 .shared_button {
     background-color: #434952 !important;
     color: #b8b8b8 !important;
+}
+
+.check_icons {
+    display: flex;
+    flex-direction: column;
+}
+
+.check_passed {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    color: green;
+}
+
+.check_failed {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    color: red;
 }

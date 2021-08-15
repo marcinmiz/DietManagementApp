@@ -10,8 +10,8 @@ export default class App extends Component {
         this.state = {
             loggedInStatus: "LOGGED_IN",
             user: {},
-            admin: true,
-            adminMode: true
+            admin: false,
+            adminMode: false
         }
 
         this.handleAdminMode = this.handleAdminMode.bind(this);

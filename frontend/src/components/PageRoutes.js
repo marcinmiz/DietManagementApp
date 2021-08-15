@@ -19,7 +19,7 @@ export default function PageRoutes(props) {
                 </Route>
                 <Route exact path="/products/:id/:mode" component={ProductsDetails}>
                 </Route>
-                <Route exact path="/recipes/:msg?" render={(props) => <Recipes admin={admin} adminMode={adminMode} {...props} /> }>
+                <Route exact path="/recipes/:recipe_id?/:type?" render={(props) => <Recipes admin={admin} adminMode={adminMode} {...props} /> }>
                 </Route>
                 <Route exact path="/programmes">
                     Dietary Programmes
