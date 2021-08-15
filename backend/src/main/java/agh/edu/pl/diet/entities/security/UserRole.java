@@ -1,7 +1,7 @@
 package agh.edu.pl.diet.entities.security;
 
 import agh.edu.pl.diet.entities.User;
-import agh.edu.pl.diet.entities.security.Role;
+import agh.edu.pl.diet.entities.Role;
 
 import javax.persistence.*;
 
