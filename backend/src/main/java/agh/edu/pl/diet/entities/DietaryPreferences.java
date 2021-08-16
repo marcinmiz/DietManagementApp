@@ -18,7 +18,7 @@ public class DietaryPreferences {
     @ManyToOne
     private User owner;
     @ManyToOne
-    private Category dietType;
+    private DietType dietType;
 
     @OneToMany(mappedBy = "dietary_preference", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -44,12 +44,12 @@ public class DietaryPreferences {
         this.dietaryPreferenceName = dietaryPreferenceName;
     }
 
-    public Integer getCalories() {
+    public Integer getTotalCalories() {
         return totalCalories;
     }
 
-    public void setCalories(Integer calories) {
-        this.totalCalories = calories;
+    public void setTotalCalories(Integer totalCalories) {
+        this.totalCalories = totalCalories;
     }
 
     public User getOwner() {
@@ -58,14 +58,6 @@ public class DietaryPreferences {
 
     public void setOwner(User owner) {
         this.owner = owner;
-    }
-
-    public Category getDietType() {
-        return dietType;
-    }
-
-    public void setDietType(Category dietType) {
-        this.dietType = dietType;
     }
 
     public Set<DietaryPreferencesNutrient> getNutrients() {
@@ -90,5 +82,13 @@ public class DietaryPreferences {
 
     public void setTargetWeight(Integer targetWeight) {
         this.targetWeight = targetWeight;
+    }
+
+    public DietType getDietType() {
+        return dietType;
+    }
+
+    public void setDietType(DietType dietType) {
+        this.dietType = dietType;
     }
 }
