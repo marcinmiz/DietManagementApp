@@ -24,6 +24,14 @@ public class DietaryPreferences {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesNutrient> nutrients = new HashSet<>();
 
+    @OneToMany(mappedBy = "dietary_preference", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<DietaryPreferencesProduct> products = new HashSet<>();
+
+    @OneToMany(mappedBy = "dietary_preference", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<DietaryPreferencesRecipe> recipes = new HashSet<>();
+
     private String creationDate = null;
 
     private Integer targetWeight;
@@ -64,6 +72,10 @@ public class DietaryPreferences {
         return nutrients;
     }
 
+    public void addNutrient(DietaryPreferencesNutrient dietaryPreferencesNutrient) {
+        nutrients.add(dietaryPreferencesNutrient);
+    }
+
     public void setNutrients(Set<DietaryPreferencesNutrient> nutrients) {
         this.nutrients = nutrients;
     }
@@ -90,5 +102,21 @@ public class DietaryPreferences {
 
     public void setDietType(DietType dietType) {
         this.dietType = dietType;
+    }
+
+    public Set<DietaryPreferencesProduct> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<DietaryPreferencesProduct> products) {
+        this.products = products;
+    }
+
+    public Set<DietaryPreferencesRecipe> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<DietaryPreferencesRecipe> recipes) {
+        this.recipes = recipes;
     }
 }

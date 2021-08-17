@@ -24,7 +24,7 @@ public class DietaryPreferencesRecipe {
     @ManyToOne(cascade = CascadeType.PERSIST)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @JoinColumn(name="recipe_id", nullable=false)
-    private Product product;
+    private Recipes recipe;
 
     @NotNull
     private boolean recipePreferred;
@@ -47,12 +47,12 @@ public class DietaryPreferencesRecipe {
         this.dietaryPreferences = dietaryPreferences;
     }
 
-    public Product getProduct() {
-        return product;
+    public Recipes getRecipe() {
+        return recipe;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setRecipe(Recipes recipe) {
+        this.recipe = recipe;
     }
 
     public boolean isRecipePreferred() {

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class DietaryPreferencesController {
 
    @Autowired
-    private DietaryPreferencesService dietaryPreferencesService;
+   private DietaryPreferencesService dietaryPreferencesService;
 
 //    @GetMapping
 //    public List<Product> getAllProducts() {
