@@ -21,5 +21,4 @@ public interface RecipeService {
 
     List<Recipes> searchRecipes(RecipeSearchRequest recipeSearchRequest);
 
-    void removeOne(Long id);
 }

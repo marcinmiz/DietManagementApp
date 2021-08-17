@@ -400,9 +400,4 @@ public class ProductServiceImpl implements ProductService {
 
     }
 
-    @Override
-    public void removeOne(Long id) {
-
-    }
-
 }

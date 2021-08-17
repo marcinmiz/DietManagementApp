@@ -1,20 +1,20 @@
 package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.payloads.request.UserLoginRequest;
+import agh.edu.pl.diet.payloads.request.UserRequest;
+import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import org.springframework.validation.BindingResult;
 
 
 public interface UserService {
-//    User getCreateUser(User user, Set<UserRole> userRoles) throws Exception;
-
-    void save(User user);
 
     User findByUsername(String username);
 
-    User findByName(String email);
+    ResponseMessage registerUser(UserRequest userRequest, BindingResult bindingResult);
 
-//    ResponseMessage getCreateUser(ProductRequest userRequest);
-//
-//    ResponseMessage addNewUser(UserRequest userRequest);
+    ResponseMessage loginUser(UserLoginRequest userLoginRequest);
 
+    User getLoggedUser();
 
-}
+    }

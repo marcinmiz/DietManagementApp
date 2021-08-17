@@ -270,9 +270,4 @@ public class RecipeServiceImpl implements RecipeService {
         }
         return products;
     }
-
-    @Override
-    public void removeOne(Long id) {
-
-    }
 }

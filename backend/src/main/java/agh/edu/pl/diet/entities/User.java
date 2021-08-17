@@ -1,6 +1,11 @@
 package agh.edu.pl.diet.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.util.Pair;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,12 +21,16 @@ public class User {
     @JsonIgnore
     private String password;
     @JsonIgnore
+    @Transient
     private String passwordConfirmation;
     private String username;
-    private Set<Role> roles;
+    private String email;
+    @ManyToOne
+    private Role role;
+    private String creationDate;
+    @Transient
+    private List<Pair<String, Float>> weights = new ArrayList<>();
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     public Long getUserId() {
         return userId;
     }
@@ -62,7 +71,6 @@ public class User {
         this.password = password;
     }
 
-    @Transient
     public String getPasswordConfirmation() {
         return passwordConfirmation;
     }
@@ -71,14 +79,39 @@ public class User {
         this.passwordConfirmation = passwordConfirm;
     }
 
-    @ManyToMany
-    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    public Set<Role> getRoles() {
-        return roles;
+    public Role getRole() {
+        return role;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Pair<String, Float>> getWeights() {
+        return weights;
+    }
+
+    public void setWeights(List<Pair<String, Float>> weights) {
+        this.weights = weights;
+    }
+
+    public void addNewWeight(Pair<String, Float> weight) {
+        this.weights.add(weight);
+    }
 }

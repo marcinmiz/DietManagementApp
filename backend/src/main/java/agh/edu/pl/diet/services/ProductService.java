@@ -25,5 +25,4 @@ public interface ProductService {
 
     ResponseMessage assessProduct(ProductAssessRequest productAssessRequest);
 
-    void removeOne(Long id);
 }

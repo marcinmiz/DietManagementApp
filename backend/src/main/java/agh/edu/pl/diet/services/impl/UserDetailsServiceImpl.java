@@ -17,6 +17,9 @@ import java.util.Set;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService{
+
+    String ROLE_PREFIX = "ROLE_";
+
     @Autowired
     private UserRepo userRepo;
 
@@ -26,9 +29,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         User user = userRepo.findByUsername(username);
 
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        for (Role role : user.getRoles()){
-            grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
-        }
+        Role role = user.getRole();
+            grantedAuthorities.add(new SimpleGrantedAuthority(ROLE_PREFIX + role.getName()));
 
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities);
     }

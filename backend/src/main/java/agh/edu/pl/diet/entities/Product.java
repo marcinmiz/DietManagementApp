@@ -3,7 +3,6 @@ package agh.edu.pl.diet.entities;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +15,6 @@ public class Product {
     private Long productId;
     private String productName;
     private Integer calories;
-    //	private String publicationDate;
     @ManyToOne
     private User owner;
     @ManyToOne
@@ -34,18 +32,8 @@ public class Product {
 
     private Boolean productFavourite = false;
 
-//	@Column(columnDefinition="text")
-//	private String description;
-//	private int inStockNumber;
-
     @Transient
     private String productImage;
-
-
-//	@OneToMany(mappedBy = "product")
-//	@JsonIgnore
-//	private List<BookToCartItem> bookToCartItemList;
-
 
     public Long getProductId() {
         return productId;
@@ -71,22 +59,6 @@ public class Product {
         this.calories = calories;
     }
 
-//	public String getPublicationDate() {
-//		return publicationDate;
-//	}
-//
-//	public void setPublicationDate(String publicationDate) {
-//		this.publicationDate = publicationDate;
-//	}
-//
-//	public String getLanguage() {
-//		return language;
-//	}
-//
-//	public void setLanguage(String language) {
-//		this.language = language;
-//	}
-
     public Category getCategory() {
         return category;
     }
@@ -95,15 +67,6 @@ public class Product {
         this.category = category;
     }
 
-
-//	public int getInStockNumber() {
-//		return inStockNumber;
-//	}
-//
-//	public void setInStockNumber(int inStockNumber) {
-//		this.inStockNumber = inStockNumber;
-//	}
-
     public String getProductImage() {
         return productImage;
     }
@@ -111,14 +74,6 @@ public class Product {
     public void setProductImage(String productImage) {
         this.productImage = productImage;
     }
-
-//	public List<BookToCartItem> getBookToCartItemList() {
-//		return bookToCartItemList;
-//	}
-//
-//	public void setBookToCartItemList(List<BookToCartItem> bookToCartItemList) {
-//		this.bookToCartItemList = bookToCartItemList;
-//	}
 
     public Set<ProductNutrient> getNutrients() {
         return nutrients;

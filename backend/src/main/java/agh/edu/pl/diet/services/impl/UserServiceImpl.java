@@ -1,97 +1,46 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.entities.Role;
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.payloads.request.UserLoginRequest;
+import agh.edu.pl.diet.payloads.request.UserRequest;
+import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.payloads.validators.UserValidator;
 import agh.edu.pl.diet.repos.RoleRepo;
 import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.services.SecurityService;
 import agh.edu.pl.diet.services.UserService;
+import agh.edu.pl.diet.utility.SecurityUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Date;
 
 @Service
 public class UserServiceImpl implements UserService {
-
-//    private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepo userRepo;
 
     @Autowired
+    private UserValidator userValidator;
+
+    @Autowired
     private RoleRepo roleRepo;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private AuthenticationManager authenticationManager;
 
-//    private ResponseMessage verify(String mode, String type, Object item) {
-//        switch (type) {
-//            case "username":
-//                String name = String.valueOf(item);
-//                if (name == null) {
-//                    return new ResponseMessage("Username name has to be given");
-//                } else if (name.length() < 2 || name.length() > 40) {
-//                    return new ResponseMessage("Username name has to have min 2 and max 40 characters");
-//                } else if (!(name.matches("^[a-zA-Z ]+$"))) {
-//                    return new ResponseMessage("Username name has to contain only letters and spaces");
-//                } else if (!mode.equals("username") && userRepo.findByName(name) != null) {
-//                    return new ResponseMessage("Username with this name exists yet");
-//                } else {
-//                    return new ResponseMessage("Username name is valid");
-//                }
-//            case "password":
-//                if (item == null) {
-//                    return new ResponseMessage("Password calories has to be given");
-//                }
-//
-//                String password = String.valueOf(item);
-//
-//                if (password.toString().length() < 2) {
-//                    return new ResponseMessage("Password has to have min 3 characters");
-//                } else if (!(password.toString().matches("^0$") || password.toString().matches("^(-)?[1-9]\\d*$"))) {
-//                    return new ResponseMessage("Password has to contain only digits");
-//                } else if (password.length() < 0) {
-//                    return new ResponseMessage("Password has to be greater or equal 0");
-//                } else {
-//                    return new ResponseMessage("Password are valid");
-//                }
-//        }
-//
-//        return new ResponseMessage("Invalid type");
-//    }
+    @Autowired
+    private SecurityService securityService;
 
-    //@Override
-//    public User createUser(User user, Set<UserRole> userRoles) {
-//        User localUser = userRepo.findByUsername(user.getUsername());
-//
-//        if (localUser != null) {
-//            LOG.info("user {} already exists. Nothing will be done.", user.getUsername());
-//        } else {
-//            for (UserRole ur : userRoles) {
-//                roleRepo.save(ur.getRole());
-//            }
-//
-//            user.getUserRoles().addAll(userRoles);
-//
-//            localUser = userRepo.save(user);
-//        }
-//
-//        return localUser;
-//    }
-
-//    @Override
-//    public User getCreateUser(User user, Set<UserRole> userRoles) throws Exception {
-//        return null;
-//    }
-
-    @Override
-    public void save(User user) {
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setRoles(new HashSet<>((Collection<? extends Role>) roleRepo.findAll()));
-        userRepo.save(user);
-    }
+    private BCryptPasswordEncoder encoder = SecurityUtility.passwordEncoder();
 
     @Override
     public User findByUsername(String username) {
@@ -99,19 +48,56 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByName(String email) {
-        return userRepo.findByName(email);
+    public ResponseMessage registerUser(UserRequest userRequest, BindingResult bindingResult) {
+        userValidator.validate(userRequest, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            String message = bindingResult.getFieldError().getDefaultMessage();
+            return new ResponseMessage(message);
+        }
+
+        User user = new User();
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setName(userRequest.getName());
+        user.setSurname(userRequest.getSurname());
+        user.setPassword(encoder.encode(userRequest.getPassword()));
+        String creationDate = new Date().toInstant().toString();
+        user.setCreationDate(creationDate);
+        user.setRole(roleRepo.findByName("USER"));
+
+        userRepo.save(user);
+
+        return new ResponseMessage("User has been registered");
     }
 
+    @Override
+    public ResponseMessage loginUser(UserLoginRequest userLoginRequest) {
 
-//    @Override
-//    public ResponseMessage getCreateUser(ProductRequest userRequest) {
-//        return null;
-//    }
-//
-//    @Override
-//    public ResponseMessage addNewUser(UserRequest userRequest) {
-//        return null;
-//    }
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userLoginRequest.getUsername(), userLoginRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        if (authentication.isAuthenticated()) {
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            return new ResponseMessage("User has been logged in");
+
+        }
+
+        return new ResponseMessage("User has not been logged in. Check username and password");
+    }
+
+    @Override
+    public User getLoggedUser() {
+        String username = securityService.findLoggedInUsername();
+        if (username != null) {
+            User user = userRepo.findByUsername(username);
+            if (user != null) {
+                return user;
+            }
+            return null;
+        }
+        return null;
+    }
 
 }
