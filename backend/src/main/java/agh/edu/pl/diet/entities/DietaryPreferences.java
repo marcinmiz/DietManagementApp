@@ -13,7 +13,7 @@ public class DietaryPreferences {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dietaryPreferenceId;
-    private String dietaryPreferenceName;
+    private String dietaryPreferencesName;
     private Integer totalCalories;
     @ManyToOne
     private User owner;
@@ -44,12 +44,12 @@ public class DietaryPreferences {
         this.dietaryPreferenceId = dietaryPreferenceId;
     }
 
-    public String getDietaryPreferenceName() {
-        return dietaryPreferenceName;
+    public String getDietaryPreferencesName() {
+        return dietaryPreferencesName;
     }
 
-    public void setDietaryPreferenceName(String dietaryPreferenceName) {
-        this.dietaryPreferenceName = dietaryPreferenceName;
+    public void setDietaryPreferencesName(String dietaryPreferencesName) {
+        this.dietaryPreferencesName = dietaryPreferencesName;
     }
 
     public Integer getTotalCalories() {

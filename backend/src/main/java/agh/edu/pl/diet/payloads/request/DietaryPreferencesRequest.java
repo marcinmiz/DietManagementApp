@@ -5,7 +5,7 @@ import java.util.List;
 
 public class DietaryPreferencesRequest {
     @NotBlank
-    private String dietaryPreferenceName;
+    private String dietaryPreferencesName;
     @NotBlank
     private Integer totalCalories;
     @NotBlank
@@ -19,12 +19,12 @@ public class DietaryPreferencesRequest {
     @NotBlank
     private List<String> recipes;
 
-    public String getDietaryPreferenceName() {
-        return dietaryPreferenceName;
+    public String getDietaryPreferencesName() {
+        return dietaryPreferencesName;
     }
 
-    public void setDietaryPreferenceName(String dietaryPreferenceName) {
-        this.dietaryPreferenceName = dietaryPreferenceName;
+    public void setDietaryPreferencesName(String dietaryPreferencesName) {
+        this.dietaryPreferencesName = dietaryPreferencesName;
     }
 
     public Integer getTotalCalories() {

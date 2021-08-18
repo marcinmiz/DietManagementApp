@@ -7,7 +7,7 @@ import agh.edu.pl.diet.payloads.response.ResponseMessage;
 
 public interface DietaryPreferencesService {
 
-//    List<DietaryPreferences> getAllDietaryPreferences();
+  //  List<DietaryPreferences> getAllPreferencesService();
 
     DietaryPreferences getDietaryPreferences(Long dietaryPreferencesId);
 

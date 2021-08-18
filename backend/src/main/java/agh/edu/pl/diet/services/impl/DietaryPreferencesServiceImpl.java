@@ -1,17 +1,19 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.entities.*;
+import agh.edu.pl.diet.entities.DietaryPreferences;
+import agh.edu.pl.diet.entities.DietaryPreferencesNutrient;
+import agh.edu.pl.diet.entities.Nutrient;
 import agh.edu.pl.diet.payloads.request.DietaryPreferencesRequest;
-import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.*;
+import agh.edu.pl.diet.services.DietaryPreferencesService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DietaryPreferencesServiceImpl {
+public class DietaryPreferencesServiceImpl implements DietaryPreferencesService {
 
     @Autowired
     private ProductRepo productRepo;
@@ -117,11 +119,11 @@ public class DietaryPreferencesServiceImpl {
     @Override
     public ResponseMessage addNewDietaryPreferences(DietaryPreferencesRequest dietaryPreferencesRequest) {
         DietaryPreferences dietaryPreferences = new DietaryPreferences();
-        String dietaryPreferencesName = DietaryPreferencesRequest.getDietaryPreferenceName();
+        String dietaryPreferencesName = dietaryPreferencesRequest.getDietaryPreferencesName();
 
         ResponseMessage responseMessage = verify("add", "name", dietaryPreferencesRequest);
         if (responseMessage.getMessage().equals("DietaryPreferences name is valid")){
-            dietaryPreferences.setDietaryPreferenceName(dietaryPreferencesName);
+            dietaryPreferences.setDietaryPreferencesName(dietaryPreferencesName);
         } else {
             return responseMessage;
         }
@@ -186,56 +188,56 @@ public class DietaryPreferencesServiceImpl {
         }
 
         //change to logged in user id
-        dietaryPreferences.setOwner(userRepo.findById(1L).get());
+        dietaryPreferences.setOwner(userRepo.findById(256L).get());
         String creationDate = new Date().toInstant().toString();
         dietaryPreferences.setCreationDate(creationDate);
 
         dietaryPreferencesRepo.save(dietaryPreferences);
-        DietaryPreferences lastAddedDietaryPreferences = getDietaryPreferences().stream().filter(p -> p.getCreationDate().equals(creationDate)).findFirst().orElse(null);
-        if (lastAddedDietaryPreferences != null) {
-            return new ResponseMessage(lastAddedDietaryPreferences.getDietaryPreferenceId() + " Dietary Preference " + dietaryPreferencesName + " has been added successfully");
-        } else {
-            return new ResponseMessage("Dietary Preference " + dietaryPreferencesName + " has not been found");
-        }
+//        DietaryPreferences lastAddedDietaryPreferences = getDietaryPreferences().stream().filter(p -> p.getCreationDate().equals(creationDate)).findFirst().orElse(null);
+//        if (lastAddedDietaryPreferences != null) {
+//            return new ResponseMessage(lastAddedDietaryPreferences.getDietaryPreferenceId() + " Dietary Preference " + dietaryPreferencesName + " has been added successfully");
+//        } else {
+          return new ResponseMessage("Dietary Preference " + dietaryPreferencesName + " has not been found");
+//        }
     }
 
     @Override
-    public ResponseMessage updateProduct(Long productId, ProductRequest productRequest) {
+    public ResponseMessage updateDietaryPreferences(Long dietaryPreferencesId, DietaryPreferencesRequest dietaryPreferencesRequest) {
 
-        String productName = "";
-        Optional<Product> product = productRepo.findById(productId);
-        if (product.isPresent()) {
-            Product updatedProduct = product.get();
-            productName = productRequest.getProductName();
+        String dietaryPreferencesName = "";
+        Optional<DietaryPreferences> dietaryPreferences = dietaryPreferencesRepo.findById(dietaryPreferencesId);
+        if (dietaryPreferences.isPresent()) {
+            DietaryPreferences updatedDietaryPreferences = dietaryPreferences.get();
+            dietaryPreferencesName = dietaryPreferencesRequest.getDietaryPreferencesName();
 
-            ResponseMessage responseMessage = verify("update", "name", productName);
-            if (responseMessage.getMessage().equals("Product name is valid")){
-                updatedProduct.setProductName(productName);
+            ResponseMessage responseMessage = verify("update", "name", dietaryPreferencesName);
+            if (responseMessage.getMessage().equals("Dietary Preferences name is valid")){
+                updatedDietaryPreferences.setDietaryPreferencesName(dietaryPreferencesName);
             } else {
                 return responseMessage;
             }
 
-            Integer calories = productRequest.getCalories();
+            Integer totalCalories = dietaryPreferencesRequest.getTotalCalories();
 
-            ResponseMessage responseMessage2 = verify("update", "calories", calories);
+            ResponseMessage responseMessage2 = verify("update", "calories", totalCalories);
 
             if (responseMessage2.getMessage().equals("Product calories are valid")) {
-                updatedProduct.setCalories(calories);
+                updatedDietaryPreferences.setTotalCalories(totalCalories);
             } else {
                 return responseMessage2;
             }
 
-            String dietTypeName = DietaryPreferencesRequest.getDietType();
+            String dietTypeName = dietaryPreferencesRequest.getDietType();
 
             ResponseMessage responseMessage3 = verify("update", "dietType", dietTypeName);
 
             if (responseMessage3.getMessage().equals("Diet type is valid")) {
-                updatedDietaryPreferences.setCategory(dietTypeRepo.findByDietTypeName(dietTypeName));
+                updatedDietaryPreferences.setDietType(dietTypeRepo.findByDietTypeName(dietTypeName));
             } else {
                 return responseMessage3;
             }
 
-            List<String> nutrients = productRequest.getNutrients();
+            List<String> nutrients = dietaryPreferencesRequest.getNutrients();
 
             ResponseMessage responseMessage4 = verify("update", "list", nutrients);
 
@@ -266,31 +268,37 @@ public class DietaryPreferencesServiceImpl {
                     return responseMessage7;
                 }
 
-                ProductNutrient productNutrient = updatedProduct.getNutrients().stream().filter(pn -> pn.getNutrient().getNutrientName().equals(nutrientName)).findFirst().orElse(null);
+                DietaryPreferencesNutrient dietaryPreferencesNutrient = updatedDietaryPreferences.getNutrients().stream().filter(pn -> pn.getNutrient().getNutrientName().equals(nutrientName)).findFirst().orElse(null);
 
-                if (productNutrient != null) {
-                    productNutrient.setNutrientAmount(nutrientAmount);
+                if (dietaryPreferencesNutrient != null) {
+                    dietaryPreferencesNutrient.setNutrientAmount(nutrientAmount);
                 } else {
-                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
+                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + dietaryPreferencesName + " has not been found");
                 }
             }
-            productRepo.save(updatedProduct);
+            dietaryPreferencesRepo.save(updatedDietaryPreferences);
 
-            return new ResponseMessage("Product " + productName + " has been updated successfully");
+            return new ResponseMessage("Dietary Preferences " + dietaryPreferencesName + " has been updated successfully");
         }
-        return new ResponseMessage("Product " + productName + " has not been found");
+        return new ResponseMessage("Dietary Preferences " + dietaryPreferencesName + " has not been found");
+    }
+
+
+    @Override
+    public ResponseMessage removeDietaryPreferences(Long dietaryPreferencesId) {
+
+        Optional<DietaryPreferences> dietaryPreferences = dietaryPreferencesRepo.findById(dietaryPreferencesId);
+        if (dietaryPreferences.isPresent()) {
+            DietaryPreferences removedDietaryPreferences = dietaryPreferences.get();
+            dietaryPreferencesRepo.delete(removedDietaryPreferences);
+            return new ResponseMessage("Dietary Preferences " + removedDietaryPreferences.getDietaryPreferencesName() + " has been removed successfully");
+        }
+        return new ResponseMessage("Dietary Preferences id " + dietaryPreferencesId + " has not been found");
     }
 
     @Override
-    public ResponseMessage removeProduct(Long productId) {
+    public void removeOne(Long id) {
 
-        Optional<Product> product = productRepo.findById(productId);
-        if (product.isPresent()) {
-            Product removedProduct = product.get();
-            productRepo.delete(removedProduct);
-            return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
-        }
-        return new ResponseMessage("Product id " + productId + " has not been found");
     }
 
 }
