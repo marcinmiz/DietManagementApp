@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {ChangeEvent, useEffect} from 'react';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -12,33 +12,65 @@ import SpaIcon from '@material-ui/icons/Spa';
 import {useHistory} from "react-router-dom";
 
 
-export default function UserBottomNavigation() {
-    let history = useHistory();
+export default function UserBottomNavigation(props) {
 
-    const [value, setValue] = React.useState('now');
+    const [value, setValue] = React.useState('dashboard');
+
+    useEffect(
+        () => {
+            switch (props.url) {
+                case "/dashboard":
+                    document.getElementById("dashboard").click();
+                    break;
+                case "/dashboard/products/main":
+                    document.getElementById("products").click();
+                    break;
+                case "/dashboard/recipes":
+                    document.getElementById("recipes").click();
+                    break;
+                case "/dashboard/preferences":
+                    document.getElementById("preferences").click();
+                    break;
+                case "/dashboard/programmes":
+                    document.getElementById("programmes").click();
+                    break;
+                case "/dashboard/menus":
+                    document.getElementById("menus").click();
+                    break;
+                case "/dashboard/shopping":
+                    document.getElementById("shopping").click();
+                    break;
+                case "/dashboard/settings":
+                    document.getElementById("settings").click();
+                    break;
+                default:
+                    document.getElementById("dashboard").click();
+            }
+        },[props.url]
+    );
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        let destination;
+        let destination = "/dashboard";
         if (newValue === "products") {
-            destination = "/products/main";
-        } else {
-            destination = "/" + newValue;
+            destination += "/products/main";
+        } else if (newValue !== "dashboard") {
+            destination += "/" + newValue;
         }
-        history.push(destination);
+        props.history.push(destination);
     };
 
     return (
         <div>
             <BottomNavigation value={value} onChange={handleChange} className="user_bottom_navigation">
-                <BottomNavigationAction label="Now" value="now" icon={<NearMeIcon/>}/>
-                <BottomNavigationAction label="Products" value="products" icon={<SpaIcon/>}/>
-                <BottomNavigationAction label="Recipes" value="recipes" icon={<ReceiptIcon/>}/>
-                <BottomNavigationAction label="Dietary programmes" value="programmes" icon={<TrackChangesIcon/>}/>
-                <BottomNavigationAction label="Dietary preferences" value="preferences" icon={<FingerprintIcon/>}/>
-                <BottomNavigationAction label="Daily menus" value="menus" icon={<RestaurantIcon/>}/>
-                <BottomNavigationAction label="Shopping lists" value="shopping" icon={<LocalMallIcon/>}/>
-                <BottomNavigationAction label="Settings" value="settings" icon={<SettingsIcon/>}/>
+                <BottomNavigationAction id="dashboard" label="Dashboard" value="dashboard" icon={<NearMeIcon/>}/>
+                <BottomNavigationAction id="products" label="Products" value="products" icon={<SpaIcon/>}/>
+                <BottomNavigationAction id="recipes" label="Recipes" value="recipes" icon={<ReceiptIcon/>}/>
+                <BottomNavigationAction id="preferences" label="Dietary preferences" value="preferences" icon={<FingerprintIcon/>}/>
+                <BottomNavigationAction id="programmes" id="programmes" label="Dietary programmes" value="programmes" icon={<TrackChangesIcon/>}/>
+                <BottomNavigationAction id="menus" label="Daily menus" value="menus" icon={<RestaurantIcon/>}/>
+                <BottomNavigationAction id="shopping" label="Shopping lists" value="shopping" icon={<LocalMallIcon/>}/>
+                <BottomNavigationAction id="settings" label="Settings" value="settings" icon={<SettingsIcon/>}/>
             </BottomNavigation>
         </div>
 

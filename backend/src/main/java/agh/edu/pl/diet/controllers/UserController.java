@@ -9,10 +9,12 @@ import agh.edu.pl.diet.repos.RoleRepo;
 import agh.edu.pl.diet.services.SecurityService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
@@ -23,6 +25,7 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = {"http://localhost:3000"})
 public class UserController {
 
     @Autowired
@@ -33,9 +36,9 @@ public class UserController {
 
         String message = userService.registerUser(userRequest, bindingResult).getMessage();
 
-        if (!message.equals("User has been registered")) {
+        if (!message.equals("User " + userRequest.getName() + " " + userRequest.getSurname() + " has been registered")) {
             return ResponseEntity
-                    .badRequest()
+                    .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseMessage(message));
         }
 
@@ -43,13 +46,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseMessage> loginUser(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+    public ResponseEntity<ResponseMessage> loginUser(@AuthenticationPrincipal @RequestBody UserLoginRequest userLoginRequest) {
 
         String message = userService.loginUser(userLoginRequest).getMessage();
 
         if (!message.equals("User has been logged in")) {
 
-            return ResponseEntity.badRequest().body(new ResponseMessage(message));
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
 
         }
 
@@ -57,14 +60,23 @@ public class UserController {
 
     }
 
+    @GetMapping("/login?logout")
+        public ResponseEntity<ResponseMessage> logoutUser() {
+            return ResponseEntity.ok(new ResponseMessage("User has been logged out"));
+        }
+
     @GetMapping("/loggedUser")
     public ResponseEntity<User> getLoggedUser() {
 
         User user = userService.getLoggedUser();
 
-        if (user == null) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/existsUser/{username}")
+    public ResponseEntity<Boolean> existsUser(@PathVariable String username) {
+
+        Boolean user = userService.existsUser(username);
 
         return ResponseEntity.ok(user);
     }

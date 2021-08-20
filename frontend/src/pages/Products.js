@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import CategoryIcon from '@material-ui/icons/Category';
-import {MenuItem, Grid, Container, makeStyles, Tooltip, Divider} from '@material-ui/core';
+import {MenuItem, Grid, Container, makeStyles, withStyles, Tooltip, Divider} from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -19,8 +19,27 @@ import FilledInput from '@material-ui/core/FilledInput';
 import http from "../http-common";
 import Button from "@material-ui/core/Button";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import Backdrop from "@material-ui/core/Backdrop/Backdrop";
+import LinearProgress from '@material-ui/core/LinearProgress';
+import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
 
-const useStyles = makeStyles({
+const BorderLinearProgress = withStyles((theme) => ({
+    root: {
+        height: 10,
+        width: 400,
+        borderRadius: 5,
+        marginLeft: 300,
+    },
+    colorPrimary: {
+        backgroundColor: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
+    },
+    bar: {
+        borderRadius: 5,
+        backgroundColor: '#1a90ff',
+    },
+}))(LinearProgress);
+
+const useStyles = makeStyles((theme) =>({
     formControl: {
         minWidth: 110,
     },
@@ -28,7 +47,12 @@ const useStyles = makeStyles({
         width: '80%',
         maxHeight: 435,
     },
-});
+    backdrop: {
+        zIndex: theme.zIndex.drawer + 1,
+        color: '#fff',
+        backgroundColor: '#282c34'
+    },
+}));
 
 export default function Products(props) {
 
@@ -50,6 +74,7 @@ export default function Products(props) {
 
     useEffect(
         () => {
+            console.log(props);
             if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
                 let parts = props.match.params.msg.split('-');
                 props.history.push('/products/' + parts[1] + '/edit');
@@ -160,6 +185,7 @@ export default function Products(props) {
                         } else {
                             document.getElementsByClassName("loading").item(0).setAttribute("hidden", true);
                         }
+
                 })
                     .catch(error => console.log(error))
 
@@ -587,6 +613,10 @@ export default function Products(props) {
                 </div>
                 <div className="msg"></div>
                 <div className="loading">Loading</div>
+                {/*<Backdrop className={classes.backdrop} open={!props.loaded}>*/}
+                    {/*<CircularProgress color="inherit" />*/}
+                {/*</Backdrop>*/}
+                <BorderLinearProgress variant="determinate" value={90} />
                 {tab}
             </div>
         </Container>

@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
         userRepo.save(user);
 
-        return new ResponseMessage("User has been registered");
+        return new ResponseMessage("User " + user.getName() + " " + user.getSurname() + " has been registered");
     }
 
     @Override
@@ -99,5 +99,11 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    @Override
+    public Boolean existsUser(String username) {
+        return userRepo.findByUsername(username) != null;
+    }
+
 
 }

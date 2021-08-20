@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react'
-import {Switch, Route, Redirect} from 'react-router-dom'
+import {Switch, Route, useRouteMatch, Redirect} from 'react-router-dom'
 import Products from "../pages/Products";
 import ProductsDetails from "../pages/ProductsDetails";
 import Recipes from "../pages/Recipes";
@@ -8,36 +8,39 @@ export default function PageRoutes(props) {
 
     let admin = props.admin;
     let adminMode = props.adminMode;
+    let loaded = props.loaded;
+
+    let { path, url } = useRouteMatch();
 
     return (
         <div>
             <Switch>
-                <Route exact path="/now">
+                <Route exact path={path}>
                     Now
                 </Route>
-                <Route exact path="/products/:msg" render={(props) => <Products admin={admin} adminMode={adminMode} {...props} /> }>
+                <Route exact path={`${path}/products/:msg`} render={(props) => <Products history={props.history} loaded={loaded} admin={admin} adminMode={adminMode} {...props} /> }>
                 </Route>
-                <Route exact path="/products/:id/:mode" component={ProductsDetails}>
+                <Route exact path={`${path}/products/:id/:mode`} component={ProductsDetails}>
                 </Route>
-                <Route exact path="/recipes/:recipe_id?/:type?" render={(props) => <Recipes admin={admin} adminMode={adminMode} {...props} /> }>
+                <Route path={`${path}/recipes/:recipe_id?/:type?`} render={(props) => <Recipes history={props.history} admin={admin} adminMode={adminMode} {...props} /> }>
                 </Route>
-                <Route exact path="/programmes">
+                <Route exact path={`${path}/programmes`}>
                     Dietary Programmes
                 </Route>
-                <Route exact path="/preferences">
+                <Route exact path={`${path}/preferences`}>
                     Dietary Preferences
                 </Route>
-                <Route exact path="/menus">
+                <Route exact path={`${path}/menus`}>
                     Daily menus
                 </Route>
-                <Route exact path="/shopping">
+                <Route exact path={`${path}/shopping`}>
                     Shopping lists
                 </Route>
-                <Route exact path="/settings">
+                <Route exact path={`${path}/settings`}>
                     Settings
                 </Route>
                 <Route path="*">
-                    <Redirect to="/now"/>
+                    <Redirect to={path} />
                 </Route>
             </Switch>
         </div>

@@ -1,43 +1,117 @@
-import React, {Component} from 'react';
+import React, {useEffect} from 'react';
 import './App.css';
 import Authentication from "./pages/Authentication";
 import UserDashboard from "./UserDashboard";
+import {BrowserRouter as Router, Switch, Route, Redirect, useHistory} from 'react-router-dom'
+import http from "./http-common";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
-export default class App extends Component {
-    constructor() {
-        super();
+export default function App() {
 
-        this.state = {
-            loggedInStatus: "LOGGED_IN",
+    const history = useHistory();
+
+    const [state, setState] = React.useState({
+            loggedInStatus: "NOT_LOGGED_IN",
             user: {},
             admin: false,
-            adminMode: false
-        }
+            adminMode: false,
+            loaded: false,
+    });
 
-        this.handleAdminMode = this.handleAdminMode.bind(this);
-    }
+    useEffect(
+        () => {
+            const getUser = async () => {
+                let user = await http.get("/api/users/loggedUser");
 
-    handleAdminMode() {
-        let newAdminMode = !this.state.adminMode;
-        this.setState({
-            ...this.state,
+                let user_data = user.data;
+
+                setState({
+                    ...state,
+                    loaded: true
+                });
+
+                if (user_data !== "") {
+                    handleInit(user_data);
+                }
+
+            };
+            getUser();
+    }, []);
+
+    const handleAdminMode = () => {
+        let newAdminMode = !state.adminMode;
+        setState({
+            ...state,
             adminMode: newAdminMode
         });
-    }
+    };
 
-    render() {
-        if (this.state.loggedInStatus === "NOT_LOGGED_IN") {
+    const handleLogin = (user) => {
+        setState({
+            ...state,
+            loggedInStatus: "LOGGED_IN",
+            user: user
+        });
+    };
+
+    const handleInit = (user) => {
+
+        setState({
+            ...state,
+            loggedInStatus: "LOGGED_IN",
+            user: user,
+            admin: user.role.name === "ADMIN",
+            adminMode: user.role.name === "ADMIN",
+            loaded: true
+        });
+
+    };
+
+    const handleLogout = () => {
+        setState({
+            ...state,
+            loggedInStatus: "NOT_LOGGED_IN",
+            user: null,
+        });
+
+    };
+
             return (
+                <Router>
                 <div className="App App_content">
-                    <Authentication loggedInStatus={this.state.loggedInStatus}/>
+                    {state.loaded ? <Switch>
+                        <Route path="/dashboard"
+                               render={(props) =>
+                                   state.loggedInStatus === "LOGGED_IN"
+                                       ? (<UserDashboard history={history} name={state.user.name} surname={state.user.surname}
+                                                          loaded={state.loaded} loggedInStatus={state.loggedInStatus}
+                                                          admin={state.admin} adminMode={state.adminMode}
+                                                          handleAdminMode={handleAdminMode}
+                                                          handleLogout={handleLogout}
+                                                         {...props} />)
+                                       : (<Redirect to={{ pathname: '/login', state: { from: props.location } }} />)}
+                        />
+                        {/*<PrivateRoute path="/dashboard" component={UserDashboard} history={history} loggedInStatus={state.loggedInStatus} admin={state.admin} adminMode={state.adminMode} handleAdminMode={handleAdminMode} handleLogout={handleLogout}/>*/}
+                            <Route path="/:authentication_type"
+                                     render={(props) => {
+
+                                         let path = "/dashboard";
+                                         if (props.location.state !== undefined) {
+                                             path = props.location.state.from.pathname;
+                                         }
+                                        return state.loggedInStatus === "NOT_LOGGED_IN"
+                                         ? (<Authentication history={history} loaded={state.loaded}
+                                                                        loggedInStatus={state.loggedInStatus}
+                                                                        admin={state.admin} adminMode={state.adminMode}
+                                                                        handleLogin={handleLogin} {...props} />)
+                                         : (<Redirect to={{ pathname: path, state: { from: props.location } }} />)}
+                                     }
+
+                            />
+                            {/*: <Redirect to="/dashboard"/>*/}
+                    </Switch> : <div className="loading">Loading</div>}
                 </div>
+                </Router>
             );
-        } else {
-            return (
-                <div className="App App_content">
-                    <UserDashboard props={this.props} loggedInStatus={this.state.loggedInStatus} admin={this.state.admin} adminMode={this.state.adminMode} handleAdminMode={this.handleAdminMode}/>
-                </div>
-            );
-        }
-    }
 }

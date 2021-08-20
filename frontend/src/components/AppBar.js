@@ -4,15 +4,21 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from "@material-ui/core/Button";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import http from "../http-common";
+import {Redirect, useHistory} from "react-router-dom";
 
 export default function Appbar(props) {
 
-    useEffect(
-    () => {
-        console.log("adminMode: " + props.adminMode)
-        console.log("admin: " + props.admin)
-    }, [props.adminMode]
-    );
+    const history = useHistory();
+
+    const logoutUser = async () => {
+        props.handleLogout();
+
+        setTimeout(() => history.push('/login'), 10);
+
+        await http.post("/api/users/logout");
+
+    };
 
     return (
         <div className="app_bar">
@@ -21,7 +27,7 @@ export default function Appbar(props) {
             </div>
             <div>
                 <Avatar className="user_avatar" alt="template user avatar" src=""/>
-                <div>John Smith</div>
+                <div>{props.name + " " + props.surname}</div>
             </div>
             {(props.admin === true) ?
                 <FormControlLabel
@@ -42,7 +48,7 @@ export default function Appbar(props) {
             {/*</div>*/}
 
             <div>
-                <button className="form_button">Log out</button>
+                <button className="form_button" onClick={logoutUser}>Log out</button>
             </div>
         </div>
     );

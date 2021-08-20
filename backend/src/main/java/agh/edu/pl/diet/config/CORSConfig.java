@@ -1,17 +1,30 @@
 package agh.edu.pl.diet.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class CORSConfig implements WebMvcConfigurer {
+public class CORSConfig {
 
-        @Override
-        public void addCorsMappings(CorsRegistry registry){
-            String origin = "http://localhost:3000";
-            registry.addMapping("/api/**")
-                    .allowedMethods("GET", "POST", "PUT", "DELETE")
-                    .allowedOrigins(origin);
-        }
+    @Value("${allowed.origin}")
+    private String allowedOrigin;
+
+    @Bean
+    public WebMvcConfigurer getCorsConfiguration() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry){
+                registry.addMapping("/api/**")
+                        .allowedOrigins(allowedOrigin)
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .exposedHeaders("Access-Control-Allow-Origin")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+
+        };
+    }
     }

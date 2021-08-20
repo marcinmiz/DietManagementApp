@@ -81,7 +81,7 @@ export default function ProductsDetails(props) {
                 .catch(error => console.log(error));
 
             state.mode = mode;
-
+console.log(state.mode);
             if (product_id !== 'new') {
                 //retrieve product specified by id data
                 http.get("/api/products/" + product_id)

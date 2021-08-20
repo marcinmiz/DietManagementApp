@@ -231,7 +231,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         //change to logged in user id
-        product.setOwner(userRepo.findById(1L).get());
+        product.setOwner(userRepo.findById(262L).get());
         String creationDate = new Date().toInstant().toString();
         product.setCreationDate(creationDate);
 

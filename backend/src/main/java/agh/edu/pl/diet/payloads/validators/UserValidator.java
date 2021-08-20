@@ -28,7 +28,7 @@ public class UserValidator implements Validator {
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "username", "NotEmpty", "Username has not to be empty or contains only spaces");
-        if (user.getUsername().length() < 6 || user.getUsername().length() > 32) {
+        if (user.getUsername().trim().length() < 6 || user.getUsername().length() > 32) {
             errors.rejectValue("username", "Size.userForm.username", "Username has to have min 6 and max 32 characters");
         }
 
@@ -45,7 +45,7 @@ public class UserValidator implements Validator {
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty", "Name has not to be empty or contains only spaces");
-        if (user.getName().length() < 2 || user.getName().length() > 40) {
+        if (user.getName().trim().length() < 2 || user.getName().length() > 40) {
             errors.rejectValue("name", "Size.userForm.name", "Name has to have min 2 and max 40 characters");
         }
         if (!user.getName().matches("^[a-zA-Z ]+$")) {
@@ -58,7 +58,7 @@ public class UserValidator implements Validator {
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "NotEmpty", "Surname has not to be empty or contains only spaces");
-        if (user.getSurname().length() < 2 || user.getSurname().length() > 40) {
+        if (user.getSurname().trim().length() < 2 || user.getSurname().length() > 40) {
             errors.rejectValue("surname", "Size.userForm.surname", "Surname has to have min 2 and max 40 characters");
         }
         if (!user.getSurname().matches("^[a-zA-Z ]+$")) {
