@@ -1,10 +1,7 @@
 package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.controllers.ImageController;
-import agh.edu.pl.diet.entities.Category;
-import agh.edu.pl.diet.entities.Nutrient;
-import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.entities.ProductNutrient;
+import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
@@ -14,6 +11,7 @@ import agh.edu.pl.diet.repos.NutrientRepo;
 import agh.edu.pl.diet.repos.ProductRepo;
 import agh.edu.pl.diet.repos.UserRepo;
 import agh.edu.pl.diet.services.ProductService;
+import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -38,6 +36,8 @@ public class ProductServiceImpl implements ProductService {
     private CategoryRepo categoryRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private UserService userService;
 
     private ResponseMessage verify(String mode, String type, Object item) {
         switch (type) {
@@ -231,7 +231,11 @@ public class ProductServiceImpl implements ProductService {
         }
 
         //change to logged in user id
-        product.setOwner(userRepo.findById(262L).get());
+        User productOwner = userService.getLoggedUser();
+        if (productOwner == null) {
+            return new ResponseMessage("Product " + productName + " owner has not been found");
+        }
+        product.setOwner(productOwner);
         String creationDate = new Date().toInstant().toString();
         product.setCreationDate(creationDate);
 
@@ -251,6 +255,17 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> product = productRepo.findById(productId);
         if (product.isPresent()) {
             Product updatedProduct = product.get();
+
+            User currentLoggedUser = userService.getLoggedUser();
+
+            if (currentLoggedUser == null) {
+                return new ResponseMessage("Current logged user has not been found");
+            }
+
+            if (!updatedProduct.getOwner().equals(currentLoggedUser)) {
+                return new ResponseMessage("Only product owner is permitted to update product");
+            }
+
             productName = productRequest.getProductName();
 
             ResponseMessage responseMessage = verify("update", "name", productName);
@@ -319,6 +334,11 @@ public class ProductServiceImpl implements ProductService {
                     return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
                 }
             }
+
+            updatedProduct.setApprovalStatus("pending");
+            updatedProduct.setRejectExplanation(null);
+            updatedProduct.setAssessmentDate(null);
+
             productRepo.save(updatedProduct);
 
             return new ResponseMessage("Product " + productName + " has been updated successfully");
@@ -332,6 +352,17 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> product = productRepo.findById(productId);
         if (product.isPresent()) {
             Product removedProduct = product.get();
+
+            User currentLoggedUser = userService.getLoggedUser();
+
+            if (currentLoggedUser == null) {
+                return new ResponseMessage("Current logged user has not been found");
+            }
+
+            if (!removedProduct.getOwner().equals(currentLoggedUser)) {
+                return new ResponseMessage("Only product owner is permitted to remove product");
+            }
+
             productRepo.delete(removedProduct);
             return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
         }

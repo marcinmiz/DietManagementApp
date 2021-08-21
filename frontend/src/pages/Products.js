@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react'
 import CategoryIcon from '@material-ui/icons/Category';
-import {MenuItem, Grid, Container, makeStyles, withStyles, Tooltip, Divider} from '@material-ui/core';
+import {Container, Divider, Grid, makeStyles, MenuItem, Tooltip, withStyles} from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -11,17 +11,13 @@ import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import FavoriteIcon from '@material-ui/icons/Favorite';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import FilledInput from '@material-ui/core/FilledInput';
 import http from "../http-common";
 import Button from "@material-ui/core/Button";
 import ConfirmationDialog from "../components/ConfirmationDialog";
-import Backdrop from "@material-ui/core/Backdrop/Backdrop";
 import LinearProgress from '@material-ui/core/LinearProgress';
-import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
 
 const BorderLinearProgress = withStyles((theme) => ({
     root: {
@@ -39,7 +35,7 @@ const BorderLinearProgress = withStyles((theme) => ({
     },
 }))(LinearProgress);
 
-const useStyles = makeStyles((theme) =>({
+const useStyles = makeStyles((theme) => ({
     formControl: {
         minWidth: 110,
     },
@@ -66,29 +62,24 @@ export default function Products(props) {
         categories: [],
         msg: "",
         loaded: false,
-        open_confirmation_popup: false,
+        open_confirmation_modal: false,
         complement: "",
         confirmation_product_id: null,
         confirmation_product_name: null,
+        open_viewer_modal: false,
     });
 
     useEffect(
         () => {
-            console.log(props);
-            if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
-                let parts = props.match.params.msg.split('-');
-                props.history.push('/products/' + parts[1] + '/edit');
-            }
-            state.loaded = false;
-            document.getElementsByClassName("loading").item(0).innerHTML = "Loading";
-            document.getElementsByClassName("loading").item(0).removeAttribute("hidden");
-            let msg_container = document.getElementsByClassName("msg").item(0);
-            msg_container.style.display = "none";
+            // if ((/^product-\d*$/.test(props.match.params.msg)) || (/^product-new$/.test(props.match.params.msg))) {
+            //     let parts = props.match.params.msg.split('-');
+            //     props.history.push('/products/' + parts[1] + '/edit');
+            // }
             let categoriesTable = [];
 
             http.get("/api/categories")
                 .then(resp => {
-                    for (let x in resp.data){
+                    for (let x in resp.data) {
                         categoriesTable[x] = {};
                         categoriesTable[x].category_id = resp.data[x].categoryId;
                         categoriesTable[x].category_name = resp.data[x].categoryName;
@@ -96,98 +87,66 @@ export default function Products(props) {
                 })
                 .catch(error => console.log(error));
 
-                //retrieve all products and set its values to product state field
+            //retrieve all products and set its values to product state field
 
-                let search_parameters = {};
-                search_parameters.phrase = state.search;
-                search_parameters.category = state.category;
-                http.post("/api/products/search", search_parameters)
-                    .then(resp => {
-                        let table = [];
-                        if (state.products_group === 0) {
+            let search_parameters = {};
+            search_parameters.phrase = state.search;
+            search_parameters.category = state.category;
+            http.post("/api/products/search", search_parameters)
+                .then(resp => {
+                    let table = [];
+                    if (state.products_group === 0) {
 
-                            for (let x in resp.data) {
-                                if (resp.data[x].approvalStatus === "accepted") {
+                        for (let x in resp.data) {
+                            if (resp.data[x].approvalStatus === "accepted") {
+                                table[x] = createProduct(resp.data, x);
+                            }
+                        }
+
+                    } else if (state.products_group === 1) {
+                        //retrieve unconfirmed products and set its values to product state field
+
+                        for (let x in resp.data) {
+                            if (props.admin === true && props.adminMode === true) {
+                                if (resp.data[x].approvalStatus === "pending") {
+                                    table[x] = createProduct(resp.data, x);
+                                }
+                            } else {
+                                if (resp.data[x].approvalStatus !== "accepted") {
                                     table[x] = createProduct(resp.data, x);
                                 }
                             }
+                        }
 
-                        } else if (state.products_group === 1) {
-                            //retrieve unconfirmed products and set its values to product state field
+                    } else {
+                        //retrieve new products and set its values to product state field
 
-                            for (let x in resp.data) {
-                                if (props.admin === true && props.adminMode === true) {
-                                    if (resp.data[x].approvalStatus === "pending") {
-                                        table[x] = createProduct(resp.data, x);
-                                    }
-                                } else {
-                                    if (resp.data[x].approvalStatus !== "accepted") {
-                                        table[x] = createProduct(resp.data, x);
-                                    }
+                        for (let x in resp.data) {
+                            if (props.admin === true && props.adminMode === true) {
+                                if (resp.data[x].approvalStatus === "rejected") {
+                                    table[x] = createProduct(resp.data, x);
+                                }
+                            } else {
+                                let lastWeekBefore = new Date();
+                                lastWeekBefore.setDate(lastWeekBefore.getDate() - 7);
+                                let creationDate = new Date(resp.data[x].creationDate);
+
+                                if (creationDate >= lastWeekBefore && resp.data[x].approvalStatus === "accepted") {
+                                    table[x] = createProduct(resp.data, x);
                                 }
                             }
-
-                        } else {
-                            //retrieve new products and set its values to product state field
-
-                            for (let x in resp.data) {
-                                if (props.admin === true && props.adminMode === true) {
-                                    if (resp.data[x].approvalStatus === "rejected") {
-                                        table[x] = createProduct(resp.data, x);
-                                    }
-                                } else {
-                                    let lastWeekBefore = new Date();
-                                    lastWeekBefore.setDate(lastWeekBefore.getDate() - 7);
-                                    let creationDate = new Date(resp.data[x].creationDate);
-
-                                    if (creationDate >= lastWeekBefore && resp.data[x].approvalStatus === "accepted") {
-                                        table[x] = createProduct(resp.data, x);
-                                    }
-                                }
-                            }
-
                         }
-                        setState({
-                            ...state,
-                            products: table,
-                            categories: categoriesTable,
-                        });
 
-                        if ((/^[a-z_A-Z]+(-)[a-zA-Z]+$/.test(props.match.params.msg))) {
-                            let parts = props.match.params.msg.split("-");
-                            switch (parts[1]) {
-                                case "added":
-                                    msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + " has been added";
-                                    break;
-                                case "updated":
-                                    msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product " + parts[0].replaceAll("_", " ") + "  has been updated";
-                                    break;
-                                case "removed":
-                                    msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been removed";
-                                    break;
-                                case "accepted":
-                                    msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been accepted";
-                                    break;
-                                case "rejected":
-                                    msg_container.style.display = "block";
-                                    msg_container.innerHTML = "Product  " + parts[0].replaceAll("_", " ") + " has been rejected";
-                                    break;
-                            }
-                            setTimeout(() => props.history.push("/products/main"), 3000);
-                        }
-                        state.loaded = true;
-                        if (table.length === 0) {
-                            document.getElementsByClassName("loading").item(0).innerHTML = "No products found";
-                        } else {
-                            document.getElementsByClassName("loading").item(0).setAttribute("hidden", true);
-                        }
+                    }
+                    setState({
+                        ...state,
+                        products: table,
+                        categories: categoriesTable,
+                        loaded: true
+                    });
 
                 })
-                    .catch(error => console.log(error))
+                .catch(error => console.log(error))
 
         }, [state.products_group, props.match.params.msg, state.search, state.category, props.adminMode]
     );
@@ -226,8 +185,7 @@ export default function Products(props) {
     };
 
     const handleProduct = (event, product_id) => {
-        let destination = "/products/" + product_id + "/view";
-        props.history.push(destination);
+
     };
 
     const handleCategory = (event) => {
@@ -280,16 +238,16 @@ export default function Products(props) {
         setState({
             ...state,
             complement: name === "REJECT" ? "reject this product" : "accept this product",
-            open_confirmation_popup: true,
+            open_confirmation_modal: true,
             confirmation_product_id: product_id,
             confirmation_product_name: product_name
         });
     };
 
-    const handleCloseConfirmationPopup = () => {
+    const handleCloseConfirmationModal = () => {
         setState({
             ...state,
-            open_confirmation_popup: false,
+            open_confirmation_modal: false,
         });
 
     };
@@ -303,7 +261,8 @@ export default function Products(props) {
                     <div id={"product" + product.product_id} className="unconfirmed_product">
                         <div className="product">
                             <div className="product_header">
-                                <div className="product_name" onClick={event => handleProduct(event, product.product_id)}>
+                                <div className="product_name"
+                                     onClick={event => handleProduct(event, product.product_id)}>
                                     {product.product_name}
                                 </div>
                                 <div className="product_buttons">
@@ -327,7 +286,8 @@ export default function Products(props) {
 
                             <div className="product_content">
                                 <div className="product_image_container">
-                                    <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                                    <img src={product.product_image} alt={product.product_name}
+                                         className="product_image"/>
                                 </div>
                                 <div className="product_description">
 
@@ -350,7 +310,8 @@ export default function Products(props) {
                         <div className="product_status">
                             <div className="unconfirmed_header">Status</div>
                             <Divider variant="fullWidth"/>
-                            <div className={product.approval_status === "accepted"?"accepted_product unconfirmed_body":(product.approval_status === "pending"?"pending_product unconfirmed_body":"rejected_product unconfirmed_body")}>
+                            <div
+                                className={product.approval_status === "accepted" ? "accepted_product unconfirmed_body" : (product.approval_status === "pending" ? "pending_product unconfirmed_body" : "rejected_product unconfirmed_body")}>
                                 {product.approval_status.toUpperCase()}
                             </div>
                         </div>
@@ -358,10 +319,12 @@ export default function Products(props) {
                             ?
                             <div className="assessment_details">
                                 <div>
-                                    <Button name="accept" variant="contained" className="accept_button" onClick={(event) => handleAssess(event, product.product_id, product.product_name)}>Accept</Button>
+                                    <Button name="accept" variant="contained" className="accept_button"
+                                            onClick={(event) => handleAssess(event, product.product_id, product.product_name)}>Accept</Button>
                                 </div>
                                 <div>
-                                    <Button name="reject" variant="contained" className="reject_button" onClick={event => handleAssess(event, product.product_id, product.product_name)}>Reject</Button>
+                                    <Button name="reject" variant="contained" className="reject_button"
+                                            onClick={event => handleAssess(event, product.product_id, product.product_name)}>Reject</Button>
                                 </div>
 
                             </div>
@@ -387,21 +350,21 @@ export default function Products(props) {
                     <Divider variant="middle"/>
                 </div>
             ))}
-                    <ConfirmationDialog
-                        classes={{
-                            paper: classes.paper,
-                        }}
-                        id="confirmation_popup"
-                        open={state.open_confirmation_popup}
-                        onClose={handleCloseConfirmationPopup}
-                        complement = {state.complement}
-                        productId = {state.confirmation_product_id}
-                        productName = {state.confirmation_product_name}
-                        history = {props.history}
-                    />
+            <ConfirmationDialog
+                classes={{
+                    paper: classes.paper,
+                }}
+                id="confirmation_popup"
+                open={state.open_confirmation_modal}
+                onClose={handleCloseConfirmationModal}
+                complement={state.complement}
+                productId={state.confirmation_product_id}
+                productName={state.confirmation_product_name}
+                history={props.history}
+            />
         </div>;
 
-} else {
+    } else {
         switch (state.products_group) {
             case 0:
             case 2:
@@ -410,7 +373,8 @@ export default function Products(props) {
                         {state.products.map((product, index) => (
                             <Grid item key={index} id={"product" + product.product_id} className="product">
                                 <div className="product_header">
-                                    <div className="product_name" onClick={event => handleProduct(event, product.product_id)}>
+                                    <div className="product_name"
+                                         onClick={event => handleProduct(event, product.product_id)}>
                                         {product.product_name}
                                     </div>
                                     <div className="product_buttons">
@@ -428,13 +392,15 @@ export default function Products(props) {
                                         </Tooltip>
                                     </div>
                                 </div>
-                                <div className="creation_date" onClick={event => handleProduct(event, product.product_id)}>
+                                <div className="creation_date"
+                                     onClick={event => handleProduct(event, product.product_id)}>
                                     {"created " + product.creation_date}
                                 </div>
 
                                 <div className="product_content">
                                     <div className="product_image_container">
-                                        <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                                        <img src={product.product_image} alt={product.product_name}
+                                             className="product_image"/>
                                     </div>
                                     <div className="product_description">
 
@@ -465,7 +431,8 @@ export default function Products(props) {
                             <div id={"product" + product.product_id} className="unconfirmed_product">
                                 <div className="product">
                                     <div className="product_header">
-                                        <div className="product_name" onClick={event => handleProduct(event, product.product_id)}>
+                                        <div className="product_name"
+                                             onClick={event => handleProduct(event, product.product_id)}>
                                             {product.product_name}
                                         </div>
                                         <div className="product_buttons">
@@ -476,20 +443,23 @@ export default function Products(props) {
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Edit" aria-label="edit">
-                                                <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                                <IconButton type="button" aria-label="edit"
+                                                            className="product_icon_button"
                                                             onClick={(event) => handleEdit(event, product.product_id)}>
                                                     <EditIcon fontSize="small"/>
                                                 </IconButton>
                                             </Tooltip>
                                         </div>
                                     </div>
-                                    <div className="creation_date" onClick={event => handleProduct(event, product.product_id)}>
+                                    <div className="creation_date"
+                                         onClick={event => handleProduct(event, product.product_id)}>
                                         {"created " + product.creation_date}
                                     </div>
 
                                     <div className="product_content">
                                         <div className="product_image_container">
-                                            <img src={product.product_image} alt={product.product_name} className="product_image"/>
+                                            <img src={product.product_image} alt={product.product_name}
+                                                 className="product_image"/>
                                         </div>
                                         <div className="product_description">
 
@@ -512,7 +482,8 @@ export default function Products(props) {
                                 <div className="product_status">
                                     <div className="unconfirmed_header">Status</div>
                                     <Divider variant="fullWidth"/>
-                                    <div className={product.approval_status === "pending"?"pending_product unconfirmed_body":"rejected_product unconfirmed_body"}>
+                                    <div
+                                        className={product.approval_status === "pending" ? "pending_product unconfirmed_body" : "rejected_product unconfirmed_body"}>
                                         {product.approval_status.toUpperCase()}
                                     </div>
                                 </div>
@@ -552,33 +523,33 @@ export default function Products(props) {
                 <h2>Products</h2>
                 <div className="toolbar_container">
 
-                        {props.admin === true && props.adminMode === true ?
-                            <Tabs
-                                name="products_group"
-                                value={state.products_group}
-                                indicatorColor="primary"
-                                textColor="inherit"
-                                onChange={handleTab}
-                                aria-label="product groups buttons"
-                            >
+                    {props.admin === true && props.adminMode === true ?
+                        <Tabs
+                            name="products_group"
+                            value={state.products_group}
+                            indicatorColor="primary"
+                            textColor="inherit"
+                            onChange={handleTab}
+                            aria-label="product groups buttons"
+                        >
                             <Tab className="product_group_tab" label="Accepted"/>
                             <Tab className="product_group_tab" label="Pending"/>
                             <Tab className="product_group_tab" label="Rejected"/>
-                            </Tabs>
-                            :
-                            <Tabs
-                                name="products_group"
-                                value={state.products_group}
-                                indicatorColor="primary"
-                                textColor="inherit"
-                                onChange={handleTab}
-                                aria-label="product groups buttons"
-                            >
-                                <Tab className="product_group_tab" label="All"/>
-                                <Tab className="product_group_tab" label="Unconfirmed"/>
-                                <Tab className="product_group_tab" label="New"/>
-                            </Tabs>
-                        }
+                        </Tabs>
+                        :
+                        <Tabs
+                            name="products_group"
+                            value={state.products_group}
+                            indicatorColor="primary"
+                            textColor="inherit"
+                            onChange={handleTab}
+                            aria-label="product groups buttons"
+                        >
+                            <Tab className="product_group_tab" label="All"/>
+                            <Tab className="product_group_tab" label="Unconfirmed"/>
+                            <Tab className="product_group_tab" label="New"/>
+                        </Tabs>
+                    }
                     <div>
                         <FormControl variant="filled">
                             <InputLabel htmlFor="search" className="search_input">Search</InputLabel>
@@ -602,8 +573,9 @@ export default function Products(props) {
                                 onChange={handleChange}
                             >
                                 {state.categories.map((category, index) => (
-                                    <MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>
-                                 ))}
+                                    <MenuItem key={index}
+                                              value={category.category_name}>{category.category_name}</MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
                     </div>
@@ -611,12 +583,13 @@ export default function Products(props) {
                         <AddIcon/>
                     </Fab>
                 </div>
-                <div className="msg"></div>
-                <div className="loading">Loading</div>
+                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.products.length === 0 ?
+                    <div className="loading">{!state.loaded ? "Loading" : "No products found"}</div> : null}
                 {/*<Backdrop className={classes.backdrop} open={!props.loaded}>*/}
-                    {/*<CircularProgress color="inherit" />*/}
+                {/*<CircularProgress color="inherit" />*/}
                 {/*</Backdrop>*/}
-                <BorderLinearProgress variant="determinate" value={90} />
+                <BorderLinearProgress variant="determinate" value={90}/>
                 {tab}
             </div>
         </Container>

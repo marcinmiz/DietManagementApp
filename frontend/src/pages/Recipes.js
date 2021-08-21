@@ -39,7 +39,7 @@ export default function Recipes(props) {
         hover_rating: -1,
         msg: "",
         loaded: false,
-        open_confirmation_popup: false,
+        open_confirmation_modal: false,
         complement: "",
         confirmation_recipe_id: null,
         confirmation_recipe_name: null,
@@ -49,9 +49,12 @@ export default function Recipes(props) {
 
     useEffect(
         () => {
-            console.log(props.match.params.type)
-            console.log(props.match.params.recipe_id)
-
+            console.log(props.match.params.type);
+            console.log(props.match.params.recipe_id);
+            setState({
+                ...state,
+                loaded: true
+            });
         }, [state.msg, props.match.params.type, props.match.params.recipe_id]
     );
 
@@ -118,7 +121,7 @@ export default function Recipes(props) {
         setState({
             ...state,
             complement: name === "REJECT" ? "reject this product" : "accept this product",
-            open_confirmation_popup: true,
+            open_confirmation_modal: true,
             confirmation_product_id: product_id,
             confirmation_product_name: product_name
         });
@@ -127,7 +130,7 @@ export default function Recipes(props) {
     const handleCloseConfirmationPopup = () => {
         setState({
             ...state,
-            open_confirmation_popup: false,
+            open_confirmation_modal: false,
         });
 
     };
@@ -341,7 +344,7 @@ export default function Recipes(props) {
                     paper: classes.paper,
                 }}
                 id="confirmation_popup"
-                open={state.open_confirmation_popup}
+                open={state.open_confirmation_modal}
                 onClose={handleCloseConfirmationPopup}
                 complement = {state.complement}
                 productId = {state.confirmation_product_id}
@@ -592,7 +595,7 @@ export default function Recipes(props) {
                     </Fab>
                 </div>
                 {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
-                <div className="loading">Loading</div>
+                {!state.loaded ? <div className="loading">Loading</div> : null}
                 {tab}
             </div>
         </Container>
