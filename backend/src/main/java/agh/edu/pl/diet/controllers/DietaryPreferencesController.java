@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/preferences")
 public class DietaryPreferencesController {
 
-   @Autowired
-   private DietaryPreferencesService dietaryPreferencesService;
+    @Autowired
+    private DietaryPreferencesService dietaryPreferencesService;
 
 //    @GetMapping
-//    public List<Product> getAllProducts() {
-//        return dietaryPreferencesService.getAllProducts();
+//    public List<DietaryPreferences> getAllDietaryPreferences() {
+//        return dietaryPreferencesService.getAllDietaryPreferences();
 //    }
 
     @GetMapping("/{id}")
@@ -27,7 +27,7 @@ public class DietaryPreferencesController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ResponseMessage> addDietaryPreferences(@RequestBody DietaryPreferencesRequest dietaryPreferencesRequest) {
+    public ResponseEntity<ResponseMessage> addNewDietaryPreferences(@RequestBody DietaryPreferencesRequest dietaryPreferencesRequest) {
         ResponseMessage message = dietaryPreferencesService.addNewDietaryPreferences(dietaryPreferencesRequest);
         if (message.getMessage().endsWith(" has been added successfully")) {
             return ResponseEntity.status(HttpStatus.OK).body(message);

@@ -141,7 +141,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         //change to logged in user id
-        recipe.setOwner(userRepo.findById(1L).get());
+        recipe.setOwner(userRepo.findById(256L).get());
         String creationDate = new Date().toInstant().toString();
         recipe.setCreationDate(creationDate);
 

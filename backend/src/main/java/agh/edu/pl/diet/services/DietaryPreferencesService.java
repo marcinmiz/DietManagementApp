@@ -17,5 +17,5 @@ public interface DietaryPreferencesService {
 
     ResponseMessage removeDietaryPreferences(Long dietaryPreferencesId);
 
-    void removeOne(Long id);
+//    void removeOne(Long id);
 }

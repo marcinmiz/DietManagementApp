@@ -8,15 +8,17 @@ import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.DietaryPreferencesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class DietaryPreferencesServiceImpl implements DietaryPreferencesService {
 
-    @Autowired
-    private ProductRepo productRepo;
+//    @Autowired
+//    private ProductRepo productRepo;
     @Autowired
     private DietTypeRepo dietTypeRepo;
     @Autowired
@@ -296,9 +298,9 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
         return new ResponseMessage("Dietary Preferences id " + dietaryPreferencesId + " has not been found");
     }
 
-    @Override
-    public void removeOne(Long id) {
-
-    }
+//    @Override
+//    public void removeOne(Long id) {
+//
+//    }
 
 }
