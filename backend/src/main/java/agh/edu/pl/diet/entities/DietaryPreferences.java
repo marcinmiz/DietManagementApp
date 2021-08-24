@@ -20,15 +20,15 @@ public class DietaryPreferences {
     @ManyToOne
     private DietType dietType;
 
-    @OneToMany(mappedBy = "dietary_preferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesNutrient> nutrients = new HashSet<>();
 
-    @OneToMany(mappedBy = "dietary_preferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesProduct> products = new HashSet<>();
 
-    @OneToMany(mappedBy = "dietary_preferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesRecipe> recipes = new HashSet<>();
 

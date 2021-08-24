@@ -21,6 +21,11 @@ public class Nutrient {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<ProductNutrient> products = new HashSet<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "nutrient", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<DietaryPreferencesNutrient> dietaryPreferences = new HashSet<>();
+
     public Long getNutrientId() {
         return nutrientId;
     }
@@ -47,5 +52,13 @@ public class Nutrient {
 
     public void addProduct(ProductNutrient product) {
         products.add(product);
+    }
+
+    public Set<DietaryPreferencesNutrient> getDietaryPreferences() {
+        return dietaryPreferences;
+    }
+
+    public void setDietaryPreferences(Set<DietaryPreferencesNutrient> dietaryPreferences) {
+        this.dietaryPreferences = dietaryPreferences;
     }
 }
