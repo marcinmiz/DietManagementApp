@@ -22,6 +22,10 @@ public class Recipes {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<RecipeProduct> recipes = new HashSet<>();
 
+    @OneToMany(mappedBy = "recipe", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<DietaryPreferencesRecipe> dietaryPreferences = new HashSet<>();
+
     @Transient
     private String recipeImage;
 
@@ -73,5 +77,13 @@ public class Recipes {
 
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Set<DietaryPreferencesRecipe> getDietaryPreferences() {
+        return dietaryPreferences;
+    }
+
+    public void setDietaryPreferences(Set<DietaryPreferencesRecipe> dietaryPreferences) {
+        this.dietaryPreferences = dietaryPreferences;
     }
 }

@@ -7,19 +7,20 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "Product_nutrients")
-public class ProductNutrient {
+@Table(name = "Dietary_preferences_nutrient")
+public class DietaryPreferencesNutrient {
+
     @JsonIgnore
     @Id
-    @Column(name = "product_nutrient_id")
+    @Column(name = "dietary_preferences_nutrient_id")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
-    @JoinColumn(name="product_id", nullable=false)
-    private Product product;
+    @JoinColumn(name="dietary_preferences_id", nullable=false)
+    private DietaryPreferences dietaryPreferences;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -29,7 +30,7 @@ public class ProductNutrient {
     @NotNull
     private Double nutrientAmount;
 
-    public ProductNutrient() {}
+    public DietaryPreferencesNutrient() {}
 
     public Long getId() {
         return id;
@@ -39,12 +40,12 @@ public class ProductNutrient {
         this.id = id;
     }
 
-    public Product getProduct() {
-        return product;
+    public DietaryPreferences getDietaryPreferences() {
+        return dietaryPreferences;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setDietaryPreferences(DietaryPreferences dietaryPreferences) {
+        this.dietaryPreferences = dietaryPreferences;
     }
 
     public Nutrient getNutrient() {

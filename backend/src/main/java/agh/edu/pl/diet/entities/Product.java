@@ -24,6 +24,10 @@ public class Product {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<ProductNutrient> nutrients = new HashSet<>();
 
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    private Set<DietaryPreferencesProduct> dietaryPreferences = new HashSet<>();
+
     private String creationDate = null;
 
     private String approvalStatus = "pending";
@@ -133,5 +137,13 @@ public class Product {
 
     public void setAssessmentDate(String assessmentDate) {
         this.assessmentDate = assessmentDate;
+    }
+
+    public Set<DietaryPreferencesProduct> getDietaryPreferences() {
+        return dietaryPreferences;
+    }
+
+    public void setDietaryPreferences(Set<DietaryPreferencesProduct> dietaryPreferences) {
+        this.dietaryPreferences = dietaryPreferences;
     }
 }
