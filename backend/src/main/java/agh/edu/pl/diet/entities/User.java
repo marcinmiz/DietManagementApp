@@ -6,7 +6,6 @@ import org.springframework.data.util.Pair;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "User")
@@ -30,6 +29,7 @@ public class User {
     private String creationDate;
     @Transient
     private List<Pair<String, Float>> weights = new ArrayList<>();
+    private double targetWeight;
 
     public Long getUserId() {
         return userId;
@@ -114,4 +114,16 @@ public class User {
     public void addNewWeight(Pair<String, Float> weight) {
         this.weights.add(weight);
     }
+
+    public double getTargetWeight() {
+        return targetWeight;
+    }
+
+//    public void setTargetWeight(double newTargetWeight) {    //newTarget<0 is handled in the consutructor
+//        targetWeight = newTargetWeight;
+//        setChanged();//Makes change true so that it will notify observers
+//        notifyObservers(this);//Passes current user as a parameter to Observer in this case Diet
+//        //So that Diet can access the User object.
+//    }
+
 }
