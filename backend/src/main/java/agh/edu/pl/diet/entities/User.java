@@ -119,11 +119,13 @@ public class User {
         return targetWeight;
     }
 
-//    public void setTargetWeight(double newTargetWeight) {    //newTarget<0 is handled in the consutructor
+    public void setTargetWeight(double targetWeight) {
+        this.targetWeight = targetWeight;
+    }
+
+    //    public void setTargetWeight(double newTargetWeight) {    //newTarget<0 is handled in the consutructor
 //        targetWeight = newTargetWeight;
 //        setChanged();//Makes change true so that it will notify observers
 //        notifyObservers(this);//Passes current user as a parameter to Observer in this case Diet
-//        //So that Diet can access the User object.
-//    }
-
+        //So that Diet can access the User object.
 }
