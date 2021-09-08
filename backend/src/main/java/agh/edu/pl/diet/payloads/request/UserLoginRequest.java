@@ -1,8 +1,6 @@
 package agh.edu.pl.diet.payloads.request;
 
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 public class UserLoginRequest {
 

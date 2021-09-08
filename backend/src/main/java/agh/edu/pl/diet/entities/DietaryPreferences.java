@@ -13,12 +13,15 @@ public class DietaryPreferences {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dietaryPreferenceId;
-    private String dietaryPreferencesName;
+//    private String dietaryPreferencesName;
     private Integer totalCalories;
     @ManyToOne
-    private User owner;
+    private User preferenceOwner;
     @ManyToOne
     private DietType dietType;
+    private Integer caloriesPerMeal;
+    private Integer mealsQuantity;
+    private Integer targetWeight;
 
     @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -34,8 +37,6 @@ public class DietaryPreferences {
 
     private String creationDate = null;
 
-    private Integer targetWeight;
-
     public Long getDietaryPreferenceId() {
         return dietaryPreferenceId;
     }
@@ -44,13 +45,13 @@ public class DietaryPreferences {
         this.dietaryPreferenceId = dietaryPreferenceId;
     }
 
-    public String getDietaryPreferencesName() {
-        return dietaryPreferencesName;
-    }
-
-    public void setDietaryPreferencesName(String dietaryPreferencesName) {
-        this.dietaryPreferencesName = dietaryPreferencesName;
-    }
+//    public String getDietaryPreferencesName() {
+//        return dietaryPreferencesName;
+//    }
+//
+//    public void setDietaryPreferencesName(String dietaryPreferencesName) {
+//        this.dietaryPreferencesName = dietaryPreferencesName;
+//    }
 
     public Integer getTotalCalories() {
         return totalCalories;
@@ -60,12 +61,12 @@ public class DietaryPreferences {
         this.totalCalories = totalCalories;
     }
 
-    public User getOwner() {
-        return owner;
+    public User getPreferenceOwner() {
+        return preferenceOwner;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setPreferenceOwner(User preferenceOwner) {
+        this.preferenceOwner = preferenceOwner;
     }
 
     public Set<DietaryPreferencesNutrient> getNutrients() {
@@ -102,6 +103,22 @@ public class DietaryPreferences {
 
     public void setDietType(DietType dietType) {
         this.dietType = dietType;
+    }
+
+    public Integer getCaloriesPerMeal() {
+        return caloriesPerMeal;
+    }
+
+    public void setCaloriesPerMeal(Integer caloriesPerMeal) {
+        this.caloriesPerMeal = caloriesPerMeal;
+    }
+
+    public Integer getMealsQuantity() {
+        return mealsQuantity;
+    }
+
+    public void setMealsQuantity(Integer mealsQuantity) {
+        this.mealsQuantity = mealsQuantity;
     }
 
     public Set<DietaryPreferencesProduct> getProducts() {

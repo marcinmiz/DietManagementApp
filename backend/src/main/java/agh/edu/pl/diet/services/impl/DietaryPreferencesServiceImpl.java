@@ -30,20 +30,20 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
 
     private ResponseMessage verify(String mode, String type, Object item) {
         switch (type) {
-            case "name":
-                String name = String.valueOf(item);
-                if (name == null) {
+            case "id":
+                Long id = Long.parseLong(item.toString());
+                if (id == null) {
                     return new ResponseMessage("Dietary Preferences name has to be given");
-                } else if (name.length() < 2 || name.length() > 40) {
+                } else if (id.toString().length() < 2 || id.toString().length() > 40) {
                     return new ResponseMessage("Dietary Preferences name has to have min 2 and max 40 characters");
-                } else if (!(name.matches("^[a-zA-Z ]+$"))) {
+                } else if (!(id.toString().matches("^[a-zA-Z ]+$"))) {
                     return new ResponseMessage("Dietary Preferences name has to contain only letters and spaces");
-                } else if (!mode.equals("update") && dietaryPreferencesRepo.findByDietaryPreferencesName(name) != null) {
+                } else if (!mode.equals("update") && dietaryPreferencesRepo.findByDietaryPreferenceId(id) != null) {
                     return new ResponseMessage("Dietary Preferences with this name exists yet");
                 } else {
                     return new ResponseMessage("Dietary Preferences name is valid");
                 }
-            case "calories":
+            case "totalCalories":
                 if (item == null) {
                     return new ResponseMessage("Dietary Preferences calories has to be given");
                 }
@@ -69,6 +69,54 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                     return new ResponseMessage("Diet type does not exist");
                 } else {
                     return new ResponseMessage("Diet type is valid");
+                }
+            case "caloriesPerMeal":
+                if (item == null) {
+                    return new ResponseMessage("Calories per meal has to be given");
+                }
+
+                Integer caloriesPerMeal = Integer.parseInt(item.toString());
+
+                if (caloriesPerMeal.toString().length() < 1 || caloriesPerMeal.toString().length() > 10) {
+                    return new ResponseMessage("Calories per meal has to have min 1 and max 10 characters");
+                } else if (!(caloriesPerMeal.toString().matches("^0$") || caloriesPerMeal.toString().matches("^(-)?[1-9]\\d*$"))) {
+                    return new ResponseMessage("Calories per meal has to contain only digits");
+                } else if (caloriesPerMeal < 0) {
+                    return new ResponseMessage("Calories per meal has to be greater or equal 0");
+                } else {
+                    return new ResponseMessage("Calories per meal are valid");
+                }
+            case "mealsQuantity":
+                if (item == null) {
+                    return new ResponseMessage("Meals quantity has to be given");
+                }
+
+                Integer mealsQuantity = Integer.parseInt(item.toString());
+
+                if (mealsQuantity.toString().length() < 1 || mealsQuantity.toString().length() > 10) {
+                    return new ResponseMessage("Meals quantity has to have min 1 and max 10 characters");
+                } else if (!(mealsQuantity.toString().matches("^0$") || mealsQuantity.toString().matches("^(-)?[1-9]\\d*$"))) {
+                    return new ResponseMessage("Meals quantity has to contain only digits");
+                } else if (mealsQuantity < 0) {
+                    return new ResponseMessage("Meals quantity has to be greater or equal 0");
+                } else {
+                    return new ResponseMessage("Meals quantity are valid");
+                }
+            case "targetWeight":
+                if (item == null) {
+                    return new ResponseMessage("Target weight has to be given");
+                }
+
+                Integer targetWeight = Integer.parseInt(item.toString());
+
+                if (targetWeight.toString().length() < 1 || targetWeight.toString().length() > 10) {
+                    return new ResponseMessage("Target weight has to have min 1 and max 10 characters");
+                } else if (!(targetWeight.toString().matches("^0$") || targetWeight.toString().matches("^(-)?[1-9]\\d*$"))) {
+                    return new ResponseMessage("Target weight has to contain only digits");
+                } else if (targetWeight < 0) {
+                    return new ResponseMessage("Target weight has to be greater or equal 0");
+                } else {
+                    return new ResponseMessage("Target weight are valid");
                 }
             case "list":
                 List<String> nutrients = (List<String>) item;
@@ -121,11 +169,11 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
     @Override
     public ResponseMessage addNewDietaryPreferences(DietaryPreferencesRequest dietaryPreferencesRequest) {
         DietaryPreferences dietaryPreferences = new DietaryPreferences();
-        String dietaryPreferencesName = dietaryPreferencesRequest.getDietaryPreferencesName();
+        Long dietaryPreferenceId = dietaryPreferencesRequest.getDietaryPreferenceId();
 
-        ResponseMessage responseMessage = verify("add", "name", dietaryPreferencesRequest);
-        if (responseMessage.getMessage().equals("DietaryPreferences name is valid")){
-            dietaryPreferences.setDietaryPreferencesName(dietaryPreferencesName);
+        ResponseMessage responseMessage = verify("add", "id", dietaryPreferencesRequest);
+        if (responseMessage.getMessage().equals("DietaryPreferences id is valid")){
+            dietaryPreferences.setDietaryPreferenceId(dietaryPreferenceId);
         } else {
             return responseMessage;
         }
@@ -150,35 +198,65 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
             return responseMessage3;
         }
 
+        Integer caloriesPerMeal = dietaryPreferencesRequest.getCaloriesPerMeal();
+
+        ResponseMessage responseMessage4 = verify("add","caloriesPerMeal", caloriesPerMeal);
+
+        if (responseMessage4.getMessage().equals("Calories per meal are valid")) {
+            dietaryPreferences.setCaloriesPerMeal(caloriesPerMeal);
+        } else {
+            return responseMessage4;
+        }
+
+        Integer mealsQuantity = dietaryPreferencesRequest.getMealsQuantity();
+
+        ResponseMessage responseMessage5 = verify("add","mealsQuantity", mealsQuantity);
+
+        if (responseMessage5.getMessage().equals("Meals quantity are valid")) {
+            dietaryPreferences.setMealsQuantity(mealsQuantity);
+        } else {
+            return responseMessage5;
+        }
+
+        Integer targetWeight = dietaryPreferencesRequest.getTargetWeight();
+
+        ResponseMessage responseMessage6 = verify("add","targetWeight", targetWeight);
+
+        if (responseMessage6.getMessage().equals("Target weight are valid")) {
+            dietaryPreferences.setTargetWeight(targetWeight);
+        } else {
+            return responseMessage6;
+        }
+
         List<String> nutrients = dietaryPreferencesRequest.getNutrients();
 
-        ResponseMessage responseMessage4 = verify("add", "list", nutrients);
+        ResponseMessage responseMessage7 = verify("add", "list", nutrients);
 
-        if (!(responseMessage4.getMessage().equals("Product nutrients are valid"))) {
-            return responseMessage4;
+        if (!(responseMessage7.getMessage().equals("Product nutrients are valid"))) {
+            return responseMessage7;
         }
 
         for (String nutrientStatement: nutrients) {
 
-            ResponseMessage responseMessage5 = verify("add","nutrientStatement", nutrientStatement);
+            ResponseMessage responseMessage8 = verify("add","nutrientStatement", nutrientStatement);
 
-            if (!(responseMessage5.getMessage().equals("Product nutrient statement is valid"))) {
-                return responseMessage5;
+            if (!(responseMessage8.getMessage().equals("Product nutrient statement is valid"))) {
+                return responseMessage8;
             }
             String[] parts = nutrientStatement.split(";");
             String nutrientName = parts[0];
             Double nutrientAmount = Double.valueOf(parts[1]);
 
-            ResponseMessage responseMessage6 = verify("add","nutrientName", nutrientName);
+            ResponseMessage responseMessage9 = verify("add","nutrientName", nutrientName);
 
-            if (!(responseMessage6.getMessage().equals("Product nutrient name is valid"))) {
-                return responseMessage6;
+            if (!(responseMessage9.getMessage().equals("Product nutrient name is valid"))) {
+                return responseMessage9;
             }
 
-            ResponseMessage responseMessage7 = verify("add","nutrientAmount", nutrientAmount);
+            ResponseMessage responseMessage10 = verify("add","nutrientAmount", nutrientAmount);
 
-            if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
-                return responseMessage7;
+            if (!(responseMessage10.getMessage().equals("Product nutrient amount is valid"))) {
+                return responseMessage10;
             }
 
             Nutrient nutrient = nutrientRepo.findByNutrientName(nutrientName);
@@ -190,7 +268,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
         }
 
         //change to logged in user id
-        dietaryPreferences.setOwner(userRepo.findById(256L).get());
+        dietaryPreferences.setPreferenceOwner(userRepo.findById(256L).get());
         String creationDate = new Date().toInstant().toString();
         dietaryPreferences.setCreationDate(creationDate);
 
@@ -199,22 +277,22 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
 //        if (lastAddedDietaryPreferences != null) {
 //            return new ResponseMessage(lastAddedDietaryPreferences.getDietaryPreferenceId() + " Dietary Preference " + dietaryPreferencesName + " has been added successfully");
 //        } else {
-          return new ResponseMessage("Dietary Preference " + dietaryPreferencesName + " has not been found");
+          return new ResponseMessage("Dietary Preference " + dietaryPreferenceId + " has not been found");
 //        }
     }
 
     @Override
     public ResponseMessage updateDietaryPreferences(Long dietaryPreferencesId, DietaryPreferencesRequest dietaryPreferencesRequest) {
 
-        String dietaryPreferencesName = "";
-        Optional<DietaryPreferences> dietaryPreferences = dietaryPreferencesRepo.findById(dietaryPreferencesId);
+        Long dietaryPreferenceId = null;
+        Optional<DietaryPreferences> dietaryPreferences = dietaryPreferencesRepo.findById(dietaryPreferenceId);
         if (dietaryPreferences.isPresent()) {
             DietaryPreferences updatedDietaryPreferences = dietaryPreferences.get();
-            dietaryPreferencesName = dietaryPreferencesRequest.getDietaryPreferencesName();
+            dietaryPreferenceId = dietaryPreferencesRequest.getDietaryPreferenceId();
 
-            ResponseMessage responseMessage = verify("update", "name", dietaryPreferencesName);
+            ResponseMessage responseMessage = verify("update", "name", dietaryPreferenceId);
             if (responseMessage.getMessage().equals("Dietary Preferences name is valid")){
-                updatedDietaryPreferences.setDietaryPreferencesName(dietaryPreferencesName);
+                updatedDietaryPreferences.setDietaryPreferenceId(dietaryPreferenceId);
             } else {
                 return responseMessage;
             }
@@ -239,35 +317,65 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                 return responseMessage3;
             }
 
+            Integer caloriesPerMeal = dietaryPreferencesRequest.getCaloriesPerMeal();
+
+            ResponseMessage responseMessage4 = verify("update","caloriesPerMeal", caloriesPerMeal);
+
+            if (responseMessage4.getMessage().equals("Calories per meal are valid")) {
+                updatedDietaryPreferences.setCaloriesPerMeal(caloriesPerMeal);
+            } else {
+                return responseMessage4;
+            }
+
+            Integer mealsQuantity = dietaryPreferencesRequest.getMealsQuantity();
+
+            ResponseMessage responseMessage5 = verify("add","mealsQuantity", mealsQuantity);
+
+            if (responseMessage5.getMessage().equals("Meals quantity are valid")) {
+                updatedDietaryPreferences.setMealsQuantity(mealsQuantity);
+            } else {
+                return responseMessage5;
+            }
+
+            Integer targetWeight = dietaryPreferencesRequest.getTargetWeight();
+
+            ResponseMessage responseMessage6 = verify("add","targetWeight", targetWeight);
+
+            if (responseMessage6.getMessage().equals("Target weight are valid")) {
+                updatedDietaryPreferences.setTargetWeight(targetWeight);
+            } else {
+                return responseMessage6;
+            }
+
             List<String> nutrients = dietaryPreferencesRequest.getNutrients();
 
-            ResponseMessage responseMessage4 = verify("update", "list", nutrients);
+            ResponseMessage responseMessage7 = verify("update", "list", nutrients);
 
-            if (!(responseMessage4.getMessage().equals("Product nutrients are valid"))) {
-                return responseMessage4;
+            if (!(responseMessage7.getMessage().equals("Product nutrients are valid"))) {
+                return responseMessage7;
             }
 
             for (String nutrientStatement: nutrients) {
 
-                ResponseMessage responseMessage5 = verify("update", "nutrientStatement", nutrientStatement);
+                ResponseMessage responseMessage8 = verify("update", "nutrientStatement", nutrientStatement);
 
-                if (!(responseMessage5.getMessage().equals("Product nutrient statement is valid"))) {
-                    return responseMessage5;
+                if (!(responseMessage8.getMessage().equals("Product nutrient statement is valid"))) {
+                    return responseMessage8;
                 }
                 String[] parts = nutrientStatement.split(";");
                 String nutrientName = parts[0];
                 Double nutrientAmount = Double.valueOf(parts[1]);
 
-                ResponseMessage responseMessage6 = verify("update", "nutrientName", nutrientName);
+                ResponseMessage responseMessage9 = verify("update", "nutrientName", nutrientName);
 
-                if (!(responseMessage6.getMessage().equals("Product nutrient name is valid"))) {
-                    return responseMessage6;
+                if (!(responseMessage9.getMessage().equals("Product nutrient name is valid"))) {
+                    return responseMessage9;
                 }
 
-                ResponseMessage responseMessage7 = verify("update", "nutrientAmount", nutrientAmount);
+                ResponseMessage responseMessage10 = verify("update", "nutrientAmount", nutrientAmount);
 
-                if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
-                    return responseMessage7;
+                if (!(responseMessage10.getMessage().equals("Product nutrient amount is valid"))) {
+                    return responseMessage10;
                 }
 
                 DietaryPreferencesNutrient dietaryPreferencesNutrient = updatedDietaryPreferences.getNutrients().stream().filter(pn -> pn.getNutrient().getNutrientName().equals(nutrientName)).findFirst().orElse(null);
@@ -275,14 +383,14 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                 if (dietaryPreferencesNutrient != null) {
                     dietaryPreferencesNutrient.setNutrientAmount(nutrientAmount);
                 } else {
-                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + dietaryPreferencesName + " has not been found");
+                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + dietaryPreferenceId + " has not been found");
                 }
             }
             dietaryPreferencesRepo.save(updatedDietaryPreferences);
 
-            return new ResponseMessage("Dietary Preferences " + dietaryPreferencesName + " has been updated successfully");
+            return new ResponseMessage("Dietary Preferences " + dietaryPreferenceId + " has been updated successfully");
         }
-        return new ResponseMessage("Dietary Preferences " + dietaryPreferencesName + " has not been found");
+        return new ResponseMessage("Dietary Preferences " + dietaryPreferenceId + " has not been found");
     }
 
 
@@ -293,7 +401,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
         if (dietaryPreferences.isPresent()) {
             DietaryPreferences removedDietaryPreferences = dietaryPreferences.get();
             dietaryPreferencesRepo.delete(removedDietaryPreferences);
-            return new ResponseMessage("Dietary Preferences " + removedDietaryPreferences.getDietaryPreferencesName() + " has been removed successfully");
+            return new ResponseMessage("Dietary Preferences " + removedDietaryPreferences.getDietaryPreferenceId() + " has been removed successfully");
         }
         return new ResponseMessage("Dietary Preferences id " + dietaryPreferencesId + " has not been found");
     }

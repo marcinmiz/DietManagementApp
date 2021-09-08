@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DietaryPreferencesRepo extends CrudRepository<DietaryPreferences, Long> {
-    DietaryPreferences findByDietaryPreferencesName(String dietaryPreferencesName);
+    DietaryPreferences findByDietaryPreferenceId(Long dietaryPreferenceId);
 }
