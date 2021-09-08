@@ -1,34 +1,22 @@
 import React, {useEffect} from 'react';
 import "../Authentication.css";
-import {Redirect, useHistory} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 import http from "../http-common";
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles } from '@material-ui/core/styles';
 
 export default function Authentication(props) {
 
     const history = useHistory();
 
-    const useStyles = makeStyles((theme) => ({
-        backdrop: {
-            zIndex: theme.zIndex.drawer + 1,
-            color: '#fff',
-        },
-    }));
-
-    const classes = useStyles();
-
     const [state, setState] = React.useState({
-            name: "",
-            surname: "",
-            username: "",
-            email: "",
-            password: "",
-            passwordConfirmation: "",
-            msg: "",
-            mode: ""
-        });
+        name: "",
+        surname: "",
+        username: "",
+        email: "",
+        password: "",
+        passwordConfirmation: "",
+        msg: "",
+        mode: ""
+    });
 
     useEffect(
         () => {
@@ -46,7 +34,7 @@ export default function Authentication(props) {
             return "error";
         }
 
-            const occupiedUsername = await http.get("/api/users/existsUser/" + state.username);
+        const occupiedUsername = await http.get("/api/users/existsUser/" + state.username);
 
         if (!/^[a-zA-Z 0-9]+$/.test(state.username)) {
             setState({
@@ -161,12 +149,12 @@ export default function Authentication(props) {
             if (event.target.name === "register_button") {
 
                 credentials = {
-                  "name": state.name,
-                  "surname": state.surname,
-                  "password": state.password,
-                  "passwordConfirmation": state.passwordConfirmation,
-                  "username": state.username,
-                  "email": state.email
+                    "name": state.name,
+                    "surname": state.surname,
+                    "password": state.password,
+                    "passwordConfirmation": state.passwordConfirmation,
+                    "username": state.username,
+                    "email": state.email
                 };
 
                 if (validateRegistrationData() !== "error") {
@@ -206,7 +194,7 @@ export default function Authentication(props) {
                             let user_data = user.data;
 
                             if (user_data != null) {
-                                props.handleLogin(user_data);
+                                props.handleInit(user_data);
                                 const state = props.location.state;
 
                                 history.push(state === undefined ? '/dashboard' : state.from.pathname);
@@ -217,7 +205,7 @@ export default function Authentication(props) {
                     .catch(() => {
                         setState({
                             ...state,
-                            "msg": "bad credentials"
+                            "msg": "bad username or password"
                         });
                     })
 
@@ -243,166 +231,173 @@ export default function Authentication(props) {
         }
     };
 
-    const type = props.match.params.authentication_type;
+    const type = props.authentication_type;
     type === "register" ? state.mode = "register" : state.mode = "login";
 
     if (props.loggedInStatus === "LOGGED_IN") {
         return <div>Loading</div>;
-        {/*<CircularProgress color="inherit" />;*/}
-
-        {/*<Backdrop className={classes.backdrop} open={props.loaded}>*/}
-
-        // </Backdrop>;
     }
 
     if (state.mode === "register") {
 
         return (
-            <div className="auth_container">
-                 <div className="card auth_card">
-                     <div className="logo">
-                         DIETIX
-                     </div>
-                     <div className="tabs_area">
-                         <button
-                             type="button"
-                             className="tab first_tab"
-                             name="login_tab"
-                             onClick={event => handleTab(event)}>
-                             Log in
-                         </button>
-                         <button
-                             type="button"
-                             className="tab last_tab current_tab"
-                             name="register_tab"
-                             onClick={event => handleTab(event)}>
-                             Register
-                         </button>
-                     </div>
+            <div className="auth_container auth_container_register">
+                <div className="card auth_card">
+                    <div className="logo">
+                        DIETIX
+                    </div>
+                    <div className="tabs_area">
+                        <button
+                            type="button"
+                            className="tab first_tab"
+                            name="login_tab"
+                            onClick={event => handleTab(event)}>
+                            Log in
+                        </button>
+                        <button
+                            type="button"
+                            className="tab last_tab current_tab"
+                            name="register_tab"
+                            onClick={event => handleTab(event)}>
+                            Register
+                        </button>
+                    </div>
 
-                     {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                    {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
-                     <form className="form">
+                    <form className="form">
 
-                         <label htmlFor="username">Username</label>
-                         <input
-                             className="input_field"
-                             id="username"
-                             type="text"
-                             name="username"
-                             value={state.username}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="username">Username</label>
+                        <input
+                            className="input_field"
+                            id="username"
+                            type="text"
+                            name="username"
+                            autoComplete="off"
+                            value={state.username}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="name">Name</label>
-                         <input
-                             className="input_field"
-                             id="name"
-                             type="text"
-                             name="name"
-                             value={state.name}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="name">Name</label>
+                        <input
+                            className="input_field"
+                            id="name"
+                            type="text"
+                            name="name"
+                            autoComplete="off"
+                            value={state.name}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="surname">Surname</label>
-                         <input
-                             className="input_field"
-                             id="surname"
-                             type="text"
-                             name="surname"
-                             value={state.surname}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="surname">Surname</label>
+                        <input
+                            className="input_field"
+                            id="surname"
+                            type="text"
+                            name="surname"
+                            autoComplete="off"
+                            value={state.surname}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="email">E-mail</label>
-                         <input
-                             className="input_field"
-                             id="email"
-                             type="email"
-                             name="email"
-                             value={state.email}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="email">E-mail</label>
+                        <input
+                            className="input_field"
+                            id="email"
+                            type="email"
+                            name="email"
+                            autoComplete="off"
+                            value={state.email}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="password">Password</label>
-                         <input
-                             className="input_field"
-                             id="password"
-                             type="password"
-                             name="password"
-                             value={state.password}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="password">Password</label>
+                        <input
+                            className="input_field"
+                            id="password"
+                            type="password"
+                            name="password"
+                            autoComplete="off"
+                            value={state.password}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="passwordConfirmation">Password Confirmation</label>
-                         <input
-                             className="input_field"
-                             id="passwordConfirmation"
-                             type="password"
-                             name="passwordConfirmation"
-                             value={state.passwordConfirmation}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="passwordConfirmation">Password Confirmation</label>
+                        <input
+                            className="input_field"
+                            id="passwordConfirmation"
+                            type="password"
+                            name="passwordConfirmation"
+                            autoComplete="off"
+                            value={state.passwordConfirmation}
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <button className="form_button" name="register_button" type="button" onClick={event => handleSubmit(event)}>Register</button>
+                        <button className="form_button" name="register_button" type="button"
+                                onClick={event => handleSubmit(event)}>Register
+                        </button>
 
-                     </form>
-                 </div>
-             </div>
-    )
-         } else {
-             return ( <div className="auth_container">
-                 <div className="card auth_card">
-                     <div className="logo">
-                         DIETIX
-                     </div>
-                     <div className="tabs_area">
-                         <button
-                             type="button"
-                             className="tab first_tab current_tab"
-                             name="login_tab"
-                             onClick={event => handleTab(event)}>
-                             Log in
-                         </button>
-                         <button
-                             type="button"
-                             className="tab last_tab"
-                             name="register_tab"
-                             onClick={event => handleTab(event)}>
-                             Register
-                         </button>
-                     </div>
+                    </form>
+                </div>
+            </div>
+        )
+    } else {
+        return (<div className="auth_container auth_container_login">
+                <div className="card auth_card">
+                    <div className="logo">
+                        DIETIX
+                    </div>
+                    <div className="tabs_area">
+                        <button
+                            type="button"
+                            className="tab first_tab current_tab"
+                            name="login_tab"
+                            onClick={event => handleTab(event)}>
+                            Log in
+                        </button>
+                        <button
+                            type="button"
+                            className="tab last_tab"
+                            name="register_tab"
+                            onClick={event => handleTab(event)}>
+                            Register
+                        </button>
+                    </div>
 
-                     {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                    {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
-                     <form className="form">
+                    <form className="form">
 
-                         <label htmlFor="username">Username</label>
-                         <input
-                             className="input_field"
-                             id="username"
-                             type="text"
-                             name="username"
-                             value={state.username}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="username">Username</label>
+                        <input
+                            className="input_field"
+                            id="username"
+                            type="text"
+                            name="username"
+                            value={state.username}
+                            autoComplete="off"
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <label htmlFor="password">Password</label>
-                         <input
-                             className="input_field"
-                             id="password"
-                             type="password"
-                             name="password"
-                             value={state.password}
-                             onChange={event => handleChange(event)}
-                             required/>
+                        <label htmlFor="password">Password</label>
+                        <input
+                            className="input_field"
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={state.password}
+                            autoComplete="off"
+                            onChange={event => handleChange(event)}
+                            required/>
 
-                         <button className="form_button" name="login_button" type="button" onClick={event => handleSubmit(event)}>Log in</button>
+                        <button className="form_button" name="login_button" type="button"
+                                onClick={event => handleSubmit(event)}>Log in
+                        </button>
 
-                     </form>
-                 </div>
-             </div>
-            );
-        }
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
 }

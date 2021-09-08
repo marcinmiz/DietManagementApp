@@ -3,6 +3,7 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.controllers.ImageController;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
+import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -20,6 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -157,6 +161,58 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepo.findById(productId).get();
         product.setProductImage(url);
         return product;
+    }
+
+    @Override
+    public ResponseMessage checkProductApprovalStatus(Long productId) {
+        Product product = productRepo.findById(productId).orElse(null);
+
+        if (product == null) {
+            return new ResponseMessage("Product with id " + productId + " has not been found");
+        }
+
+        return new ResponseMessage(product.getApprovalStatus());
+    }
+
+    @Override
+    public List<Product> getProducts(ProductGetRequest productGetRequest) {
+
+        ProductSearchRequest productSearchRequest = new ProductSearchRequest();
+        productSearchRequest.setPhrase(productGetRequest.getPhrase());
+        productSearchRequest.setCategory(productGetRequest.getCategory());
+
+        List<Product> productList = searchProducts(productSearchRequest);
+
+        switch (productGetRequest.getProductsGroup()) {
+            case "all":
+                productList = productList.stream().filter(product -> product.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
+                break;
+            case "unconfirmed":
+                productList = productList.stream().filter(product -> product.getApprovalStatus().equals("pending") || product.getApprovalStatus().equals("rejected")).collect(Collectors.toList());
+                break;
+            case "pending":
+                productList = productList.stream().filter(product -> product.getApprovalStatus().equals("pending")).collect(Collectors.toList());
+                break;
+            case "rejected":
+                productList = productList.stream().filter(product -> product.getApprovalStatus().equals("rejected")).collect(Collectors.toList());
+                break;
+            case "new":
+                productList = productList.stream().filter(product -> product.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
+                LocalDate lastWeekBefore = LocalDate.now().minusDays(7);
+                Instant lastWeekBeforeInstant = lastWeekBefore.atStartOfDay(ZoneId.systemDefault()).toInstant();
+                LocalDate lastWeekBefore2 = LocalDate.ofInstant(lastWeekBeforeInstant, ZoneId.systemDefault());
+
+                productList = productList.stream().filter(product -> {
+                    Instant creationDate = Instant.parse(product.getCreationDate());
+                    LocalDate creationDate2 = LocalDate.ofInstant(creationDate, ZoneId.systemDefault());
+                    return creationDate2.isAfter(lastWeekBefore2) || creationDate2.isEqual(lastWeekBefore2);
+                }).collect(Collectors.toList());
+                break;
+            default:
+                productList = null;
+        }
+
+        return productList;
     }
 
     @Override

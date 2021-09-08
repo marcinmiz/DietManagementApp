@@ -3,25 +3,14 @@ package agh.edu.pl.diet.controllers;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.payloads.request.UserLoginRequest;
 import agh.edu.pl.diet.payloads.request.UserRequest;
-import agh.edu.pl.diet.payloads.validators.UserValidator;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.repos.RoleRepo;
-import agh.edu.pl.diet.services.SecurityService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/api/users")
@@ -60,10 +49,10 @@ public class UserController {
 
     }
 
-    @GetMapping("/login?logout")
-        public ResponseEntity<ResponseMessage> logoutUser() {
-            return ResponseEntity.ok(new ResponseMessage("User has been logged out"));
-        }
+    @GetMapping("/logout")
+    public ResponseEntity<ResponseMessage> logoutUser() {
+        return ResponseEntity.ok(new ResponseMessage("User has been logged out"));
+    }
 
     @GetMapping("/loggedUser")
     public ResponseEntity<User> getLoggedUser() {

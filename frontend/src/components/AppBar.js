@@ -1,11 +1,10 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import "../App.css"
 import Avatar from '@material-ui/core/Avatar';
-import Button from "@material-ui/core/Button";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import http from "../http-common";
-import {Redirect, useHistory} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 
 export default function Appbar(props) {
 
@@ -31,21 +30,18 @@ export default function Appbar(props) {
             </div>
             {(props.admin === true) ?
                 <FormControlLabel
-                control={
-                <Switch
-                    checked={props.adminMode}
-                    onChange={props.handleAdminMode}
-                    name="adminMode"
-                    color="primary"
-                />
-                }
-                //switch is showed if user is admin, second variable defines if admin or user mode is on
-                label="Admin mode"
-                labelPlacement="top"
+                    control={
+                        <Switch
+                            checked={props.adminMode}
+                            onChange={event => props.handleAdminMode(event, !props.adminMode)}
+                            name="adminMode"
+                            color="primary"
+                        />
+                    }
+                    //switch is showed if user is admin, second variable defines if admin or user mode is on
+                    label="Admin mode"
+                    labelPlacement="top"
                 /> : ""}
-            {/*<div>*/}
-            {/*<Button variant="text">User</Button>*/}
-            {/*</div>*/}
 
             <div>
                 <button className="form_button" onClick={logoutUser}>Log out</button>

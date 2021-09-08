@@ -20,6 +20,7 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import SuitableRecipeModal from "../components/SuitableRecipeModal";
 import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
+import {useHistory, useParams} from "react-router-dom";
 
 const useStyles = makeStyles({
     paper: {
@@ -30,7 +31,14 @@ const useStyles = makeStyles({
 
 export default function Recipes(props) {
 
+    const history = useHistory();
+
     const classes = useStyles();
+
+    let { recipeId, mode } = useParams();
+
+    console.log("recipeId " + recipeId);
+    console.log("mode " + mode);
 
     const [state, setState] = React.useState({
         search: '',
@@ -49,13 +57,11 @@ export default function Recipes(props) {
 
     useEffect(
         () => {
-            console.log(props.match.params.type);
-            console.log(props.match.params.recipe_id);
             setState({
                 ...state,
                 loaded: true
             });
-        }, [state.msg, props.match.params.type, props.match.params.recipe_id]
+        }, [state.msg, recipeId, mode]
     );
 
     const handleTab = (event, newValue) => {

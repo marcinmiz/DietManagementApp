@@ -9,7 +9,7 @@ import TextareaAutosize from "@material-ui/core/TextareaAutosize/TextareaAutosiz
 import http from "../http-common";
 
 export default function ConfirmationDialog(props) {
-    const { onClose, open, complement, history, productId, productName, ...other } = props;
+    const { onClose, open, complement, productId, productName, ...other } = props;
     const textareaRef = React.useRef(null);
     const [rejectExplanation, setRejectExplanation] = React.useState("");
     const [msg, setMsg] = React.useState("");
@@ -27,25 +27,26 @@ export default function ConfirmationDialog(props) {
 
     const handleOk = async () => {
         try {
-            console.log(props.productId + " " + props.productName);
             let assessment_parameters = {};
             assessment_parameters.productId = productId;
             complement === "reject this product" ? assessment_parameters.assessment = "reject" : assessment_parameters.assessment = "accept";
             if (complement === "reject this product") {
                 assessment_parameters.rejectExplanation = rejectExplanation;
             }
-            console.log(assessment_parameters);
             const res = await http.post("/api/products/assess", assessment_parameters);
             const data = res.data;
             if ((data.message !== "Product " + productName + " has been accepted") && (data.message !== "Product " + productName + " has been rejected")) {
                 setMsg(data.message);
             } else {
-                onClose();
+
                 if (data.message === "Product " + productName + " has been accepted") {
-                    history.push("/products/" + productName.replace(" ", "_") + "-accepted");
+                    onClose();
+                    props.handleOperationMessage("Product " + productName + " has been accepted");
                 } else {
-                    history.push("/products/" + productName.replace(" ", "_") + "-rejected");
+                    onClose();
+                    props.handleOperationMessage("Product " + productName + " has been rejected");
                 }
+
             }
 
         } catch (err) {
@@ -54,7 +55,6 @@ export default function ConfirmationDialog(props) {
     };
 
     const handleRejectExplanation = (event) => {
-        console.log(event.target.value);
         setRejectExplanation(event.target.value);
     };
 

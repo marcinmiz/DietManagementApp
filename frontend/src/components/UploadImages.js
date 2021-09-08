@@ -12,18 +12,20 @@ export default function UploadImages({currentImage, submitted, type, id}) {
     })
 
     React.useEffect(() => {
-        if (currentImage !== "") {
+
+            if (currentImage !== "" && !state.currentFile) {
             setState({
                 ...state,
                 previewImage: currentImage
             });
 
         }
+
             if (submitted && currentFile) {
                 upload();
             }
         }
-        , [currentImage, submitted]
+        , [state.currentFile, state.previewImage, submitted]
     )
 
     function selectFile(event) {
@@ -51,7 +53,7 @@ export default function UploadImages({currentImage, submitted, type, id}) {
                     isError: true
                 });
             });
-    };
+    }
     const {
         currentFile,
         previewImage,
@@ -60,7 +62,7 @@ export default function UploadImages({currentImage, submitted, type, id}) {
     } = state;
 
     return (
-        <div id="upload_container" className="upload_container product_selected_element product_selected_element_moved">
+        <div id="upload_container" className="upload_container">
 
             {previewImage && (
                 <div>
@@ -79,7 +81,7 @@ export default function UploadImages({currentImage, submitted, type, id}) {
                     style={{display: 'none'}}
                     type="file"
                     accept="image/*"
-                    onChange={selectFile}/>
+                    onChange={event => selectFile(event)}/>
                 <Button
                     className="btn-choose"
                     variant="outlined"

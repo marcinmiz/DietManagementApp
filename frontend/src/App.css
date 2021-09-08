@@ -14,7 +14,14 @@
 .auth_container {
     position: fixed;
     left: 40%;
+}
+
+.auth_container_login {
     top: 10%;
+}
+
+.auth_container_register {
+    top: 5%;
 }
 
 .card {
@@ -156,29 +163,82 @@
     margin: 0.1rem !important;
     padding: 0.5rem;
     min-height: 22vh;
-    min-width: 55vh;
+    min-width: 60vh;
+    cursor: pointer;
+}
+
+.viewer {
+    height: 80%;
+}
+
+.product_edit {
+    background-color: lightslategrey;
+    border-radius: 10px;
+    margin: 0.1rem !important;
+    padding: 0.5rem;
+    min-height: 22vh;
+    width: min-content;
     cursor: pointer;
 }
 
 .product_header, .recipe_header {
+    display: flex !important;
+    flex-direction: row;
+    margin-bottom: 0.4rem;
+}
+
+.product_header_inputs {
+    align-items: flex-end;
+}
+
+.product_header_buttons {
+    align-items: center;
+    justify-content: center;
+}
+
+.product_selected_bottom {
     display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.selected_bottom_product_rep {
+    background-color: #283987 !important;
+}
+
+.first_middle_bottom_product_rep {
+    /*height: 1.5rem !important;*/
+    opacity: 0.7;
+}
+
+.second_middle_bottom_product_rep {
+    opacity: 0.5;
+}
+
+.third_middle_bottom_product_rep {
+    /*height: 1.0rem !important;*/
+    opacity: 0.3;
 }
 
 .product_content, .recipe_content {
     display: flex;
     justify-content: space-between;
     margin-top: 2%;
+    height: 75%;
 }
 
 .product_name, .recipe_name {
     margin-left: auto;
     margin-right: auto;
     width: max-content;
-    color: inherit;
+    color: inherit !important;
 }
 
 .creation_date, .recipe_ratings_header {
     font-size: 0.7rem;
+    text-align: center;
 }
 
 .product_description, .recipe_description {
@@ -186,7 +246,7 @@
     align-items: center;
     justify-content: space-around;
     flex-direction: column;
-    width: 60%;
+    width: 50%;
 }
 
 .product_id, .recipe_id {
@@ -199,16 +259,18 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    justify-content: center;
+    width: 50%;
 }
 
 .product_image, .recipe_image {
-    width: 9rem;
+    width: 12rem;
     border-radius: 100%;
     cursor: pointer;
 }
 
 .product_category {
-    margin: 0 2rem !important;
+    margin: 0 1rem !important;
 }
 
 .product_author, .recipe_author {
@@ -231,7 +293,7 @@
     width: 108%;
 }
 
-.nutrients, .ingredients {
+.product_nutrients, .ingredients {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -239,13 +301,19 @@
     width: fit-content;
 }
 
-.nutrient, .ingredient {
+.product_nutrients_header {
+    font-size: large;
+    margin-top: 1.0rem;
+    margin-bottom: 0.5rem;
+}
+
+.product_nutrient, .ingredient {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.nutrient_unit, .nutrient_amount, .ingredient_unit, .ingredient_amount {
+.product_nutrient_unit, .product_nutrient_amount, .ingredient_unit, .ingredient_amount {
     margin-left: 0.5rem;
 }
 
@@ -340,6 +408,13 @@
     }
 }
 
+@media screen and (max-width: 850px) {
+    .products_existed_container {
+        left: 65% !important;
+        width: 30% !important;
+    }
+}
+
 @media screen and (min-width: 1160px) {
     .product, .recipe {
         width: 35%;
@@ -358,13 +433,17 @@
 }
 
 .product_selected, .recipe_selected {
-    position: absolute;
-    top: 29%;
-    left: 33%;
-    width: 35vw;
-    height: 40vh;
-    z-index: 100;
-    transition: all 2s ease-in-out;
+    /*position: absolute;*/
+    /*top: 29%;*/
+    /*left: 33%;*/
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    /*z-index: 100;*/
+    /*transition: all 2s ease-in-out;*/
 }
 
 .product_selected_element, .recipe_selected_element {
@@ -406,7 +485,7 @@
 
 .upload_container {
     display: flex;
-    width: 30%;
+    width: 80%;
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
@@ -421,18 +500,18 @@
 }
 
 .products_existed_container, .recipes_existed_container {
-    display: none;
     position: absolute;
-    top: 0;
-    left: 0;
+    text-align: center;
+    top: 10%;
+    left: 5%;
     width: 15%;
     background-color: red;
     z-index: 100;
     cursor: auto;
     border-radius: 5px;
-    padding: 2%;
+    padding: 1%;
     transition: display 2s ease-in-out;
-    font-size: 1.5em;
+    font-size: 1.2em;
 }
 
 .product_existed, .recipe_existed {

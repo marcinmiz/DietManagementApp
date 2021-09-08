@@ -2,6 +2,7 @@ package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Product;
 import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
+import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -24,9 +25,29 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @PostMapping
+    public ResponseEntity<List<Product>> getProducts(@RequestBody ProductGetRequest productGetRequest) {
+        List<Product> productList = productService.getProducts(productGetRequest);
+        if (productList == null) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(productList);
+    }
+
     @GetMapping("/{id}")
     public Product getProduct(@PathVariable("id") Long productId) {
         return productService.getProduct(productId);
+    }
+
+    @GetMapping("/checkProductApprovalStatus/{id}")
+    public ResponseEntity<ResponseMessage> checkProductApprovalStatus(@PathVariable("id") Long productId) {
+        ResponseMessage result = productService.checkProductApprovalStatus(productId);
+
+        if (result.getMessage().equals("Product with id " + productId + " has not been found")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
     }
 
     @PostMapping("/add")
