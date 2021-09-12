@@ -29,7 +29,7 @@ public class User {
     private String creationDate;
     @Transient
     private List<Pair<String, Float>> weights = new ArrayList<>();
-    private double targetWeight;
+//    private double targetWeight;
 
     public Long getUserId() {
         return userId;
@@ -115,13 +115,13 @@ public class User {
         this.weights.add(weight);
     }
 
-    public double getTargetWeight() {
-        return targetWeight;
-    }
-
-    public void setTargetWeight(double targetWeight) {
-        this.targetWeight = targetWeight;
-    }
+//    public double getTargetWeight() {
+//        return targetWeight;
+//    }
+//
+//    public void setTargetWeight(double targetWeight) {
+//        this.targetWeight = targetWeight;
+//    }
 
     //    public void setTargetWeight(double newTargetWeight) {    //newTarget<0 is handled in the consutructor
 //        targetWeight = newTargetWeight;

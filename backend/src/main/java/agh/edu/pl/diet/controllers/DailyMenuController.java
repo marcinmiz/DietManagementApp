@@ -1,6 +1,8 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.DailyMenu;
+import agh.edu.pl.diet.entities.DietaryProgramme;
+import agh.edu.pl.diet.entities.Meals;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.DailyMenuService;
@@ -20,6 +22,16 @@ public class DailyMenuController {
     @GetMapping("/{id}")
     public DailyMenu getDailyMenu(@PathVariable("id") Long dailyMenuId) {
         return dailyMenuService.getDailyMenu(dailyMenuId);
+    }
+
+    @GetMapping("/meal/{id}")
+    public Meals getMeal(@PathVariable("id") Long dailyMenuId) {
+        return dailyMenuService.getMeals(dailyMenuId);
+    }
+
+    @GetMapping("/programme/{id}")
+    public DietaryProgramme getDietaryProgramme(@PathVariable("id") Long dailyMenuId) {
+        return dailyMenuService.getDietaryProgramme((dailyMenuId));
     }
 
     @PostMapping("/add")

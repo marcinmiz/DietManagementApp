@@ -15,7 +15,7 @@ public class DietTypeRequest {
     private Integer carbohydrates;
     @NotBlank
     private Integer fats;
-    @NotBlank
+   // @NotBlank
     protected double targetWeight;
 
 

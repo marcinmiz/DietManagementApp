@@ -10,9 +10,9 @@ public interface DietTypeService {
 
  //   public void update(Object o);
 
-    public double calculateCalories();
-    public double calculateProtein();
-    public double calculateCarbohydrates();
-    public double calculateFats();
+    double calculateCalories();
+    double calculateProtein();
+    double calculateCarbohydrates();
+    double calculateFats();
 
     }
