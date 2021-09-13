@@ -17,7 +17,7 @@ public class DietaryPreferencesRequest {
     @NotBlank
     private Integer mealsQuantity;
     @NotBlank
-    private Integer targetWeight;
+    private Double targetWeight;
     @NotBlank
     private List<String> nutrients;
     @NotBlank
@@ -73,11 +73,11 @@ public class DietaryPreferencesRequest {
         this.mealsQuantity = mealsQuantity;
     }
 
-    public Integer getTargetWeight() {
+    public Double getTargetWeight() {
         return targetWeight;
     }
 
-    public void setTargetWeight(Integer targetWeight) {
+    public void setTargetWeight(Double targetWeight) {
         this.targetWeight = targetWeight;
     }
 

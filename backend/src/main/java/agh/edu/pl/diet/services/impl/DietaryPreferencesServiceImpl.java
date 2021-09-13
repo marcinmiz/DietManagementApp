@@ -218,7 +218,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
             return responseMessage5;
         }
 
-        Integer targetWeight = dietaryPreferencesRequest.getTargetWeight();
+        Double targetWeight = dietaryPreferencesRequest.getTargetWeight();
 
         ResponseMessage responseMessage6 = verify("add","targetWeight", targetWeight);
 
@@ -337,7 +337,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                 return responseMessage5;
             }
 
-            Integer targetWeight = dietaryPreferencesRequest.getTargetWeight();
+            Double targetWeight = dietaryPreferencesRequest.getTargetWeight();
 
             ResponseMessage responseMessage6 = verify("add","targetWeight", targetWeight);
 

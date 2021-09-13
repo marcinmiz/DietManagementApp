@@ -16,6 +16,12 @@ public class DietTypeImpl extends DietTypeRequest implements DietTypeService {
     @Autowired
     DietTypeRepo dietTypeRepo;
 
+     void Type(double multiplicationCalculateProtein, double multiplicationCalculateCarbohydrates, double multiplicationCalculateFats) {
+        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
+        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
+        this.multiplicationCalculateFats = multiplicationCalculateFats;
+    }
+
 
     @Override
     public List<DietType> getAllDietType() {
@@ -47,14 +53,25 @@ public class DietTypeImpl extends DietTypeRequest implements DietTypeService {
         return calculatedFats;
     }
 
-    private final Type multiplicationCalculateProtein;
-    private final Type multiplicationCalculateCarbohydrates;
-    private final Type multiplicationCalculateFats;
+    private double multiplicationCalculateProtein;
+    private double multiplicationCalculateCarbohydrates;
+    private double multiplicationCalculateFats;
 
-    public DietTypeImpl(Type multiplicationCalculateProtein, Type multiplicationCalculateCarbohydrates, Type multiplicationCalculateFats) {
-        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
-        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
-        this.multiplicationCalculateFats = multiplicationCalculateFats;
-    }
+//    public DietTypeImpl(Type multiplicationCalculateProtein, Type multiplicationCalculateCarbohydrates, Type multiplicationCalculateFats) {
+//        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
+//        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
+//        this.multiplicationCalculateFats = multiplicationCalculateFats;
+//    }
 
+//    public Type getMultiplicationCalculateCarbohydrates() {
+//        return multiplicationCalculateCarbohydrates;
+//    }
+//
+//    public Type getMultiplicationCalculateProtein() {
+//        return multiplicationCalculateProtein;
+//    }
+//
+//    public Type getMultiplicationCalculateFats() {
+//        return multiplicationCalculateFats;
+//    }
 }

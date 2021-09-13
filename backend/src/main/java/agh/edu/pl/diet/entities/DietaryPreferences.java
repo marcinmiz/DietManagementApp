@@ -21,7 +21,7 @@ public class DietaryPreferences {
     private DietType dietType;
     private Integer caloriesPerMeal;
     private Integer mealsQuantity;
-    private Integer targetWeight;
+    private Double targetWeight;
 
     @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -89,11 +89,11 @@ public class DietaryPreferences {
         this.creationDate = creationDate;
     }
 
-    public Integer getTargetWeight() {
+    public Double getTargetWeight() {
         return targetWeight;
     }
 
-    public void setTargetWeight(Integer targetWeight) {
+    public void setTargetWeight(Double targetWeight) {
         this.targetWeight = targetWeight;
     }
 
