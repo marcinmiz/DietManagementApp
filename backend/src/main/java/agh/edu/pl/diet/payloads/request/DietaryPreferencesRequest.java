@@ -5,13 +5,19 @@ import java.util.List;
 
 public class DietaryPreferencesRequest {
     @NotBlank
-    private String dietaryPreferencesName;
+    private Long dietaryPreferenceId;
     @NotBlank
     private Integer totalCalories;
     @NotBlank
     private String dietType;
     @NotBlank
-    private String owner;
+    private String preferenceOwner;
+    @NotBlank
+    private Integer caloriesPerMeal;
+    @NotBlank
+    private Integer mealsQuantity;
+    @NotBlank
+    private Double targetWeight;
     @NotBlank
     private List<String> nutrients;
     @NotBlank
@@ -19,12 +25,12 @@ public class DietaryPreferencesRequest {
     @NotBlank
     private List<String> recipes;
 
-    public String getDietaryPreferencesName() {
-        return dietaryPreferencesName;
+    public Long getDietaryPreferenceId() {
+        return dietaryPreferenceId;
     }
 
-    public void setDietaryPreferencesName(String dietaryPreferencesName) {
-        this.dietaryPreferencesName = dietaryPreferencesName;
+    public void setDietaryPreferenceId(Long dietaryPreferenceId) {
+        this.dietaryPreferenceId = dietaryPreferenceId;
     }
 
     public Integer getTotalCalories() {
@@ -43,12 +49,36 @@ public class DietaryPreferencesRequest {
         this.dietType = dietType;
     }
 
-    public String getOwner() {
-        return owner;
+    public String getPreferenceOwner() {
+        return preferenceOwner;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
+    public void setPreferenceOwner(String preferenceOwner) {
+        this.preferenceOwner = preferenceOwner;
+    }
+
+    public Integer getCaloriesPerMeal() {
+        return caloriesPerMeal;
+    }
+
+    public void setCaloriesPerMeal(Integer caloriesPerMeal) {
+        this.caloriesPerMeal = caloriesPerMeal;
+    }
+
+    public Integer getMealsQuantity() {
+        return mealsQuantity;
+    }
+
+    public void setMealsQuantity(Integer mealsQuantity) {
+        this.mealsQuantity = mealsQuantity;
+    }
+
+    public Double getTargetWeight() {
+        return targetWeight;
+    }
+
+    public void setTargetWeight(Double targetWeight) {
+        this.targetWeight = targetWeight;
     }
 
     public List<String> getNutrients() {

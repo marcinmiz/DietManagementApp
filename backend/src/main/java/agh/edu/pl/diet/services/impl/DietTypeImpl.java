@@ -16,6 +16,13 @@ public class DietTypeImpl extends DietTypeRequest implements DietTypeService {
     @Autowired
     DietTypeRepo dietTypeRepo;
 
+     void Type(double multiplicationCalculateProtein, double multiplicationCalculateCarbohydrates, double multiplicationCalculateFats) {
+        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
+        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
+        this.multiplicationCalculateFats = multiplicationCalculateFats;
+    }
+
+
     @Override
     public List<DietType> getAllDietType() {
         List<DietType> list = new ArrayList<>();
@@ -30,38 +37,41 @@ public class DietTypeImpl extends DietTypeRequest implements DietTypeService {
 
     @Override
     public double calculateProtein() {
-        double calculatedProtein = targetWeight * 0.9;
+        double calculatedProtein = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateProtein));
         return calculatedProtein;
     }
 
     @Override
     public double calculateCarbohydrates() {
-        double calculatedCarbohydrates = targetWeight * 4;
+        double calculatedCarbohydrates = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateCarbohydrates));
         return calculatedCarbohydrates;
     }
 
     @Override
     public double calculateFats() {
-        double calculatedFats = targetWeight * 0.5;
+        double calculatedFats = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateFats));
         return calculatedFats;
     }
 
-//    public void setTargetWeight(double newTargetWeight) throws InvalidInputException {
-//        if (newTargetWeight < 0) {
-//            throw new InvalidInputException();
-//        }
-//        targetWeight = newTargetWeight; //
+    private double multiplicationCalculateProtein;
+    private double multiplicationCalculateCarbohydrates;
+    private double multiplicationCalculateFats;
+
+//    public DietTypeImpl(Type multiplicationCalculateProtein, Type multiplicationCalculateCarbohydrates, Type multiplicationCalculateFats) {
+//        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
+//        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
+//        this.multiplicationCalculateFats = multiplicationCalculateFats;
+//    }
+
+//    public Type getMultiplicationCalculateCarbohydrates() {
+//        return multiplicationCalculateCarbohydrates;
 //    }
 //
-//    //Updates user's target macronutrients when notifyObservers() called
-//    @Override
-//    public void update(PropertyChangeListener pcl, Object arg) {
-//        DietaryPreferences updatedDietaryPreferences = (DietaryPreferences)pcl;
-//        targetWeight = updatedDietaryPreferences.getTargetWeight();
-//        calories = updatedDietaryPreferences.getDietType().calculateCalories();
-//        protein = updatedDietaryPreferences.getDietType().calculateProtein();
-//        carbohydrates = updatedDietaryPreferences.getDietType().calculateCarbohydrates();
-//        fats = updatedDietaryPreferences.getDietType().calculateFats();
-//        System.out.println("I have updated");
+//    public Type getMultiplicationCalculateProtein() {
+//        return multiplicationCalculateProtein;
+//    }
+//
+//    public Type getMultiplicationCalculateFats() {
+//        return multiplicationCalculateFats;
 //    }
 }

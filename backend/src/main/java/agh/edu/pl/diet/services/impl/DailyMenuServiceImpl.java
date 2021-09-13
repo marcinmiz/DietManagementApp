@@ -1,9 +1,13 @@
 package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.entities.DailyMenu;
+import agh.edu.pl.diet.entities.DietaryProgramme;
+import agh.edu.pl.diet.entities.Meals;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
+import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
+import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,13 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private DailyMenuRepo dailyMenuRepo;
+
+    @Autowired
+    private MealRepo mealRepo;
+
+    @Autowired
+    private DietaryProgrammeRepo dietaryProgrammeRepo;
+
 //    @Autowired
 //    private NutrientRepo nutrientRepo;
 //    @Autowired
@@ -112,6 +123,18 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     public DailyMenu getDailyMenu(Long dailyMenuId) {
         DailyMenu dailyMenu = dailyMenuRepo.findById(dailyMenuId).get();
         return dailyMenu;
+    }
+
+    @Override
+    public Meals getMeals(Long dailyMenuId) {
+        Meals meals = mealRepo.findById(dailyMenuId).get();
+        return meals;
+    }
+
+    @Override
+    public DietaryProgramme getDietaryProgramme(Long dailyMenuId) {
+        DietaryProgramme dietaryProgramme = dietaryProgrammeRepo.findById(dailyMenuId).get();
+        return dietaryProgramme;
     }
 
     @Override
