@@ -209,7 +209,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
         }
 
 //        //change to logged in user id
-//        product.setOwner(userRepo.findById(262L).get());
+//        product.setRecipeOwner(userRepo.findById(262L).get());
         String creationDate = new Date().toInstant().toString();
         dailyMenu.setCreationDate(creationDate);
 

@@ -9,7 +9,7 @@ import TextareaAutosize from "@material-ui/core/TextareaAutosize/TextareaAutosiz
 import http from "../http-common";
 
 export default function ConfirmationDialog(props) {
-    const { onClose, open, complement, productId, productName, ...other } = props;
+    const { type, onClose, open, complement, itemId, itemName, ...other } = props;
     const textareaRef = React.useRef(null);
     const [rejectExplanation, setRejectExplanation] = React.useState("");
     const [msg, setMsg] = React.useState("");
@@ -28,25 +28,52 @@ export default function ConfirmationDialog(props) {
     const handleOk = async () => {
         try {
             let assessment_parameters = {};
-            assessment_parameters.productId = productId;
-            complement === "reject this product" ? assessment_parameters.assessment = "reject" : assessment_parameters.assessment = "accept";
-            if (complement === "reject this product") {
+
+            assessment_parameters.itemId = itemId;
+
+            if(complement.startsWith("reject")) {
+                assessment_parameters.assessment = "reject";
                 assessment_parameters.rejectExplanation = rejectExplanation;
-            }
-            const res = await http.post("/api/products/assess", assessment_parameters);
-            const data = res.data;
-            if ((data.message !== "Product " + productName + " has been accepted") && (data.message !== "Product " + productName + " has been rejected")) {
-                setMsg(data.message);
+            } else if(complement.startsWith("accept")){
+                assessment_parameters.assessment = "accept";
             } else {
+                throw Error("Bad complement");
+            }
 
-                if (data.message === "Product " + productName + " has been accepted") {
-                    onClose();
-                    props.handleOperationMessage("Product " + productName + " has been accepted");
+            if (type === "product") {
+
+                const res = await http.post("/api/products/assess", assessment_parameters);
+                const data = res.data;
+                if ((data.message !== "Product " + itemName + " has been accepted") && (data.message !== "Product " + itemName + " has been rejected")) {
+                    setMsg(data.message);
                 } else {
-                    onClose();
-                    props.handleOperationMessage("Product " + productName + " has been rejected");
-                }
 
+                    if (data.message === "Product " + itemName + " has been accepted") {
+                        onClose();
+                        props.handleOperationMessage("Product " + itemName + " has been accepted");
+                    } else {
+                        onClose();
+                        props.handleOperationMessage("Product " + itemName + " has been rejected");
+                    }
+                }
+            } else if (type === "recipe") {
+
+                const res = await http.post("/api/recipes/assess", assessment_parameters);
+                const data = res.data;
+                if ((data.message !== "Recipe " + itemName + " has been accepted") && (data.message !== "Recipe " + itemName + " has been rejected")) {
+                    setMsg(data.message);
+                } else {
+
+                    if (data.message === "Recipe " + itemName + " has been accepted") {
+                        onClose();
+                        props.handleOperationMessage("Recipe " + itemName + " has been accepted");
+                    } else {
+                        onClose();
+                        props.handleOperationMessage("Recipe " + itemName + " has been rejected");
+                    }
+                }
+            } else {
+                throw Error("Bad type");
             }
 
         } catch (err) {
@@ -67,19 +94,19 @@ export default function ConfirmationDialog(props) {
                     open={open}
                     {...other}
                 >
-                    <DialogTitle id="confirmation-dialog-title" className="confirmation_el">{ complement === "reject this product" ? "Rejection Explanation" : "Confirmation"}</DialogTitle>
+                    <DialogTitle id="confirmation-dialog-title" className="confirmation_el">{ complement.startsWith("reject") ? "Rejection Explanation" : "Confirmation"}</DialogTitle>
                     <DialogContent dividers className="confirmation_el">
                         {
                             msg !== "" ? <div>{msg}</div> : null
                         }
                         {
-                            complement === "reject this product" ? <div><TextareaAutosize
+                            complement.startsWith("reject") ? <div><TextareaAutosize
                                 ref={textareaRef}
                                 aria-label="reject_explanation"
                                 className="reject_explanation_textarea"
                                 rowsMin={12}
                                 cols={50}
-                                placeholder="Why product should be rejected?"
+                                placeholder={type === "product" ? "Why product should be rejected?" : "Why recipe should be rejected?"}
                                 onChange={event => handleRejectExplanation(event)}
                                 value={rejectExplanation}
                             /><DialogTitle id="confirmation-dialog-title" className="confirmation_el">Confirmation</DialogTitle></div> : null
@@ -91,7 +118,7 @@ export default function ConfirmationDialog(props) {
                         <Button autoFocus onClick={handleCancel} color="primary">
                             Cancel
                         </Button>
-                        <Button onClick={handleOk} color="primary" disabled={complement === "reject this product" && rejectExplanation === ""}>
+                        <Button onClick={handleOk} color="primary" disabled={complement.startsWith("reject") && rejectExplanation === ""}>
                             Ok
                         </Button>
                     </DialogActions>

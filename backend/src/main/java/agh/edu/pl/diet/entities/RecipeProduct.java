@@ -19,19 +19,16 @@ public class RecipeProduct {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
-    @JoinColumn(name="product_id", nullable=false)
-    private Product product;
-
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     @JoinColumn(name="recipe_id", nullable=false)
     private Recipes recipe;
 
-    @NotNull
-    private Double quantity;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
+    @JoinColumn(name="product_id", nullable=false)
+    private Product product;
 
     @NotNull
-    private String unit;
+    private String productUnit;
 
     @NotNull
     private Double productAmount;
@@ -60,20 +57,12 @@ public class RecipeProduct {
         this.recipe = recipe;
     }
 
-    public Double getQuantity() {
-        return quantity;
+    public String getProductUnit() {
+        return productUnit;
     }
 
-    public void setQuantity(Double quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setProductUnit(String productUnit) {
+        this.productUnit = productUnit;
     }
 
     public Double getProductAmount() {

@@ -2,20 +2,20 @@ package agh.edu.pl.diet.payloads.request;
 
 import javax.validation.constraints.NotBlank;
 
-public class ProductAssessRequest {
+public class ItemAssessRequest {
     @NotBlank
-    private Long productId;
+    private Long itemId;
     @NotBlank
     private String assessment;
     @NotBlank
     private String rejectExplanation;
 
-    public Long getProductId() {
-        return productId;
+    public Long getItemId() {
+        return itemId;
     }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+    public void setItemId(Long productId) {
+        this.itemId = productId;
     }
 
     public String getAssessment() {

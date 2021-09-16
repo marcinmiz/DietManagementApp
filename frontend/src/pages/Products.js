@@ -288,7 +288,7 @@ export default function Products(props) {
         const name = event.target.innerText;
         setState({
             ...state,
-            complement: name === "REJECT" ? "reject this product" : "accept this product",
+            complement: name === "REJECT" ? "reject product " + product_name : "accept product " + product_name,
             open_confirmation_modal: true,
             confirmation_product_id: product_id,
             confirmation_product_name: product_name
@@ -472,11 +472,12 @@ export default function Products(props) {
                     paper: classes.paper,
                 }}
                 id="confirmation_popup"
+                type="product"
                 open={state.open_confirmation_modal && state.msg === ''}
                 onClose={handleCloseConfirmationModal}
                 complement={state.complement}
-                productId={state.confirmation_product_id}
-                productName={state.confirmation_product_name}
+                itemId={state.confirmation_product_id}
+                itemName={state.confirmation_product_name}
                 handleOperationMessage={handleOperationMessage}
             />
         </div>;

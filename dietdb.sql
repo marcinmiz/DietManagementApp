@@ -203,7 +203,7 @@ INSERT INTO `recipe` (`recipe_id`, `approval_status`, `creation_date`, `recipe_n
 
 CREATE TABLE `recipe_product` (
   `quantity` double DEFAULT NULL,
-  `unit` varchar(255) COLLATE utf8_polish_ci DEFAULT NULL,
+  `productUnit` varchar(255) COLLATE utf8_polish_ci DEFAULT NULL,
   `recipe_recipe_id` bigint(20) NOT NULL,
   `product_product_id` bigint(20) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_polish_ci;

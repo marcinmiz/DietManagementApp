@@ -34,8 +34,6 @@ public class Product {
     private String assessmentDate = null;
     private String rejectExplanation = "";
 
-    private Boolean productFavourite = false;
-
     @Transient
     private String productImage;
 
@@ -97,14 +95,6 @@ public class Product {
 
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public Boolean getProductFavourite() {
-        return productFavourite;
-    }
-
-    public void setProductFavourite(Boolean productFavourite) {
-        this.productFavourite = productFavourite;
     }
 
     public User getOwner() {

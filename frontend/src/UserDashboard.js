@@ -43,7 +43,7 @@ export default function UserDashboard(props) {
                                 <Products admin={admin} adminMode={adminMode} loggedInStatus={props.loggedInStatus} handleAdminMode={props.handleAdminMode}/>
                             </Route>
                             <Route path={`${path}recipes/:recipeId?/:mode?`}>
-                                <Recipes admin={admin} adminMode={adminMode}/>
+                                <Recipes name={props.name} surname={props.surname} admin={admin} adminMode={adminMode}/>
                             </Route>
                             <Route path={`${path}preferences`}>
                                 Dietary Preferences

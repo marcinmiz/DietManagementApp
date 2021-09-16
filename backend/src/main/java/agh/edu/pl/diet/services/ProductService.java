@@ -1,7 +1,7 @@
 package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.Product;
-import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
+import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
@@ -28,6 +28,6 @@ public interface ProductService {
 
     List<Product> searchProducts(ProductSearchRequest productSearchRequest);
 
-    ResponseMessage assessProduct(ProductAssessRequest productAssessRequest);
+    ResponseMessage assessProduct(ItemAssessRequest itemAssessRequest);
 
 }

@@ -1,6 +1,7 @@
 package agh.edu.pl.diet.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Cascade;
 import org.springframework.data.util.Pair;
 
 import javax.persistence.*;
@@ -128,4 +129,5 @@ public class User {
 //        setChanged();//Makes change true so that it will notify observers
 //        notifyObservers(this);//Passes current user as a parameter to Observer in this case Diet
         //So that Diet can access the User object.
+
 }

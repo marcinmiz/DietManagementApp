@@ -2,7 +2,7 @@ package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.controllers.ImageController;
 import agh.edu.pl.diet.entities.*;
-import agh.edu.pl.diet.payloads.request.ProductAssessRequest;
+import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
@@ -46,10 +46,14 @@ public class ProductServiceImpl implements ProductService {
     private ResponseMessage verify(String mode, String type, Object item) {
         switch (type) {
             case "name":
+
+                if (item == null) {
+                    return new ResponseMessage("Product name is required");
+                }
+
                 String name = String.valueOf(item);
-                if (name == null) {
-                    return new ResponseMessage("Product name has to be given");
-                } else if (name.length() < 2 || name.length() > 40) {
+
+                if (name.length() < 2 || name.length() > 40) {
                     return new ResponseMessage("Product name has to have min 2 and max 40 characters");
                 } else if (!(name.matches("^[a-zA-Z ]+$"))) {
                     return new ResponseMessage("Product name has to contain only letters and spaces");
@@ -60,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             case "calories":
                 if (item == null) {
-                    return new ResponseMessage("Product calories has to be given");
+                    return new ResponseMessage("Product calories are required");
                 }
 
                 Integer calories = Integer.parseInt(item.toString());
@@ -69,15 +73,15 @@ public class ProductServiceImpl implements ProductService {
                     return new ResponseMessage("Product calories has to have min 1 and max 10 characters");
                 } else if (!(calories.toString().matches("^0$") || calories.toString().matches("^(-)?[1-9]\\d*$"))) {
                     return new ResponseMessage("Product calories has to contain only digits");
-                } else if (calories < 0) {
-                    return new ResponseMessage("Product calories has to be greater or equal 0");
+                } else if (calories <= 0) {
+                    return new ResponseMessage("Product calories has to be greater than 0");
                 } else {
                     return new ResponseMessage("Product calories are valid");
                 }
             case "category":
                 String categoryName = String.valueOf(item);
                 if (categoryName == null) {
-                    return new ResponseMessage("Product category has to be given");
+                    return new ResponseMessage("Product category is required");
                 } else if (categoryName.equals("")) {
                     return new ResponseMessage("Product category has to be chosen");
                 } else if (categoryRepo.findByCategoryName(categoryName) == null) {
@@ -88,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
             case "list":
                 List<String> nutrients = (List<String>) item;
                 if (nutrients == null) {
-                    return new ResponseMessage("Product nutrients has to be given");
+                    return new ResponseMessage("Product nutrients are required");
                 } else if (nutrients.isEmpty()) {
                     return new ResponseMessage("At least 1 product nutrient is required");
                 } else {
@@ -116,8 +120,8 @@ public class ProductServiceImpl implements ProductService {
 
                 if (nutrientAmount.toString().length() < 1 || nutrientAmount.toString().length() > 20) {
                     return new ResponseMessage("Product nutrient amount has to have min 1 and max 20 characters");
-                } else if (nutrientAmount < 0) {
-                    return new ResponseMessage("Product nutrient amount has to be greater or equal 0");
+                } else if (nutrientAmount <= 0) {
+                    return new ResponseMessage("Product nutrient amount has to be greater than 0");
                 } else {
                     return new ResponseMessage("Product nutrient amount is valid");
                 }
@@ -287,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         //change to logged in user id
-        User productOwner = userService.getLoggedUser();
+        User productOwner = userService.findByUsername(userService.getLoggedUser().getUsername());
         if (productOwner == null) {
             return new ResponseMessage("Product " + productName + " owner has not been found");
         }
@@ -312,7 +316,7 @@ public class ProductServiceImpl implements ProductService {
         if (product.isPresent()) {
             Product updatedProduct = product.get();
 
-            User currentLoggedUser = userService.getLoggedUser();
+            User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
 
             if (currentLoggedUser == null) {
                 return new ResponseMessage("Current logged user has not been found");
@@ -409,7 +413,7 @@ public class ProductServiceImpl implements ProductService {
         if (product.isPresent()) {
             Product removedProduct = product.get();
 
-            User currentLoggedUser = userService.getLoggedUser();
+            User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
 
             if (currentLoggedUser == null) {
                 return new ResponseMessage("Current logged user has not been found");
@@ -449,8 +453,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseMessage assessProduct(ProductAssessRequest productAssessRequest) {
-        Product assessedProduct = productRepo.findById(productAssessRequest.getProductId()).orElse(null);
+    public ResponseMessage assessProduct(ItemAssessRequest itemAssessRequest) {
+        Product assessedProduct = productRepo.findById(itemAssessRequest.getItemId()).orElse(null);
 
         if (assessedProduct != null) {
 
@@ -458,8 +462,8 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseMessage("Product has been assessed yet");
             }
 
-            String assessment = productAssessRequest.getAssessment();
-            String rejectExplanation = productAssessRequest.getRejectExplanation();
+            String assessment = itemAssessRequest.getAssessment();
+            String rejectExplanation = itemAssessRequest.getRejectExplanation();
             String assessmentDate = new Date().toInstant().toString();
             assessedProduct.setAssessmentDate(assessmentDate);
 
