@@ -20,14 +20,22 @@ public interface RecipeService {
 
     ResponseMessage addNewRecipe(RecipeRequest recipesRequest);
 
-    ResponseMessage updateRecipes(Long recipeId, RecipeRequest recipeRequest);
+    ResponseMessage updateRecipe(Long recipeId, RecipeRequest recipeRequest);
 
-    ResponseMessage removeRecipes(Long recipeId);
+    ResponseMessage removeRecipe(Long recipeId);
 
     List<Recipes> searchRecipes(RecipeSearchRequest recipeSearchRequest);
 
     ResponseMessage serveRecipeCustomerSatisfaction(Long recipeId, String type, Float rating);
 
     ResponseMessage assessRecipe(ItemAssessRequest itemAssessRequest);
+
+    List<String> getAllUnits();
+
+    ResponseMessage shareRecipe(Long recipeId);
+
+    ResponseMessage addRecipeToCollection(Long recipeId);
+
+    ResponseMessage checkIfInCollection(Long recipeId);
 
 }

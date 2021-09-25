@@ -704,8 +704,9 @@ export default function Products(props) {
                 {productId && state.products.length > 0 && mode && <ViewerModal
                     open={state.open_viewer_modal}
                     onClose={handleCloseViewerModal}
-                    product_index={state.product_index}
-                    products={state.products}
+                    type="product"
+                    item_index={state.product_index}
+                    items={state.products}
                     mode={mode}
                     categories={state.categories}
                     loggedInStatus={props.loggedInStatus}

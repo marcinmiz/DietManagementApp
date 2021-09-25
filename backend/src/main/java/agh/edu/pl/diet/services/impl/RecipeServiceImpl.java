@@ -8,6 +8,7 @@ import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
 import agh.edu.pl.diet.payloads.response.*;
 import agh.edu.pl.diet.repos.*;
+import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.RecipeService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
 @Service
 public class RecipeServiceImpl implements RecipeService {
 
-    private final Path root = Paths.get("images/recipes");
     private final List<String> recipeProductUnits = Arrays.asList("kg", "dag", "g", "pcs", "ml", "l");
 
     @Autowired
@@ -32,13 +32,15 @@ public class RecipeServiceImpl implements RecipeService {
     @Autowired
     private RecipeRepo recipeRepo;
     @Autowired
-    private RecipeCollectionRepo recipeCollectionRepo;
+    private CollectionRecipeRepo collectionRecipeRepo;
     @Autowired
     private RecipeCustomerSatisfactionsRepo recipeCustomerSatisfactionsRepo;
     @Autowired
     private UserRepo userRepo;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ImageService imageService;
 
     private ResponseMessage verify(String type, Object item) {
         switch (type) {
@@ -128,36 +130,19 @@ public class RecipeServiceImpl implements RecipeService {
         return new ResponseMessage("Invalid type");
     }
 
-    private String getImageURL(Long recipeId) {
-        String filename = "recipe" + recipeId + ".jpg";
-        Path file = root.resolve(filename);
-        String url = "";
-        try {
-            List<String> list2 = Files.walk(this.root, 1).filter(path -> !path.equals(this.root) && path.getFileName().toString().equals(filename)).map(this.root::relativize).map(path -> path.getFileName().toString()).collect(Collectors.toList());
-            if (!list2.isEmpty()) {
-                url = MvcUriComponentsBuilder
-                        .fromMethodName(ImageController.class, "getFile", "recipe", file.getFileName().toString()).build().toString();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return url;
-    }
-
     @Override
     public List<Recipes> getAllRecipes() {
+        String item_type = "recipe";
         List<Recipes> list = new ArrayList<>();
         recipeRepo.findAll().forEach(list::add);
 
-        for (Recipes recipe:list) {
-            String url = getImageURL(recipe.getRecipeId());
+        for (Recipes recipe : list) {
+            String url = imageService.getImageURL(item_type, recipe.getRecipeId());
             recipe.setRecipeImage(url);
-            System.out.println(url);
         }
         return list;
     }
-        //            UserCollectionRecipeResponse collectionRecipe = new UserCollectionRecipeResponse();
+    //            UserCollectionRecipeResponse collectionRecipe = new UserCollectionRecipeResponse();
 //            collectionRecipe.setRecipeId(recipe.getRecipeId());
 //            collectionRecipe.setRecipeName(recipe.getRecipeName());
 //
@@ -248,7 +233,8 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipes getRecipe(Long recipeId) {
-        String url = getImageURL(recipeId);
+        String item_type = "recipe";
+        String url = imageService.getImageURL(item_type, recipeId);
         Recipes recipe = recipeRepo.findById(recipeId).get();
         recipe.setRecipeImage(url);
         return recipe;
@@ -262,25 +248,32 @@ public class RecipeServiceImpl implements RecipeService {
 
         List<Recipes> recipesList = searchRecipes(recipeSearchRequest);
 
+        User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+        if (currentLoggedUser == null) {
+            return new ArrayList<>();
+        }
+
         switch (recipeGetRequest.getRecipesGroup()) {
             case "personal":
-                User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
-                if (currentLoggedUser == null) {
-                    return new ArrayList<>();
-                }
 
-                RecipeCollection collection = recipeCollectionRepo.findByRecipeCollector(currentLoggedUser);
+                List<CollectionRecipe> collection = collectionRecipeRepo.findByRecipeCollector(currentLoggedUser);
+
                 if (collection == null) {
                     return new ArrayList<>();
                 }
 
-                recipesList = recipesList.stream().filter(recipe -> collection.getRecipeCollection().contains(recipe)).collect(Collectors.toList());
-                recipesList.stream().map(Recipes::getRecipeName).forEach(System.out::println);
+                List<Recipes> recipesCollection = collection.stream().map(CollectionRecipe::getRecipe).collect(Collectors.toList());
+
+                recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
+
+                recipesList = recipesList.stream().filter(recipesCollection::contains).collect(Collectors.toList());
                 break;
             case "shared":
+                recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
                 recipesList = recipesList.stream().filter(Recipes::getRecipeShared).collect(Collectors.toList());
                 break;
             case "unconfirmed":
+                recipesList = recipesList.stream().filter(recipe -> recipe.getRecipeOwner().getUserId().equals(currentLoggedUser.getUserId())).collect(Collectors.toList());
                 recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("pending") || recipe.getApprovalStatus().equals("rejected")).collect(Collectors.toList());
                 break;
             case "accepted":
@@ -305,7 +298,7 @@ public class RecipeServiceImpl implements RecipeService {
         String recipeName = recipeRequest.getRecipeName();
 
         ResponseMessage responseMessage = verify("name", recipeName);
-        if (responseMessage.getMessage().equals("Recipe name is valid")){
+        if (responseMessage.getMessage().equals("Recipe name is valid")) {
             recipe.setRecipeName(recipeName);
         } else {
             return responseMessage;
@@ -319,7 +312,7 @@ public class RecipeServiceImpl implements RecipeService {
             return responseMessage4;
         }
 
-        for (String recipeProductStatement: recipeProducts) {
+        for (String recipeProductStatement : recipeProducts) {
 
             ResponseMessage responseMessage5 = verify("recipeProductStatement", recipeProductStatement);
 
@@ -366,7 +359,7 @@ public class RecipeServiceImpl implements RecipeService {
             return responseMessage9;
         }
 
-        for (String recipeStepStatement: recipeSteps) {
+        for (String recipeStepStatement : recipeSteps) {
 
             ResponseMessage responseMessage10 = verify("recipeStepStatement", recipeStepStatement);
 
@@ -390,16 +383,20 @@ public class RecipeServiceImpl implements RecipeService {
         String creationDate = new Date().toInstant().toString();
         recipe.setCreationDate(creationDate);
 
-        RecipeCollection recipeCollection = recipeCollectionRepo.findByRecipeCollector(recipeOwner);
-        if (recipeCollection == null) {
-            recipeCollection = new RecipeCollection(recipeOwner);
-        }
-        recipeCollection.addRecipeToCollection(recipe);
-
-        recipeCollectionRepo.save(recipeCollection);
         recipeRepo.save(recipe);
 
-        Recipes lastAddedRecipe = getAllRecipes().stream().filter(p -> p.getCreationDate().equals(creationDate)).findFirst().orElse(null);
+        CollectionRecipe collectionRecipe = new CollectionRecipe();
+        collectionRecipe.setRecipe(recipe);
+        collectionRecipe.setRecipeCollector(recipeOwner);
+
+        collectionRecipeRepo.save(collectionRecipe);
+
+        System.out.println(creationDate);
+
+        Recipes lastAddedRecipe = getAllRecipes().stream().filter(p -> {
+            System.out.println(p.getCreationDate());
+            return p.getCreationDate().equals(creationDate);
+        }).findFirst().orElse(null);
         if (lastAddedRecipe != null) {
             return new ResponseMessage(lastAddedRecipe.getRecipeId() + " Recipe " + recipe.getRecipeName() + " has been added successfully");
         } else {
@@ -408,81 +405,108 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public ResponseMessage updateRecipes(Long recipeId, RecipeRequest recipeRequest) {
+    public ResponseMessage updateRecipe(Long recipeId, RecipeRequest recipeRequest) {
 
         String recipeName = "";
         Optional<Recipes> recipe = recipeRepo.findById(recipeId);
         if (recipe.isPresent()) {
-            Recipes updatedRecipes = recipe.get();
+            Recipes updatedRecipe = recipe.get();
             recipeName = recipeRequest.getRecipeName();
 
             ResponseMessage responseMessage = verify("name", recipeName);
-            if (responseMessage.getMessage().equals("Recipe name is valid")){
-                updatedRecipes.setRecipeName(recipeName);
+            if (responseMessage.getMessage().equals("Recipe name is valid")) {
+                updatedRecipe.setRecipeName(recipeName);
             } else {
                 return responseMessage;
             }
 
-//            Integer calories = productRequest.getCalories();
+//            List<String> recipeProducts = recipeRequest.getRecipeProducts();
 //
-//            ResponseMessage responseMessage2 = verify("update", "calories", calories);
+//            ResponseMessage responseMessage4 = verify("recipeProducts", recipeProducts);
 //
-//            if (responseMessage2.getMessage().equals("Product calories are valid")) {
-//                updatedProduct.setCalories(calories);
-//            } else {
-//                return responseMessage2;
+//            if (!(responseMessage4.getMessage().equals("Recipe products are valid"))) {
+//                return responseMessage4;
 //            }
 //
-//            String categoryName = productRequest.getCategory();
+//            for (String recipeProductStatement: recipeProducts) {
 //
-//            ResponseMessage responseMessage3 = verify("update", "category", categoryName);
+//                ResponseMessage responseMessage5 = verify("recipeProductStatement", recipeProductStatement);
 //
-//            if (responseMessage3.getMessage().equals("Product category is valid")) {
-//                updatedProduct.setCategory(categoryRepo.findByCategoryName(categoryName));
-//            } else {
-//                return responseMessage3;
+//                if (!(responseMessage5.getMessage().equals("Recipe product statement is valid"))) {
+//                    return responseMessage5;
+//                }
+//                String[] parts = recipeProductStatement.split(";");
+//                String recipeProductName = parts[0];
+//                Double recipeProductAmount = Double.valueOf(parts[1]);
+//                String recipeProductUnit = parts[2];
+//
+//                ResponseMessage responseMessage6 = verify("recipeProductName", recipeProductName);
+//
+//                if (!(responseMessage6.getMessage().equals("Recipe product name is valid"))) {
+//                    return responseMessage6;
+//                }
+//
+//                ResponseMessage responseMessage7 = verify("recipeProductAmount", recipeProductAmount);
+//
+//                if (!(responseMessage7.getMessage().equals("Recipe product amount is valid"))) {
+//                    return responseMessage7;
+//                }
+//
+//                ResponseMessage responseMessage8 = verify("recipeProductUnit", recipeProductUnit);
+//
+//                if (!(responseMessage8.getMessage().equals("Recipe product unit is valid"))) {
+//                    return responseMessage8;
+//                }
 //            }
+//
+//            updatedRecipe.setRecipeProducts(new ArrayList<>());
+//            recipeRepo.save(updatedRecipe);
+//
+//            for (String recipeProductStatement: recipeProducts) {
+//
+//                String[] parts = recipeProductStatement.split(";");
+//                String recipeProductName = parts[0];
+//                Double recipeProductAmount = Double.valueOf(parts[1]);
+//                String recipeProductUnit = parts[2];
+//
+//                Product product = productRepo.findByProductName(recipeProductName);
+//                RecipeProduct recipeProduct = new RecipeProduct();
+//                recipeProduct.setProduct(product);
+//                recipeProduct.setProductAmount(recipeProductAmount);
+//                recipeProduct.setProductUnit(recipeProductUnit);
+//                recipeProduct.setRecipe(updatedRecipe);
+//                updatedRecipe.addRecipeProduct(recipeProduct);
+//            }
+//            recipeRepo.save(updatedRecipe);
 
-            List<String> products = new ArrayList<>();
+            List<String> recipeSteps = recipeRequest.getRecipeSteps();
+            List<RecipeStep> steps = new ArrayList<>();
 
-            ResponseMessage responseMessage4 = verify( "list", products);
+            ResponseMessage responseMessage9 = verify("recipeSteps", recipeSteps);
 
-            if (!(responseMessage4.getMessage().equals("Product are valid"))) {
-                return responseMessage4;
+            if (!(responseMessage9.getMessage().equals("Recipe steps are valid"))) {
+                return responseMessage9;
             }
 
-            for (String productStatement: products) {
+            for (String recipeStepStatement : recipeSteps) {
 
-                ResponseMessage responseMessage5 = verify("productStatement", productStatement);
+                ResponseMessage responseMessage10 = verify("recipeStepStatement", recipeStepStatement);
 
-                if (!(responseMessage5.getMessage().equals("Product statement is valid"))) {
-                    return responseMessage5;
+                if (!(responseMessage10.getMessage().equals("Recipe step statement is valid"))) {
+                    return responseMessage10;
                 }
-                String[] parts = productStatement.split(";");
-                String productName = parts[0];
-                Double productAmount = Double.valueOf(parts[1]);
-
-                ResponseMessage responseMessage6 = verify("productName", productName);
-
-                if (!(responseMessage6.getMessage().equals("Product name is valid"))) {
-                    return responseMessage6;
-                }
-
-                ResponseMessage responseMessage7 = verify("productAmount", productAmount);
-
-                if (!(responseMessage7.getMessage().equals("Product amount is valid"))) {
-                    return responseMessage7;
-                }
-
-                RecipeProduct recipeProduct = updatedRecipes.getRecipeProducts().stream().filter(pn -> pn.getRecipe().getRecipeName().equals(productName)).findFirst().orElse(null);
-
-                if (recipeProduct != null) {
-                    recipeProduct.setProductAmount(productAmount);
-                } else {
-                    return new ResponseMessage( "Product " + productName + " belonging to product " + recipeName + " has not been found");
-                }
+                RecipeStep recipeStep = new RecipeStep();
+                recipeStep.setRecipeStepDescription(recipeStepStatement);
+                steps.add(recipeStep);
             }
-            recipeRepo.save(updatedRecipes);
+
+            updatedRecipe.setRecipeSteps(steps);
+
+            for (RecipeStep step : updatedRecipe.getRecipeSteps()) {
+                step.setRecipe(updatedRecipe);
+            }
+
+            recipeRepo.save(updatedRecipe);
 
             return new ResponseMessage("Recipe " + recipeName + " has been updated successfully");
         }
@@ -490,13 +514,37 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public ResponseMessage removeRecipes(Long recipeId) {
+    public ResponseMessage removeRecipe(Long recipeId) {
 
-        Optional<Recipes> recipes = recipeRepo.findById(recipeId);
-        if (recipes.isPresent()) {
-            Recipes removedRecipe = recipes.get();
-            recipeRepo.delete(removedRecipe);
-            return new ResponseMessage("Product " + removedRecipe.getRecipeName() + " has been removed successfully");
+        String item_type = "recipe";
+
+        User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+        if (currentLoggedUser == null) {
+            return new ResponseMessage("Current logged user has not been found");
+        }
+        Optional<Recipes> optionalRecipe = recipeRepo.findById(recipeId);
+        if (optionalRecipe.isPresent()) {
+            Recipes removedRecipe = optionalRecipe.get();
+
+            if (removedRecipe.getRecipeOwner().getUserId().equals(currentLoggedUser.getUserId())) {
+
+                List<CollectionRecipe> collection = new ArrayList<>();
+                collectionRecipeRepo.findAll().forEach(collection::add);
+                if (!collection.isEmpty()) {
+                    for (CollectionRecipe collectionRecipe : collection) {
+                        if (collectionRecipe.getRecipe().getRecipeId().equals(removedRecipe.getRecipeId())) {
+                            collectionRecipeRepo.delete(collectionRecipe);
+                        }
+                    }
+                }
+
+                imageService.removeImageIfExists(item_type, removedRecipe.getRecipeId());
+                recipeRepo.delete(removedRecipe);
+                return new ResponseMessage("Recipe " + removedRecipe.getRecipeName() + " has been removed successfully");
+            }
+
+            return new ResponseMessage("Only recipe owner can remove recipe");
+
         }
         return new ResponseMessage("Recipe id " + recipeId + " has not been found");
     }
@@ -585,6 +633,125 @@ public class RecipeServiceImpl implements RecipeService {
             }
         }
         return new ResponseMessage("Proper recipe has not been found");
+    }
+
+    @Override
+    public List<String> getAllUnits() {
+        return recipeProductUnits;
+    }
+
+    @Override
+    public ResponseMessage shareRecipe(Long recipeId) {
+        Recipes sharedRecipe = recipeRepo.findById(recipeId).orElse(null);
+
+        if (sharedRecipe != null) {
+            if (sharedRecipe.getApprovalStatus().equals("accepted")) {
+
+                User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+                if (currentLoggedUser == null) {
+                    return new ResponseMessage("Current logged user has not been found");
+                }
+
+                if (!sharedRecipe.getRecipeOwner().getUserId().equals(currentLoggedUser.getUserId())) {
+                    return new ResponseMessage("Only recipe owner can share recipe");
+                }
+
+                sharedRecipe.setRecipeShared(!sharedRecipe.getRecipeShared());
+
+                if (!sharedRecipe.getRecipeShared()) {
+                    List<CollectionRecipe> collection = new ArrayList<>();
+                    collectionRecipeRepo.findAll().forEach(collection::add);
+                    if (!collection.isEmpty()) {
+                        for (CollectionRecipe collectionRecipe : collection) {
+                            if (!collectionRecipe.getRecipeCollector().getUserId().equals(currentLoggedUser.getUserId()) && collectionRecipe.getRecipe().getRecipeId().equals(sharedRecipe.getRecipeId())) {
+                                collectionRecipeRepo.delete(collectionRecipe);
+                            }
+                        }
+                    }
+                }
+
+                recipeRepo.save(sharedRecipe);
+
+                String share = sharedRecipe.getRecipeShared() ? "shared" : "unshared";
+
+                return new ResponseMessage("Recipe with id " + recipeId + " has been " + share);
+            }
+            return new ResponseMessage("Only accepted recipe can be shared");
+        }
+
+        return new ResponseMessage("Recipe with id " + recipeId + " has not been found");
+
+    }
+
+    @Override
+    public ResponseMessage addRecipeToCollection(Long recipeId) {
+        String collected = "added to";
+
+        Recipes recipe = recipeRepo.findById(recipeId).orElse(null);
+
+        if (recipe != null) {
+            if (recipe.getApprovalStatus().equals("accepted")) {
+                if (recipe.getRecipeShared()) {
+
+                    User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+                    if (currentLoggedUser == null) {
+                        return new ResponseMessage("Current logged user has not been found");
+                    }
+
+                    if (recipe.getRecipeOwner().getUserId().equals(currentLoggedUser.getUserId())) {
+                        return new ResponseMessage("Recipe owner cannot add recipe to own collection");
+                    }
+
+                    List<CollectionRecipe> collection = collectionRecipeRepo.findByRecipeCollector(currentLoggedUser);
+                    if (collection == null) {
+                        CollectionRecipe collectionRecipe = new CollectionRecipe();
+                        collectionRecipe.setRecipe(recipe);
+                        collectionRecipe.setRecipeCollector(currentLoggedUser);
+                        collectionRecipeRepo.save(collectionRecipe);
+                    } else {
+                        collection = collection.stream().filter(collectionRecipe -> collectionRecipe.getRecipe().equals(recipe)).collect(Collectors.toList());
+                        if (collection.size() < 1) {
+                            CollectionRecipe collectionRecipe = new CollectionRecipe();
+                            collectionRecipe.setRecipe(recipe);
+                            collectionRecipe.setRecipeCollector(currentLoggedUser);
+                            collectionRecipeRepo.save(collectionRecipe);
+                        } else {
+                            collected = "removed from";
+                            collectionRecipeRepo.deleteById(collection.get(0).getId());
+                        }
+                    }
+
+                    return new ResponseMessage("Recipe with id " + recipeId + " has been " + collected + " collection");
+                }
+                return new ResponseMessage("Only shared recipe can be added to collection");
+            }
+            return new ResponseMessage("Only accepted recipe can be added to collection");
+        }
+
+        return new ResponseMessage("Recipe with id " + recipeId + " has not been found");
+    }
+
+    @Override
+    public ResponseMessage checkIfInCollection(Long recipeId) {
+
+        RecipeGetRequest request = new RecipeGetRequest();
+        request.setRecipesGroup("personal");
+        request.setPhrase("");
+
+        List<Recipes> recipesList = getRecipes(request);
+
+        Recipes recipe = recipeRepo.findByRecipeId(recipeId);
+
+        if (recipe == null) {
+            return new ResponseMessage("Recipe with id " + recipeId + " has not been found");
+        }
+
+        if (recipesList.contains(recipe)) {
+            return new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipeId + " is in collection");
+        }
+
+        return new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipeId + " is not in collection");
+
     }
 
 }

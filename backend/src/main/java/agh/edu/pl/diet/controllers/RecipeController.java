@@ -6,7 +6,6 @@ import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.payloads.response.UserCollectionRecipeResponse;
 import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,13 +51,17 @@ public class RecipeController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseMessage updateRecipes(@PathVariable("id") Long recipeId, @RequestBody RecipeRequest recipeRequest) {
-        return recipeService.updateRecipes(recipeId, recipeRequest);
+    public ResponseMessage updateRecipe(@PathVariable("id") Long recipeId, @RequestBody RecipeRequest recipeRequest) {
+        return recipeService.updateRecipe(recipeId, recipeRequest);
     }
 
     @DeleteMapping("/remove/{id}")
-    public ResponseMessage removeRecipes(@PathVariable("id") Long recipeId) {
-        return recipeService.removeRecipes(recipeId);
+    public ResponseEntity<ResponseMessage> removeRecipe(@PathVariable("id") Long recipeId) {
+        ResponseMessage message = recipeService.removeRecipe(recipeId);
+        if (!message.getMessage().endsWith("has been removed successfully")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     @PostMapping("/search")
@@ -93,4 +96,37 @@ public class RecipeController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
+
+    @GetMapping("/productUnits")
+    public List<String> getAllUnits() {
+        return recipeService.getAllUnits();
+    }
+
+    @GetMapping("/share/{id}")
+    public ResponseEntity<ResponseMessage> shareRecipe(@PathVariable("id") Long recipeId) {
+        ResponseMessage responseMessage = recipeService.shareRecipe(recipeId);
+        if (!responseMessage.getMessage().endsWith("has been shared") && !responseMessage.getMessage().endsWith("has been unshared")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @GetMapping("/addToCollection/{id}")
+    public ResponseEntity<ResponseMessage> addRecipeToCollection(@PathVariable("id") Long recipeId) {
+        ResponseMessage responseMessage = recipeService.addRecipeToCollection(recipeId);
+        if (!responseMessage.getMessage().endsWith("has been added to collection") && !responseMessage.getMessage().endsWith("has been removed from collection")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @GetMapping("/checkIfInCollection/{id}")
+    public ResponseEntity<ResponseMessage> checkIfInCollection(@PathVariable("id") Long recipeId) {
+        ResponseMessage responseMessage = recipeService.checkIfInCollection(recipeId);
+        if (!responseMessage.getMessage().endsWith("is in collection") && !responseMessage.getMessage().endsWith("is not in collection")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
 }

@@ -11,6 +11,7 @@ import agh.edu.pl.diet.repos.CategoryRepo;
 import agh.edu.pl.diet.repos.NutrientRepo;
 import agh.edu.pl.diet.repos.ProductRepo;
 import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.ProductService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final Path root = Paths.get("images/products");
-
     @Autowired
     private ProductRepo productRepo;
     @Autowired
@@ -42,6 +41,8 @@ public class ProductServiceImpl implements ProductService {
     private UserRepo userRepo;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ImageService imageService;
 
     private ResponseMessage verify(String mode, String type, Object item) {
         switch (type) {
@@ -131,29 +132,13 @@ public class ProductServiceImpl implements ProductService {
         return new ResponseMessage("Invalid type");
     }
 
-    private String getImageURL(Long productId) {
-        String filename = "product" + productId + ".jpg";
-        Path file = root.resolve(filename);
-        String url = "";
-        try {
-            List<String> list2 = Files.walk(this.root, 1).filter(path -> !path.equals(this.root) && path.getFileName().toString().equals(filename)).map(this.root::relativize).map(path -> path.getFileName().toString()).collect(Collectors.toList());
-            if (!list2.isEmpty()) {
-                url = MvcUriComponentsBuilder
-                        .fromMethodName(ImageController.class, "getFile", "product", file.getFileName().toString()).build().toString();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return url;
-    }
-
     @Override
     public List<Product> getAllProducts() {
+        String item_type = "product";
         List<Product> list = new ArrayList<>();
         productRepo.findAll().forEach(list::add);
         for (Product product:list) {
-            String url = getImageURL(product.getProductId());
+            String url = imageService.getImageURL(item_type, product.getProductId());
             product.setProductImage(url);
         }
         return list;
@@ -161,7 +146,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(Long productId) {
-        String url = getImageURL(productId);
+        String item_type = "product";
+        String url = imageService.getImageURL(item_type, productId);
         Product product = productRepo.findById(productId).get();
         product.setProductImage(url);
         return product;
@@ -409,6 +395,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ResponseMessage removeProduct(Long productId) {
 
+        String item_type = "product";
         Optional<Product> product = productRepo.findById(productId);
         if (product.isPresent()) {
             Product removedProduct = product.get();
@@ -423,6 +410,7 @@ public class ProductServiceImpl implements ProductService {
                 return new ResponseMessage("Only product owner is permitted to remove product");
             }
 
+            imageService.removeImageIfExists(item_type, removedProduct.getProductId());
             productRepo.delete(removedProduct);
             return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
         }

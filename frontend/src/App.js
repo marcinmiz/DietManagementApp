@@ -113,7 +113,7 @@ export default function App() {
                                 {
                                     state.loggedInStatus === "LOGGED_IN"
                                     ?
-                                    (<UserDashboard name={state.user.name} surname={state.user.surname}
+                                    (<UserDashboard userId={state.user.userId} name={state.user.name} surname={state.user.surname}
                                     loggedInStatus={state.loggedInStatus}
                                     admin={state.admin} adminMode={state.adminMode}
                                     handleAdminMode={handleAdminMode}

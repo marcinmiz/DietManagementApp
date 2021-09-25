@@ -10,4 +10,7 @@ public interface ImageService {
 
     Resource load(String type, String filename);
 
+    String getImageURL(String item_type, Long itemId);
+
+    void removeImageIfExists(String item_type, Long itemId);
 }
