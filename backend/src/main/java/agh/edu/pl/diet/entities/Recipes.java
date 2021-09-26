@@ -82,6 +82,10 @@ public class Recipes {
         this.recipeProducts.add(recipeProduct);
     }
 
+    public void removeRecipeProduct(RecipeProduct recipeProduct) {
+        recipeProducts.remove(recipeProduct);
+    }
+
     public void setRecipeImage(String url) {
         this.recipeImage = url;
     }
@@ -148,6 +152,10 @@ public class Recipes {
 
     public void addRecipeStep(RecipeStep recipeStep) {
         recipeSteps.add(recipeStep);
+    }
+
+    public void removeRecipeStep(RecipeStep recipeStep) {
+        recipeSteps.remove(recipeStep);
     }
 
     public List<RecipeCustomerSatisfaction> getRecipeCustomerSatisfactions() {

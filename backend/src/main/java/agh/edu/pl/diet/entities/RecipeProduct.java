@@ -57,6 +57,11 @@ public class RecipeProduct {
         this.recipe = recipe;
     }
 
+    public void removeRecipe(Recipes recipe) {
+        this.recipe.removeRecipeProduct(this);
+        this.recipe = null;
+    }
+
     public String getProductUnit() {
         return productUnit;
     }

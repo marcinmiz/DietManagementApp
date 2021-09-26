@@ -36,6 +36,10 @@ public class RecipeServiceImpl implements RecipeService {
     @Autowired
     private RecipeCustomerSatisfactionsRepo recipeCustomerSatisfactionsRepo;
     @Autowired
+    private RecipeProductsRepo recipeProductsRepo;
+    @Autowired
+    private RecipeStepsRepo recipeStepsRepo;
+    @Autowired
     private UserRepo userRepo;
     @Autowired
     private UserService userService;
@@ -142,94 +146,6 @@ public class RecipeServiceImpl implements RecipeService {
         }
         return list;
     }
-    //            UserCollectionRecipeResponse collectionRecipe = new UserCollectionRecipeResponse();
-//            collectionRecipe.setRecipeId(recipe.getRecipeId());
-//            collectionRecipe.setRecipeName(recipe.getRecipeName());
-//
-//            UserResponse recipeOwner = new UserResponse();
-//            recipeOwner.setUserId(recipe.getRecipeOwner().getUserId());
-//            recipeOwner.setName(recipe.getRecipeOwner().getName());
-//            recipeOwner.setSurname(recipe.getRecipeOwner().getSurname());
-//            recipeOwner.setUsername(recipe.getRecipeOwner().getUsername());
-//            recipeOwner.setRole(recipe.getRecipeOwner().getRole());
-//            recipeOwner.setCreationDate(recipe.getRecipeOwner().getCreationDate());
-//            recipeOwner.setWeights(recipe.getRecipeOwner().getWeights());
-//
-//            collectionRecipe.setRecipeOwner(recipeOwner);
-//            collectionRecipe.setCreationDate(recipe.getCreationDate());
-//            collectionRecipe.setApprovalStatus(recipe.getApprovalStatus());
-//            collectionRecipe.setAssessmentDate(recipe.getAssessmentDate());
-//            collectionRecipe.setRejectExplanation(recipe.getRejectExplanation());
-//            collectionRecipe.setRecipeImage(recipe.getRecipeImage());
-//            collectionRecipe.setRecipeShared(recipe.getRecipeShared());
-//            collectionRecipe.setRecipeSteps(recipe.getRecipeSteps());
-//
-//            List<RecipeCustomerSatisfactionResponse> customerSatisfactions = new ArrayList<>();
-//
-//            List<RecipeCustomerSatisfaction> recipeCustomerSatisfactions = recipe.getRecipeCustomerSatisfactions();
-//
-//            for (RecipeCustomerSatisfaction satisfaction: recipeCustomerSatisfactions) {
-//                UserResponse user = new UserResponse();
-//                user.setUserId(satisfaction.getCustomerSatisfactionOwner().getUserId());
-//                user.setName(satisfaction.getCustomerSatisfactionOwner().getName());
-//                user.setSurname(satisfaction.getCustomerSatisfactionOwner().getSurname());
-//                user.setUsername(satisfaction.getCustomerSatisfactionOwner().getUsername());
-//                user.setRole(satisfaction.getCustomerSatisfactionOwner().getRole());
-//                user.setCreationDate(satisfaction.getCustomerSatisfactionOwner().getCreationDate());
-//                user.setWeights(satisfaction.getCustomerSatisfactionOwner().getWeights());
-//
-//                agh.edu.pl.diet.payloads.response.RecipeCustomerSatisfactionResponse satisfactionResponse = new agh.edu.pl.diet.payloads.response.RecipeCustomerSatisfactionResponse();
-//                satisfactionResponse.setRecipeCustomerSatisfactionId(satisfaction.getRecipeCustomerSatisfactionId());
-//                satisfactionResponse.setCustomerSatisfactionOwner(user);
-//                satisfactionResponse.setRecipeFavourite(satisfaction.getRecipeFavourite());
-//                satisfactionResponse.setRecipeRating(satisfaction.getRecipeRating());
-//
-//                customerSatisfactions.add(satisfactionResponse);
-//            }
-//
-//            collectionRecipe.setRecipeCustomerSatisfactions(customerSatisfactions);
-//
-//            List<RecipeProductResponse> recipeProductsResponses = new ArrayList<>();
-//
-//            List<RecipeProduct> recipeProducts = recipe.getRecipeProducts();
-//
-//            for (RecipeProduct product: recipeProducts) {
-//
-//                UserResponse productOwner = new UserResponse();
-//                productOwner.setUserId(product.getProduct().getOwner().getUserId());
-//                productOwner.setName(product.getProduct().getOwner().getName());
-//                productOwner.setSurname(product.getProduct().getOwner().getSurname());
-//                productOwner.setCreationDate(product.getProduct().getOwner().getCreationDate());
-//                productOwner.setUsername(product.getProduct().getOwner().getUsername());
-//                productOwner.setRole(product.getProduct().getOwner().getRole());
-//                productOwner.setWeights(product.getProduct().getOwner().getWeights());
-//
-//                ProductResponse productResponse = new ProductResponse();
-//                productResponse.setProductId(product.getProduct().getProductId());
-//                productResponse.setProductName(product.getProduct().getProductName());
-//                productResponse.setCategory(product.getProduct().getCategory());
-//                productResponse.setCreationDate(product.getProduct().getCreationDate());
-//                productResponse.setCalories(product.getProduct().getCalories());
-//                productResponse.setProductImage(product.getProduct().getProductImage());
-//                productResponse.setOwner(productOwner);
-//                productResponse.setApprovalStatus(product.getProduct().getApprovalStatus());
-//                productResponse.setAssessmentDate(product.getProduct().getAssessmentDate());
-//                productResponse.setRejectExplanation(product.getProduct().getRejectExplanation());
-//                productResponse.setNutrients(product.getProduct().getNutrients());
-//
-//                RecipeProductResponse recipeProductResponse = new RecipeProductResponse();
-//                recipeProductResponse.setId(product.getId());
-//                recipeProductResponse.setProductAmount(product.getProductAmount());
-//                recipeProductResponse.setProductUnit(product.getProductUnit());
-//                recipeProductResponse.setProduct(productResponse);
-//
-//                recipeProductsResponses.add(recipeProductResponse);
-//            }
-//
-//            collectionRecipe.setRecipeProducts(recipeProductsResponses);
-//
-//            collectionRecipe.setRecipeSteps(recipe.getRecipeSteps());
-
 
     @Override
     public Recipes getRecipe(Long recipeId) {
@@ -411,6 +327,17 @@ public class RecipeServiceImpl implements RecipeService {
         Optional<Recipes> recipe = recipeRepo.findById(recipeId);
         if (recipe.isPresent()) {
             Recipes updatedRecipe = recipe.get();
+
+            User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+
+            if (currentLoggedUser == null) {
+                return new ResponseMessage("Current logged user has not been found");
+            }
+
+            if (!updatedRecipe.getRecipeOwner().equals(currentLoggedUser)) {
+                return new ResponseMessage("Only recipe owner is permitted to update recipe");
+            }
+
             recipeName = recipeRequest.getRecipeName();
 
             ResponseMessage responseMessage = verify("name", recipeName);
@@ -420,66 +347,71 @@ public class RecipeServiceImpl implements RecipeService {
                 return responseMessage;
             }
 
-//            List<String> recipeProducts = recipeRequest.getRecipeProducts();
-//
-//            ResponseMessage responseMessage4 = verify("recipeProducts", recipeProducts);
-//
-//            if (!(responseMessage4.getMessage().equals("Recipe products are valid"))) {
-//                return responseMessage4;
-//            }
-//
-//            for (String recipeProductStatement: recipeProducts) {
-//
-//                ResponseMessage responseMessage5 = verify("recipeProductStatement", recipeProductStatement);
-//
-//                if (!(responseMessage5.getMessage().equals("Recipe product statement is valid"))) {
-//                    return responseMessage5;
-//                }
-//                String[] parts = recipeProductStatement.split(";");
-//                String recipeProductName = parts[0];
-//                Double recipeProductAmount = Double.valueOf(parts[1]);
-//                String recipeProductUnit = parts[2];
-//
-//                ResponseMessage responseMessage6 = verify("recipeProductName", recipeProductName);
-//
-//                if (!(responseMessage6.getMessage().equals("Recipe product name is valid"))) {
-//                    return responseMessage6;
-//                }
-//
-//                ResponseMessage responseMessage7 = verify("recipeProductAmount", recipeProductAmount);
-//
-//                if (!(responseMessage7.getMessage().equals("Recipe product amount is valid"))) {
-//                    return responseMessage7;
-//                }
-//
-//                ResponseMessage responseMessage8 = verify("recipeProductUnit", recipeProductUnit);
-//
-//                if (!(responseMessage8.getMessage().equals("Recipe product unit is valid"))) {
-//                    return responseMessage8;
-//                }
-//            }
-//
-//            updatedRecipe.setRecipeProducts(new ArrayList<>());
-//            recipeRepo.save(updatedRecipe);
-//
-//            for (String recipeProductStatement: recipeProducts) {
-//
-//                String[] parts = recipeProductStatement.split(";");
-//                String recipeProductName = parts[0];
-//                Double recipeProductAmount = Double.valueOf(parts[1]);
-//                String recipeProductUnit = parts[2];
-//
-//                Product product = productRepo.findByProductName(recipeProductName);
-//                RecipeProduct recipeProduct = new RecipeProduct();
-//                recipeProduct.setProduct(product);
-//                recipeProduct.setProductAmount(recipeProductAmount);
-//                recipeProduct.setProductUnit(recipeProductUnit);
-//                recipeProduct.setRecipe(updatedRecipe);
-//                updatedRecipe.addRecipeProduct(recipeProduct);
-//            }
-//            recipeRepo.save(updatedRecipe);
+            List<String> recipeProducts = recipeRequest.getRecipeProducts();
+            List<RecipeProduct> currentRecipeProducts = new ArrayList<>();
+            currentRecipeProducts.addAll(updatedRecipe.getRecipeProducts());
+            List<RecipeProduct> products = new ArrayList<>();
+
+            ResponseMessage responseMessage4 = verify("recipeProducts", recipeProducts);
+
+            if (!(responseMessage4.getMessage().equals("Recipe products are valid"))) {
+                return responseMessage4;
+            }
+
+            for (String recipeProductStatement: recipeProducts) {
+
+                ResponseMessage responseMessage5 = verify("recipeProductStatement", recipeProductStatement);
+
+                if (!(responseMessage5.getMessage().equals("Recipe product statement is valid"))) {
+                    return responseMessage5;
+                }
+                String[] parts = recipeProductStatement.split(";");
+                String recipeProductName = parts[0];
+                Double recipeProductAmount = Double.valueOf(parts[1]);
+                String recipeProductUnit = parts[2];
+
+                ResponseMessage responseMessage6 = verify("recipeProductName", recipeProductName);
+
+                if (!(responseMessage6.getMessage().equals("Recipe product name is valid"))) {
+                    return responseMessage6;
+                }
+
+                ResponseMessage responseMessage7 = verify("recipeProductAmount", recipeProductAmount);
+
+                if (!(responseMessage7.getMessage().equals("Recipe product amount is valid"))) {
+                    return responseMessage7;
+                }
+
+                ResponseMessage responseMessage8 = verify("recipeProductUnit", recipeProductUnit);
+
+                if (!(responseMessage8.getMessage().equals("Recipe product unit is valid"))) {
+                    return responseMessage8;
+                }
+
+                Product product = productRepo.findByProductName(recipeProductName);
+                RecipeProduct recipeProduct = new RecipeProduct();
+                recipeProduct.setProduct(product);
+                recipeProduct.setProductAmount(recipeProductAmount);
+                recipeProduct.setProductUnit(recipeProductUnit);
+                recipeProduct.setRecipe(updatedRecipe);
+                products.add(recipeProduct);
+            }
+
+            for (RecipeProduct recipeProduct: currentRecipeProducts) {
+                System.out.println(recipeProduct.getProduct().getProductName());
+                recipeProduct.removeRecipe(updatedRecipe);
+                recipeProductsRepo.delete(recipeProduct);
+            }
+
+            for (RecipeProduct recipeProduct: products) {
+                recipeProductsRepo.save(recipeProduct);
+            }
+
+            updatedRecipe.setRecipeProducts(products);
 
             List<String> recipeSteps = recipeRequest.getRecipeSteps();
+            List<RecipeStep> currentSteps = new ArrayList<>();
+            currentSteps.addAll(updatedRecipe.getRecipeSteps());
             List<RecipeStep> steps = new ArrayList<>();
 
             ResponseMessage responseMessage9 = verify("recipeSteps", recipeSteps);
@@ -497,14 +429,24 @@ public class RecipeServiceImpl implements RecipeService {
                 }
                 RecipeStep recipeStep = new RecipeStep();
                 recipeStep.setRecipeStepDescription(recipeStepStatement);
+                recipeStep.setRecipe(updatedRecipe);
                 steps.add(recipeStep);
+            }
+            for (RecipeStep recipeStep: currentSteps) {
+                System.out.println(recipeStep.getRecipeStepDescription());
+                recipeStep.removeRecipe(updatedRecipe);
+                recipeStepsRepo.delete(recipeStep);
+            }
+
+            for (RecipeStep recipeStep: steps) {
+                recipeStepsRepo.save(recipeStep);
             }
 
             updatedRecipe.setRecipeSteps(steps);
 
-            for (RecipeStep step : updatedRecipe.getRecipeSteps()) {
-                step.setRecipe(updatedRecipe);
-            }
+            updatedRecipe.setApprovalStatus("pending");
+            updatedRecipe.setRejectExplanation(null);
+            updatedRecipe.setAssessmentDate(null);
 
             recipeRepo.save(updatedRecipe);
 

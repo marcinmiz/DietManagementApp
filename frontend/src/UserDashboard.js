@@ -40,7 +40,7 @@ export default function UserDashboard(props) {
                                 <div>Dashboard</div>
                             </Route>
                             <Route path={`${path}products/:productId?/:mode?`}>
-                                <Products admin={admin} adminMode={adminMode} loggedInStatus={props.loggedInStatus} handleAdminMode={props.handleAdminMode}/>
+                                <Products userId={props.userId} admin={admin} adminMode={adminMode} loggedInStatus={props.loggedInStatus} handleAdminMode={props.handleAdminMode}/>
                             </Route>
                             <Route path={`${path}recipes/:recipeId?/:mode?`}>
                                 <Recipes userId={props.userId} name={props.name} surname={props.surname} admin={admin} adminMode={adminMode}/>

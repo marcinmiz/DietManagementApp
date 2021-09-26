@@ -18,11 +18,19 @@ public class RecipeStep {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
-    @JoinColumn(name="recipe_id", nullable=false)
+    @JoinColumn(name="recipe_id")
     private Recipes recipe;
 
     @NotNull
     private String recipeStepDescription;
+
+    public RecipeStep() {
+    }
+
+    public RecipeStep(Recipes recipe, @NotNull String recipeStepDescription) {
+        this.recipe = recipe;
+        this.recipeStepDescription = recipeStepDescription;
+    }
 
     public Long getRecipeStepId() {
         return recipeStepId;
@@ -38,6 +46,11 @@ public class RecipeStep {
 
     public void setRecipe(Recipes recipe) {
         this.recipe = recipe;
+    }
+
+    public void removeRecipe(Recipes recipe) {
+        this.recipe.removeRecipeStep(this);
+        this.recipe = null;
     }
 
     public String getRecipeStepDescription() {

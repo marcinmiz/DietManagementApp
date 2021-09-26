@@ -201,6 +201,7 @@ export default function Products(props) {
         let product = {};
         product.product_id = data[x].productId;
         product.product_name = data[x].productName;
+        product.product_author_id = data[x].owner.userId;
         product.product_category = data[x].category.categoryName;
         product.product_author = data[x].owner.name + " " + data[x].owner.surname;
         product.product_calories = data[x].calories;
@@ -383,18 +384,18 @@ export default function Products(props) {
                                     {product.product_name}
                                 </div>
                                 <div className="product_buttons">
-                                    <Tooltip title="Delete" aria-label="delete">
+                                    {state.products[index].product_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
                                         <IconButton aria-label="delete" className="product_icon_button"
                                                     onClick={event => handleRemove(event, index)}>
                                             <DeleteIcon fontSize="small"/>
                                         </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Edit" aria-label="edit">
+                                    </Tooltip> : null}
+                                    {state.products[index].product_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
                                         <IconButton type="button" aria-label="edit" className="product_icon_button"
                                                     onClick={(event) => handleEdit(event, product.product_id)}>
                                             <EditIcon fontSize="small"/>
                                         </IconButton>
-                                    </Tooltip>
+                                    </Tooltip> : null}
                                 </div>
                             </div>
                             <div className="creation_date">
@@ -495,18 +496,18 @@ export default function Products(props) {
                                         {product.product_name}
                                     </div>
                                     <div className="product_buttons">
-                                        <Tooltip title="Delete" aria-label="delete">
+                                        {state.products[index].product_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
                                             <IconButton aria-label="delete" className="product_icon_button"
                                                         onClick={event => handleRemove(event, index)}>
                                                 <DeleteIcon fontSize="small"/>
                                             </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Edit" aria-label="edit">
+                                        </Tooltip> : null}
+                                        {state.products[index].product_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
                                             <IconButton type="button" aria-label="edit" className="product_icon_button"
                                                         onClick={(event) => handleEdit(event, product.product_id)}>
                                                 <EditIcon fontSize="small"/>
                                             </IconButton>
-                                        </Tooltip>
+                                        </Tooltip> : null}
                                     </div>
                                 </div>
                                 <div className="creation_date">
@@ -551,19 +552,19 @@ export default function Products(props) {
                                             {product.product_name}
                                         </div>
                                         <div className="product_buttons">
-                                            <Tooltip title="Delete" aria-label="delete">
+                                            {state.products[index].product_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
                                                 <IconButton aria-label="delete" className="product_icon_button"
                                                             onClick={event => handleRemove(event, index)}>
                                                     <DeleteIcon fontSize="small"/>
                                                 </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Edit" aria-label="edit">
+                                            </Tooltip> : null}
+                                            {state.products[index].product_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
                                                 <IconButton type="button" aria-label="edit"
                                                             className="product_icon_button"
                                                             onClick={(event) => handleEdit(event, product.product_id)}>
                                                     <EditIcon fontSize="small"/>
                                                 </IconButton>
-                                            </Tooltip>
+                                            </Tooltip> : null}
                                         </div>
                                     </div>
                                     <div className="creation_date">
@@ -714,6 +715,7 @@ export default function Products(props) {
                     handlePrevProduct={handlePrevProduct}
                     handleNextProduct={handleNextProduct}
                     header={products_parameters.productsGroup}
+                    userId={props.userId}
                 />}
             </div>
         </Container>

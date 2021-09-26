@@ -330,9 +330,9 @@ export default function Recipes(props) {
 
         const recipeId = state.recipes[index].recipe_id;
 
-        let recipe_favourite = false;
-
-        recipe_favourite = state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author === props.name + " " + props.surname)[0].customer_satisfaction_favourite;
+        // let recipe_favourite = false;
+        //
+        // recipe_favourite = state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author === props.name + " " + props.surname)[0].customer_satisfaction_favourite;
 
         let response = await http.put("/api/recipes/markFavourite/" + recipeId);
 
@@ -949,6 +949,7 @@ export default function Recipes(props) {
                     header={recipes_parameters.recipesGroup}
                     name={props.name}
                     surname={props.surname}
+                    userId={props.userId}
                 />}
             </div>
         </Container>

@@ -301,17 +301,9 @@ export default function ViewerModal(props) {
     };
 
     const handleAddStep = () => {
-        let number;
-        let steps_quantity = state.selected_item.recipe_steps.length;
-        if (steps_quantity <= 0) {
-            number = 1;
-        } else {
-            number = steps_quantity + 1;
-        }
         const item = {
             ...state.selected_item,
             "recipe_steps": [...state.selected_item.recipe_steps, {
-                step_number: number,
                 step_name: state.recipe_add_step_name
             }]
         };
@@ -675,13 +667,7 @@ export default function ViewerModal(props) {
 
             let step = state.selected_item.recipe_steps[i];
 
-            if (step.step_number < 1 || (i > 0 && step.step_number < state.selected_item.recipeSteps[i - 1].step_number)) {
-                setState({
-                    ...state,
-                    "msg": "Recipe step number has to be greater than 0 and previous step number."
-                });
-                return "error";
-            } else if (step.step_name.length < 3 || step.step_name.length > 50) {
+            if (step.step_name.length < 3 || step.step_name.length > 50) {
                 setState({
                     ...state,
                     "msg": "Recipe step description has to have min 3 and max 50 characters"
@@ -850,18 +836,18 @@ export default function ViewerModal(props) {
                         </div>}
 
                     <div className="product_buttons">
-                        <Tooltip title="Delete" aria-label="delete">
+                        {state.selected_item.product_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
                             <IconButton aria-label="delete" className="product_icon_button"
                                         onClick={handleRemove} disabled={state.selected_item.product_id === 'new'}>
                                 <DeleteIcon fontSize="small"/>
                             </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit" aria-label="edit">
+                        </Tooltip> : null}
+                        {state.selected_item.product_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
                             <IconButton type="button" aria-label="edit" className="product_icon_button"
                                         onClick={(event) => handleEdit(event, state.selected_item.product_id)}>
                                 <EditIcon fontSize="small"/>
                             </IconButton>
-                        </Tooltip>
+                        </Tooltip> : null}
                     </div>
                 </div>
                 <div className="creation_date">
@@ -985,19 +971,19 @@ export default function ViewerModal(props) {
                         </div>}
 
                     <div className="product_buttons">
-                        <Tooltip title="Delete" aria-label="delete">
+                        {state.selected_item.recipe_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
                             <IconButton aria-label="delete" className="product_icon_button"
                                         onClick={handleRemove} disabled={state.selected_item.recipe_id === 'new'}>
                                 <DeleteIcon fontSize="small"/>
                             </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit" aria-label="edit">
+                        </Tooltip> : null}
+                        {state.selected_item.recipe_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
                             <IconButton type="button" aria-label="edit" className="product_icon_button"
                                         onClick={(event) => handleEdit(event, state.selected_item.recipe_id)}>
                                 <EditIcon fontSize="small"/>
                             </IconButton>
-                        </Tooltip>
-                        {state.loaded && handleFavouriteIcon(item_index)}
+                        </Tooltip> : null}
+                        {/*{state.loaded && handleFavouriteIcon(item_index)}*/}
                     </div>
                 </div>
                 <div className="creation_date">
@@ -1032,27 +1018,27 @@ export default function ViewerModal(props) {
                                         No author
                                     </div>
                             )}
-                            <div className="recipe_actions">
-                                <div className="recipe_ratings_header">
-                                    <div className="recipe_ratings">
-                                        General: {5.0} ({2} {"ratings"})
-                                    </div>
-                                    <Rating name="read-only" value={5.0} precision={0.1} readOnly/>
-                                    <div className="recipe_ratings_header">
-                                        Personal rating
-                                    </div>
-                                    <Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : 4.0}
-                                             aria-label="rate" placement="top">
-                                        <Rating name="half-rating" value={4.0} precision={0.1}
-                                                onChangeActive={(event, newHover) => setState({
-                                                    ...state,
-                                                    "hover_rating": newHover
-                                                })}/>
-                                    </Tooltip>
-                                </div>
+                            {/*<div className="recipe_actions">*/}
+                                {/*<div className="recipe_ratings_header">*/}
+                                    {/*<div className="recipe_ratings">*/}
+                                        {/*General: {5.0} ({2} {"ratings"})*/}
+                                    {/*</div>*/}
+                                    {/*<Rating name="read-only" value={5.0} precision={0.1} readOnly/>*/}
+                                    {/*<div className="recipe_ratings_header">*/}
+                                        {/*Personal rating*/}
+                                    {/*</div>*/}
+                                    {/*<Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : 4.0}*/}
+                                             {/*aria-label="rate" placement="top">*/}
+                                        {/*<Rating name="half-rating" value={4.0} precision={0.1}*/}
+                                                {/*onChangeActive={(event, newHover) => setState({*/}
+                                                    {/*...state,*/}
+                                                    {/*"hover_rating": newHover*/}
+                                                {/*})}/>*/}
+                                    {/*</Tooltip>*/}
+                                {/*</div>*/}
                                 {/*{state.recipes[index].recipe_shared ? <Tooltip title="Cancel sharing" aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}*/}
 
-                            </div>
+                            {/*</div>*/}
                         </div>
                     </div>
                     <div className="recipe_ingredients_steps">
@@ -1161,7 +1147,7 @@ export default function ViewerModal(props) {
                                 {state.selected_item.recipe_steps.length === 0 ? "No steps added. Add new step" :
                                     state.selected_item.recipe_steps.map((step, index) =>
                                     <div key={index} className="recipe_step">
-                                        <div>{step.step_number+". "}</div>
+                                        <div>{index+1}. </div>
                                         <div>{step.step_name}</div>
                                     </div>
                                 )}
