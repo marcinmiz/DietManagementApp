@@ -1,5 +1,6 @@
 package agh.edu.pl.diet.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ public class Recipes {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private List<RecipeCustomerSatisfaction> recipeCustomerSatisfactions = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "recipe", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesRecipe> dietaryPreferences = new HashSet<>();

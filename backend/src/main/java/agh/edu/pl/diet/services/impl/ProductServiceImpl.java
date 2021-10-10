@@ -1,6 +1,5 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.controllers.ImageController;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.ProductGetRequest;
@@ -16,16 +15,14 @@ import agh.edu.pl.diet.services.ProductService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -137,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
         String item_type = "product";
         List<Product> list = new ArrayList<>();
         productRepo.findAll().forEach(list::add);
-        for (Product product:list) {
+        for (Product product : list) {
             String url = imageService.getImageURL(item_type, product.getProductId());
             product.setProductImage(url);
         }
@@ -211,7 +208,7 @@ public class ProductServiceImpl implements ProductService {
         String productName = productRequest.getProductName();
 
         ResponseMessage responseMessage = verify("add", "name", productName);
-        if (responseMessage.getMessage().equals("Product name is valid")){
+        if (responseMessage.getMessage().equals("Product name is valid")) {
             product.setProductName(productName);
         } else {
             return responseMessage;
@@ -219,7 +216,7 @@ public class ProductServiceImpl implements ProductService {
 
         Integer calories = productRequest.getCalories();
 
-        ResponseMessage responseMessage2 = verify("add","calories", calories);
+        ResponseMessage responseMessage2 = verify("add", "calories", calories);
 
         if (responseMessage2.getMessage().equals("Product calories are valid")) {
             product.setCalories(calories);
@@ -245,9 +242,9 @@ public class ProductServiceImpl implements ProductService {
             return responseMessage4;
         }
 
-        for (String nutrientStatement: nutrients) {
+        for (String nutrientStatement : nutrients) {
 
-            ResponseMessage responseMessage5 = verify("add","nutrientStatement", nutrientStatement);
+            ResponseMessage responseMessage5 = verify("add", "nutrientStatement", nutrientStatement);
 
             if (!(responseMessage5.getMessage().equals("Product nutrient statement is valid"))) {
                 return responseMessage5;
@@ -256,13 +253,13 @@ public class ProductServiceImpl implements ProductService {
             String nutrientName = parts[0];
             Double nutrientAmount = Double.valueOf(parts[1]);
 
-            ResponseMessage responseMessage6 = verify("add","nutrientName", nutrientName);
+            ResponseMessage responseMessage6 = verify("add", "nutrientName", nutrientName);
 
             if (!(responseMessage6.getMessage().equals("Product nutrient name is valid"))) {
                 return responseMessage6;
             }
 
-            ResponseMessage responseMessage7 = verify("add","nutrientAmount", nutrientAmount);
+            ResponseMessage responseMessage7 = verify("add", "nutrientAmount", nutrientAmount);
 
             if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
                 return responseMessage7;
@@ -315,7 +312,7 @@ public class ProductServiceImpl implements ProductService {
             productName = productRequest.getProductName();
 
             ResponseMessage responseMessage = verify("update", "name", productName);
-            if (responseMessage.getMessage().equals("Product name is valid")){
+            if (responseMessage.getMessage().equals("Product name is valid")) {
                 updatedProduct.setProductName(productName);
             } else {
                 return responseMessage;
@@ -349,7 +346,7 @@ public class ProductServiceImpl implements ProductService {
                 return responseMessage4;
             }
 
-            for (String nutrientStatement: nutrients) {
+            for (String nutrientStatement : nutrients) {
 
                 ResponseMessage responseMessage5 = verify("update", "nutrientStatement", nutrientStatement);
 
@@ -377,7 +374,7 @@ public class ProductServiceImpl implements ProductService {
                 if (productNutrient != null) {
                     productNutrient.setNutrientAmount(nutrientAmount);
                 } else {
-                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
+                    return new ResponseMessage("Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
                 }
             }
 
@@ -414,7 +411,7 @@ public class ProductServiceImpl implements ProductService {
             productRepo.delete(removedProduct);
             return new ResponseMessage("Product " + removedProduct.getProductName() + " has been removed successfully");
         }
-            return new ResponseMessage("Product id " + productId + " has not been found");
+        return new ResponseMessage("Product id " + productId + " has not been found");
     }
 
     @Override
@@ -475,7 +472,7 @@ public class ProductServiceImpl implements ProductService {
                     return new ResponseMessage("Wrong assessment");
             }
         }
-            return new ResponseMessage("Proper product has not been found");
+        return new ResponseMessage("Proper product has not been found");
 
     }
 

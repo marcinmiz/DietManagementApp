@@ -13,8 +13,7 @@ public class DietaryPreferences {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dietaryPreferenceId;
-//    private String dietaryPreferencesName;
-    private Integer totalCalories;
+    private Integer totalDailyCalories;
     @ManyToOne
     private User preferenceOwner;
     @ManyToOne
@@ -45,20 +44,12 @@ public class DietaryPreferences {
         this.dietaryPreferenceId = dietaryPreferenceId;
     }
 
-//    public String getDietaryPreferencesName() {
-//        return dietaryPreferencesName;
-//    }
-//
-//    public void setDietaryPreferencesName(String dietaryPreferencesName) {
-//        this.dietaryPreferencesName = dietaryPreferencesName;
-//    }
-
-    public Integer getTotalCalories() {
-        return totalCalories;
+    public Integer getTotalDailyCalories() {
+        return totalDailyCalories;
     }
 
-    public void setTotalCalories(Integer totalCalories) {
-        this.totalCalories = totalCalories;
+    public void setTotalDailyCalories(Integer totalDailyCalories) {
+        this.totalDailyCalories = totalDailyCalories;
     }
 
     public User getPreferenceOwner() {
@@ -129,6 +120,14 @@ public class DietaryPreferences {
         this.products = products;
     }
 
+    public void addProduct(DietaryPreferencesProduct product) {
+        this.products.add(product);
+    }
+
+    public void removeProduct(DietaryPreferencesProduct product) {
+        products.remove(product);
+    }
+
     public Set<DietaryPreferencesRecipe> getRecipes() {
         return recipes;
     }
@@ -136,4 +135,13 @@ public class DietaryPreferences {
     public void setRecipes(Set<DietaryPreferencesRecipe> recipes) {
         this.recipes = recipes;
     }
+
+    public void addRecipe(DietaryPreferencesRecipe recipe) {
+        this.recipes.add(recipe);
+    }
+
+    public void removeRecipe(DietaryPreferencesRecipe recipe) {
+        recipes.remove(recipe);
+    }
+
 }

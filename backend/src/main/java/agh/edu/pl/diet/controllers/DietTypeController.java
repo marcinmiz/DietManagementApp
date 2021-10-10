@@ -12,15 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/type")
+@RequestMapping("/api/dietTypes")
 public class DietTypeController {
 
     @Autowired
     private DietTypeService dietTypeService;
 
     @GetMapping
-    public ResponseEntity<List<DietType>> getAllDietType() {
-        return ResponseEntity.status(HttpStatus.OK).body(dietTypeService.getAllDietType());
+    public ResponseEntity<List<DietType>> getAllDietTypes() {
+        return ResponseEntity.status(HttpStatus.OK).body(dietTypeService.getAllDietTypes());
     }
 
 }

@@ -5,6 +5,7 @@ import {Container} from '@material-ui/core';
 import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import {Switch, Route, useRouteMatch, useParams, Redirect, useHistory} from 'react-router-dom'
+import Preferences from "./pages/Preferences";
 
 function Topic() {
     let { settingsId, mode } = useParams();
@@ -46,7 +47,7 @@ export default function UserDashboard(props) {
                                 <Recipes userId={props.userId} name={props.name} surname={props.surname} admin={admin} adminMode={adminMode}/>
                             </Route>
                             <Route path={`${path}preferences`}>
-                                Dietary Preferences
+                                <Preferences admin={admin} adminMode={adminMode}/>
                             </Route>
                             <Route path={`${path}programmes`}>
                                 Dietary Programmes

@@ -6,13 +6,11 @@ import java.util.List;
 
 public interface DietTypeService {
 
-    List<DietType> getAllDietType();
+    List<DietType> getAllDietTypes();
 
- //   public void update(Object o);
-
-    double calculateCalories();
-    double calculateProtein();
-    double calculateCarbohydrates();
-    double calculateFats();
+    Double calculateCalories(String diet_type, Double targetWeight);
+    Double calculateProtein(String diet_type, Double targetWeight);
+    Double calculateCarbohydrates(String diet_type, Double targetWeight);
+    Double calculateFats(String diet_type, Double targetWeight);
 
     }

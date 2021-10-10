@@ -327,7 +327,16 @@
     width: 50%;
 }
 
-.product_nutrients_header {
+.preferenceDietType, .preferenceDetailsEdit, .nutrients, .preferredProducts, .preferredRecipes {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    width: 20%;
+    text-align: center;
+}
+
+.product_nutrients_header, .preference_nutrients_header, .preference_products_header, .preference_recipes_header {
     font-size: large;
     margin-top: 1.0rem;
     margin-bottom: 0.5rem;
@@ -365,7 +374,7 @@
     justify-content: flex-start;
 }
 
-.product_icon_button, .recipe_icon_button {
+.product_icon_button, .recipe_icon_button, .preferenceProduct_button, .preferenceRecipe_button {
     padding: 2px !important;
 }
 
@@ -383,7 +392,7 @@
     color: white !important;
 }
 
-.category_select, .author_select {
+.category_select, .author_select, .diet_type_select {
     color: white !important;
 }
 
@@ -425,6 +434,7 @@
         max-height: 75%;
         justify-content: flex-start;
     }
+
     .unconfirmed_products_list, .unconfirmed_recipes_list {
         max-height: 75% !important;
     }
@@ -451,13 +461,28 @@
     }
 }
 
+@media screen and (max-width: 1160px) {
+    .dietary_preference {
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 1100px) {
+    .preferenceLayout {
+        flex-direction: column !important;
+    }
+    .preference_input {
+        width: 100% !important;
+    }
+}
+
 @media screen and (min-width: 1525px) {
     .product, .recipe {
         width: 27%;
     }
 }
 
-.add_ingredient {
+.add_ingredient, .add_preferred_product, .add_preferred_nutrient, .add_preferred_recipe {
     display: flex;
     align-items: flex-end;
 }
@@ -503,6 +528,17 @@
 
 .ingredient_edit {
     display: flex;
+}
+
+.preferenceProduct_edit, .preferenceRecipe_edit {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.preferenceNutrient_edit {
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .product_details_edit, .recipe_details_edit {
@@ -654,4 +690,70 @@
     align-items: center;
     justify-content: space-evenly;
     color: red;
+}
+
+.dietary_preferences_list {
+    /*display: flex;*/
+    /*flex-wrap: wrap;*/
+    /*justify-content: center;*/
+    overflow-y: scroll;
+    max-height: 77%;
+}
+
+.dietary_preference {
+    min-height: 200px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.preference_nutrient, .preference_product, .preference_recipe {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.preference_basic_info, .preference_details, .preference_nutrients, .preference_products, .preference_recipes {
+    height: 200px !important;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.add_preference {
+    width: 100%;
+    text-align: center;
+}
+
+.preferenceDietTypePart {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#preferredProducts_list {
+    width: 100%;
+}
+
+.preference_edit {
+    width: 100%;
+}
+
+.preferenceLayout {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.preference_input {
+    width: 80%;
+}
+
+.upThumb {
+    color: darkgreen;
+}
+
+.downThumb {
+    color: darkred;
 }

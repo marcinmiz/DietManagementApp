@@ -5,13 +5,11 @@ import java.util.List;
 
 public class DietaryPreferencesRequest {
     @NotBlank
-    private Long dietaryPreferenceId;
+    private Boolean dietTypeSelected;
     @NotBlank
-    private Integer totalCalories;
+    private Integer totalDailyCalories;
     @NotBlank
     private String dietType;
-    @NotBlank
-    private String preferenceOwner;
     @NotBlank
     private Integer caloriesPerMeal;
     @NotBlank
@@ -25,20 +23,20 @@ public class DietaryPreferencesRequest {
     @NotBlank
     private List<String> recipes;
 
-    public Long getDietaryPreferenceId() {
-        return dietaryPreferenceId;
+    public Boolean getDietTypeSelected() {
+        return dietTypeSelected;
     }
 
-    public void setDietaryPreferenceId(Long dietaryPreferenceId) {
-        this.dietaryPreferenceId = dietaryPreferenceId;
+    public void setDietTypeSelected(Boolean dietTypeSelected) {
+        this.dietTypeSelected = dietTypeSelected;
     }
 
-    public Integer getTotalCalories() {
-        return totalCalories;
+    public Integer getTotalDailyCalories() {
+        return totalDailyCalories;
     }
 
-    public void setTotalCalories(Integer totalCalories) {
-        this.totalCalories = totalCalories;
+    public void setTotalDailyCalories(Integer totalDailyCalories) {
+        this.totalDailyCalories = totalDailyCalories;
     }
 
     public String getDietType() {
@@ -47,14 +45,6 @@ public class DietaryPreferencesRequest {
 
     public void setDietType(String dietType) {
         this.dietType = dietType;
-    }
-
-    public String getPreferenceOwner() {
-        return preferenceOwner;
-    }
-
-    public void setPreferenceOwner(String preferenceOwner) {
-        this.preferenceOwner = preferenceOwner;
     }
 
     public Integer getCaloriesPerMeal() {

@@ -1,7 +1,6 @@
 package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.entities.DietType;
-import agh.edu.pl.diet.payloads.request.DietTypeRequest;
 import agh.edu.pl.diet.repos.DietTypeRepo;
 import agh.edu.pl.diet.services.DietTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,67 +10,73 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class DietTypeImpl extends DietTypeRequest implements DietTypeService {
+public class DietTypeImpl implements DietTypeService {
 
     @Autowired
     DietTypeRepo dietTypeRepo;
 
-     void Type(double multiplicationCalculateProtein, double multiplicationCalculateCarbohydrates, double multiplicationCalculateFats) {
-        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
-        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
-        this.multiplicationCalculateFats = multiplicationCalculateFats;
-    }
-
-
     @Override
-    public List<DietType> getAllDietType() {
+    public List<DietType> getAllDietTypes() {
         List<DietType> list = new ArrayList<>();
         dietTypeRepo.findAll().forEach(list::add);
         return list;
     }
 
-    public double calculateCalories() {
-        double calculatedCalories = calculateProtein() * 4 + calculateCarbohydrates() * 4 + calculateFats() * 9;
-        return calculatedCalories;
+    public Double calculateCalories(String diet_type, Double targetWeight) {
+        return calculateProtein(diet_type, targetWeight) * 4 + calculateCarbohydrates(diet_type, targetWeight) * 4 + calculateFats(diet_type, targetWeight) * 9;
     }
 
     @Override
-    public double calculateProtein() {
-        double calculatedProtein = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateProtein));
+    public Double calculateProtein(String diet_type, Double targetWeight) {
+        Double calculatedProtein = 0.0;
+        switch (diet_type.toLowerCase()) {
+            case "regular":
+                //get coefficients from database
+                calculatedProtein = targetWeight * 0.9;
+                break;
+            case "bodybuilding":
+                calculatedProtein = targetWeight * 1.5;
+                break;
+            case "ketogenic":
+                calculatedProtein = targetWeight * 1.0;
+                break;
+                default:
+
+        }
         return calculatedProtein;
     }
 
     @Override
-    public double calculateCarbohydrates() {
-        double calculatedCarbohydrates = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateCarbohydrates));
+    public Double calculateCarbohydrates(String diet_type, Double targetWeight) {
+        Double calculatedCarbohydrates = 0.0;
+        switch (diet_type.toLowerCase()) {
+            case "regular":
+                calculatedCarbohydrates = targetWeight * 4.0;
+                break;
+            case "bodybuilding":
+                calculatedCarbohydrates = targetWeight * 1.0;
+                break;
+            case "ketogenic":
+                calculatedCarbohydrates = targetWeight * 0.5;
+                break;
+        }
         return calculatedCarbohydrates;
     }
 
     @Override
-    public double calculateFats() {
-        double calculatedFats = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateFats));
+    public Double calculateFats(String diet_type, Double targetWeight) {
+        Double calculatedFats = 0.0;
+        switch (diet_type.toLowerCase()) {
+            case "regular":
+                calculatedFats = targetWeight * 0.5;
+                break;
+            case "bodybuilding":
+                calculatedFats = targetWeight * 0.5;
+                break;
+            case "ketogenic":
+                calculatedFats = targetWeight * 1.5;
+                break;
+        }
         return calculatedFats;
     }
-
-    private double multiplicationCalculateProtein;
-    private double multiplicationCalculateCarbohydrates;
-    private double multiplicationCalculateFats;
-
-//    public DietTypeImpl(Type multiplicationCalculateProtein, Type multiplicationCalculateCarbohydrates, Type multiplicationCalculateFats) {
-//        this.multiplicationCalculateProtein = multiplicationCalculateProtein;
-//        this.multiplicationCalculateCarbohydrates = multiplicationCalculateCarbohydrates;
-//        this.multiplicationCalculateFats = multiplicationCalculateFats;
-//    }
-
-//    public Type getMultiplicationCalculateCarbohydrates() {
-//        return multiplicationCalculateCarbohydrates;
-//    }
-//
-//    public Type getMultiplicationCalculateProtein() {
-//        return multiplicationCalculateProtein;
-//    }
-//
-//    public Type getMultiplicationCalculateFats() {
-//        return multiplicationCalculateFats;
-//    }
 }

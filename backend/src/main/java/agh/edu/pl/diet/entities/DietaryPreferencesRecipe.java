@@ -47,6 +47,11 @@ public class DietaryPreferencesRecipe {
         this.dietaryPreferences = dietaryPreferences;
     }
 
+    public void removeDietaryPreference() {
+        this.dietaryPreferences.removeRecipe(this);
+        this.dietaryPreferences = null;
+    }
+
     public Recipes getRecipe() {
         return recipe;
     }

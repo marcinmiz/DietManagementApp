@@ -4,10 +4,14 @@ import agh.edu.pl.diet.entities.DietaryPreferences;
 import agh.edu.pl.diet.payloads.request.DietaryPreferencesRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 
+import java.util.List;
+
 
 public interface DietaryPreferencesService {
 
   //  List<DietaryPreferences> getAllPreferencesService();
+
+    List<DietaryPreferences> getUserDietaryPreferences();
 
     DietaryPreferences getDietaryPreferences(Long dietaryPreferencesId);
 

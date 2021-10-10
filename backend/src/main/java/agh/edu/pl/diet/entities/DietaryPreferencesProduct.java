@@ -47,6 +47,11 @@ public class DietaryPreferencesProduct {
         this.dietaryPreferences = dietaryPreferences;
     }
 
+    public void removeDietaryPreference() {
+        this.dietaryPreferences.removeProduct(this);
+        this.dietaryPreferences = null;
+    }
+
     public Product getProduct() {
         return product;
     }

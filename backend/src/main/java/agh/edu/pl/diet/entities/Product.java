@@ -1,5 +1,6 @@
 package agh.edu.pl.diet.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -24,6 +25,7 @@ public class Product {
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<ProductNutrient> nutrients = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
     private Set<DietaryPreferencesProduct> dietaryPreferences = new HashSet<>();

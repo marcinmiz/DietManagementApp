@@ -30,6 +30,9 @@ public class DietaryPreferencesNutrient {
     @NotNull
     private Double nutrientAmount;
 
+    @NotNull
+    private String nutrientRelation;
+
     public DietaryPreferencesNutrient() {}
 
     public Long getId() {
@@ -62,5 +65,13 @@ public class DietaryPreferencesNutrient {
 
     public void setNutrientAmount(Double nutrientAmount) {
         this.nutrientAmount = nutrientAmount;
+    }
+
+    public String getNutrientRelation() {
+        return nutrientRelation;
+    }
+
+    public void setNutrientRelation(String nutrientRelation) {
+        this.nutrientRelation = nutrientRelation;
     }
 }

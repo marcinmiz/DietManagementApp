@@ -30,7 +30,6 @@ public class User {
     private String creationDate;
     @Transient
     private List<Pair<String, Float>> weights = new ArrayList<>();
-//    private double targetWeight;
 
     public Long getUserId() {
         return userId;

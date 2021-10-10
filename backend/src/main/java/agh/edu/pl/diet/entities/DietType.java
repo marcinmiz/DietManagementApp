@@ -3,18 +3,16 @@ package agh.edu.pl.diet.entities;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "Diet_type")
+@Table(name = "Diet_types")
 public class DietType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dietTypeId;
     private String dietTypeName;
-
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "diet_type", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-//    @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
-//    private Set<DietaryPreferences> dietaryPreferences = new HashSet<>();
+    private Double proteinCoefficient;
+    private Double carbohydrateCoefficient;
+    private Double FatCoefficient;
 
     public Long getDietTypeId() {
         return dietTypeId;
@@ -32,11 +30,27 @@ public class DietType {
         this.dietTypeName = dietTypeName;
     }
 
-//    public Set<DietaryPreferences> getDietaryPreferences() {
-//        return dietaryPreferences;
-//    }
-//
-//    public void setDietaryPreferences(Set<DietaryPreferences> dietaryPreferences) {
-//        this.dietaryPreferences = dietaryPreferences;
-//    }
+    public Double getProteinCoefficient() {
+        return proteinCoefficient;
+    }
+
+    public void setProteinCoefficient(Double proteinCoefficient) {
+        this.proteinCoefficient = proteinCoefficient;
+    }
+
+    public Double getCarbohydrateCoefficient() {
+        return carbohydrateCoefficient;
+    }
+
+    public void setCarbohydrateCoefficient(Double carbohydrateCoefficient) {
+        this.carbohydrateCoefficient = carbohydrateCoefficient;
+    }
+
+    public Double getFatCoefficient() {
+        return FatCoefficient;
+    }
+
+    public void setFatCoefficient(Double fatCoefficient) {
+        FatCoefficient = fatCoefficient;
+    }
 }

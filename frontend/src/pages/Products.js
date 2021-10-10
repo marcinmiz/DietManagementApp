@@ -141,6 +141,7 @@ export default function Products(props) {
                 .then(async resp => {
                     let table = [];
 
+                    console.log(resp.data);
                     for (let x in resp.data) {
                         table[x] = createProduct(resp.data, x);
                     }
@@ -201,6 +202,8 @@ export default function Products(props) {
         let product = {};
         product.product_id = data[x].productId;
         product.product_name = data[x].productName;
+        console.log(data[x]);
+        console.log(data[x].owner);
         product.product_author_id = data[x].owner.userId;
         product.product_category = data[x].category.categoryName;
         product.product_author = data[x].owner.name + " " + data[x].owner.surname;
@@ -428,8 +431,7 @@ export default function Products(props) {
                         <div className="product_status">
                             <div className="unconfirmed_header">Status</div>
                             <Divider variant="fullWidth"/>
-                            <div
-                                className={product.approval_status === "accepted" ? "accepted_product unconfirmed_body" : (product.approval_status === "pending" ? "pending_product unconfirmed_body" : "rejected_product unconfirmed_body")}>
+                            <div className={product.approval_status === "accepted" ? "accepted_product unconfirmed_body" : (product.approval_status === "pending" ? "pending_product unconfirmed_body" : "rejected_product unconfirmed_body")}>
                                 {product.approval_status.toUpperCase()}
                             </div>
                         </div>
