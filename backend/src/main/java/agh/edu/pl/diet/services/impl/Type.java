@@ -1,7 +1,7 @@
 package agh.edu.pl.diet.services.impl;
 
 public enum Type {
-    REGULAR(0.9, 4.0, 0.5),
+    REGULAR(0.5, 2.2, 0.3),
     BODYCUILDING(1.5, 1.0, 0.5),
     KETOGENIC(1.0, 0.5, 1.5);
 
@@ -44,12 +44,12 @@ public enum Type {
     }
 
     public double calculateCarbohydrates() {
-        double calculatedCarbohydrates = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateCarbohydrates));
+        double calculatedCarbohydrates = targetWeight * multiplicationCalculateCarbohydrates;
         return calculatedCarbohydrates;
     }
 
     public double calculateFats() {
-        double calculatedFats = targetWeight * Double.parseDouble(String.valueOf(multiplicationCalculateFats));
+        double calculatedFats = targetWeight * multiplicationCalculateFats;
         return calculatedFats;
     }
 

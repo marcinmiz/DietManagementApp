@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-//@ComponentScan({"agh.edu.pl"})
 public class DietApplication implements CommandLineRunner {
 
     public static void main(String[] args) {

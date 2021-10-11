@@ -120,16 +120,6 @@ public class RecipeServiceImpl implements RecipeService {
             return responseMessage;
         }
 
-//        Integer calories = recipeRequest.getCalories();
-//
-//        ResponseMessage responseMessage2 = verify("add","calories", calories);
-//
-//        if (responseMessage2.getMessage().equals("Product calories are valid")) {
-//            product.setCalories(calories);
-//        } else {
-//            return responseMessage2;
-//        }
-
         String recipeNames = recipeRequest.getRecipeName();
 
         ResponseMessage responseMessage3 = verify("add", "recipes", recipeNames);

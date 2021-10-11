@@ -206,6 +206,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 //            productNutrient.setNutrientAmount(nutrientAmount);
 //            productNutrient.setProduct(product);
 //            product.addNutrient(productNutrient);
+
+            return new ResponseMessage("Daily Menu " + dailyMenuName + " has been updated successfully");
         }
 
 //        //change to logged in user id
