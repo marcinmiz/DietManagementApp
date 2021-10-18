@@ -7,7 +7,7 @@ public class ProductRequest {
     @NotBlank
     private String productName;
     @NotBlank
-    private Integer calories;
+    private Double calories;
     @NotBlank
     private String category;
     @NotBlank
@@ -22,11 +22,11 @@ public class ProductRequest {
         this.productName = productName;
     }
 
-    public Integer getCalories() {
+    public Double getCalories() {
         return calories;
     }
 
-    public void setCalories(Integer calories) {
+    public void setCalories(Double calories) {
         this.calories = calories;
     }
 

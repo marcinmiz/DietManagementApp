@@ -1,26 +1,28 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.entities.DailyMenu;
-import agh.edu.pl.diet.entities.DietaryProgramme;
-import agh.edu.pl.diet.entities.Meals;
+import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
+import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
 import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
 import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
+import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private DailyMenuRepo dailyMenuRepo;
+
+    @Autowired
+    private RecipeService recipeService;
 
     @Autowired
     private MealRepo mealRepo;
@@ -114,112 +116,177 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 //                    return new ResponseMessage("Product nutrient amount is valid");
 //                }
 //
-         }
+        }
 
         return new ResponseMessage("Invalid type");
     }
 
     @Override
-    public DailyMenu getDailyMenu(Long dailyMenuId) {
+    public DailyMenu getDailyMenuByProgrammeDay(Long dailyMenuId) {
         DailyMenu dailyMenu = dailyMenuRepo.findById(dailyMenuId).get();
         return dailyMenu;
     }
 
-    @Override
-    public Meals getMeals(Long dailyMenuId) {
-        Meals meals = mealRepo.findById(dailyMenuId).get();
-        return meals;
-    }
-
-    @Override
-    public DietaryProgramme getDietaryProgramme(Long dailyMenuId) {
-        DietaryProgramme dietaryProgramme = dietaryProgrammeRepo.findById(dailyMenuId).get();
-        return dietaryProgramme;
-    }
-
-    @Override
-    public ResponseMessage addNewDailyMenu(DailyMenuRequest dailyMenuRequest) {
-        DailyMenu dailyMenu = new DailyMenu();
-        String dailyMenuName = dailyMenuRequest.getDailyMenuName();
-
-        ResponseMessage responseMessage = verify("add", "name", dailyMenuName);
-        if (responseMessage.getMessage().equals("DailyMenu name is valid")){
-            dailyMenu.setDailyMenuName(dailyMenuName);
-        } else {
-            return responseMessage;
-        }
-
-        String dailyMenuDate = dailyMenuRequest.getDailyMenuDate();
-
-        ResponseMessage responseMessage2 = verify("add","Daily Menu",  dailyMenuDate);
-
-        if (responseMessage2.getMessage().equals("Product calories are valid")) {
-            dailyMenu.getDailyMenuDate();
-        } else {
-            return responseMessage2;
-        }
-
-        Integer mealsQuantity = dailyMenuRequest.getMealsQuantity();
-
-        ResponseMessage responseMessage3 = verify("add", "mealsQuantity", mealsQuantity);
-
-        if (responseMessage3.getMessage().equals("Product category is valid")) {
-            dailyMenu.getMealsQuantity();
-        } else {
-            return responseMessage3;
-        }
-
-        List<String> meals = dailyMenuRequest.getMeals();
-
-        ResponseMessage responseMessage4 = verify("add", "list", meals);
-
-        if (!(responseMessage4.getMessage().equals("Meals are valid"))) {
-            return responseMessage4;
-        }
-
-        for (String mealsStatement: meals) {
-
-            ResponseMessage responseMessage5 = verify("add","mealsStatement", mealsStatement);
-
-            if (!(responseMessage5.getMessage().equals("Meals statement is valid"))) {
-                return responseMessage5;
-            }
-            String[] parts = mealsStatement.split(";");
-            String mealsName = parts[0];
-//            Double nutrientAmount = Double.valueOf(parts[1]);
-
-            ResponseMessage responseMessage6 = verify("add","mealsName", mealsName);
-
-            if (!(responseMessage6.getMessage().equals("Meals name is valid"))) {
-                return responseMessage6;
-            }
-
-//            ResponseMessage responseMessage7 = verify("add","nutrientAmount", nutrientAmount);
+//    @Override
+//    public Meals getMeals(Long dailyMenuId) {
+//        Meals meals = mealRepo.findById(dailyMenuId).get();
+//        return meals;
+//    }
 //
-//            if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
-//                return responseMessage7;
-//            }
+//    @Override
+//    public DietaryProgramme getDietaryProgramme(Long dailyMenuId) {
+//        DietaryProgramme dietaryProgramme = dietaryProgrammeRepo.findById(dailyMenuId).get();
+//        return dietaryProgramme;
+//    }
 
-//            Nutrient nutrient = nutrientRepo.findByNutrientName(nutrientName);
-//            ProductNutrient productNutrient = new ProductNutrient();
-//            productNutrient.setNutrient(nutrient);
-//            productNutrient.setNutrientAmount(nutrientAmount);
-//            productNutrient.setProduct(product);
-//            product.addNutrient(productNutrient);
+    @Override
+    public ResponseMessage verifyRecipe(Recipes recipe, List<Double> mealNutrientsScopes, Map<String, Double> totalDailyNutrients) {
+
+        Double ultimateForce = 1.0;
+
+        Set<String> keySet = totalDailyNutrients.keySet();
+
+        String[] nutrientNames
+                = keySet.toArray(new String[keySet.size()]);
+
+        for (int i = 0; i < nutrientNames.length; i++) {
+
+            String nutrientName = nutrientNames[i];
+
+            if (recipe.getRecipeNutrients(nutrientName) < mealNutrientsScopes.get(0) * totalDailyNutrients.get(nutrientName) || recipe.getRecipeNutrients(nutrientName) > mealNutrientsScopes.get(1) * totalDailyNutrients.get(nutrientName)) {
+                return new ResponseMessage("Recipe has inappropriate amount of " + nutrientName);
+            }
+
         }
 
-//        //change to logged in user id
-//        product.setRecipeOwner(userRepo.findById(262L).get());
+        RecipeGetRequest request = new RecipeGetRequest();
+        request.setRecipesGroup("personal");
+        request.setPhrase("");
+        List<Recipes> collectionRecipes = recipeService.getRecipes(request);
+
+        if (collectionRecipes.stream().anyMatch(collectionRecipe -> collectionRecipe.getRecipeId().equals(recipe.getRecipeId())))
+            ultimateForce *= 0.7;
+        else
+            ultimateForce *= 0.3;
+
+        Map<String, Integer> ingredientIncidence = new LinkedHashMap<>();
+
+        List<RecipeProduct> recipeProducts = recipe.getRecipeProducts();
+
+        for (RecipeProduct recipeProduct: recipeProducts) {
+            String categoryName = recipeProduct.getProduct().getCategory().getCategoryName();
+            if(ingredientIncidence.containsKey(categoryName)) {
+                Integer newValue = ingredientIncidence.get(categoryName) + 1;
+                ingredientIncidence.put(categoryName, newValue);
+            } else {
+                ingredientIncidence.put(categoryName,0);
+            }
+        }
+
+        String majorCategoryProductName = Collections.max(ingredientIncidence.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+
+        switch (majorCategoryProductName) {
+            case "Fruit":
+            case "Vegetables":
+                ultimateForce *= 0.75;
+                break;
+            case "Cereal":
+                ultimateForce *= 0.7;
+                break;
+            case "Dairy":
+                ultimateForce *= 0.5;
+                break;
+            case "Meat":
+            case "Fish":
+                ultimateForce *= 0.25;
+                break;
+            case "Fats":
+            case "Sweets":
+            case "Nuts":
+                ultimateForce *= 0.15;
+                break;
+            default:
+                ultimateForce *= 1.0;
+        }
+
+        List<RecipeCustomerSatisfaction> recipeRatings = recipe.getRecipeCustomerSatisfactions().stream().filter(satisfaction -> satisfaction.getRecipeRating() != null).collect(Collectors.toList());
+
+        if (!recipeRatings.isEmpty()) {
+            OptionalDouble average = recipeRatings.stream().mapToDouble(RecipeCustomerSatisfaction::getRecipeRating).average();
+            if (average.isPresent()) {
+                Long averageTempRating = Math.round(average.getAsDouble() * 1000);
+
+                Double averageRating = Double.valueOf(averageTempRating) / 1000;
+
+                if (averageRating < 3.0) {
+                    ultimateForce *= 0.0;
+                }
+
+            }
+        }
+
+        if (ultimateForce < 0.15) {
+            return new ResponseMessage("Recipe is inappropriate in regard to dietary preference");
+        }
+
+        return new ResponseMessage("Recipe is appropriate in regard to dietary preference");
+    }
+
+    @Override
+    public ResponseMessage addNewDailyMenu(Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients) {
+        DailyMenu dailyMenu = new DailyMenu();
+
+        if (!(mealsQuantity.equals(4) || mealsQuantity.equals(5))) {
+            return new ResponseMessage("Meals quantity has to be equal to 4 or 5");
+        }
+
+        RecipeGetRequest request = new RecipeGetRequest();
+        request.setRecipesGroup("accepted");
+        request.setPhrase("");
+        List<Recipes> recipes = recipeService.getRecipes(request);
+
+        Map<String, List<Double>> nutrientsScopes = new LinkedHashMap<>();
+        nutrientsScopes.put("breakfast", List.of(0.25, 0.3));
+        nutrientsScopes.put("lunch", List.of(0.05, 0.1));
+        nutrientsScopes.put("dinner", List.of(0.35, 0.4));
+        if (mealsQuantity.equals(5)) {
+            nutrientsScopes.put("highTea", List.of(0.05, 0.1));
+            nutrientsScopes.put("supper", List.of(0.15, 0.2));
+        } else {
+            nutrientsScopes.put("supper", List.of(0.25, 0.3));
+        }
+
+        List<Recipes> chosenRecipes = new ArrayList<>();
+        List<Recipes> potentialRecipes;
+
+        Set<String> keySet = nutrientsScopes.keySet();
+
+        String[] mealNames
+                = keySet.toArray(new String[keySet.size()]);
+
+        for (int i = 0; i < mealsQuantity; i++) {
+            String mealName = mealNames[i];
+            potentialRecipes = recipes.stream().filter(recipe -> recipe.getRecipeCalories() >= nutrientsScopes.get(mealName).get(0) * totalDailyCalories && recipe.getRecipeCalories() <= nutrientsScopes.get(mealName).get(1) * totalDailyCalories).collect(Collectors.toList());
+
+            for (Recipes verifiedRecipe: potentialRecipes) {
+                if (verifyRecipe(verifiedRecipe, nutrientsScopes.get(mealName), totalDailyNutrients).getMessage().equals("Recipe is appropriate in regard to dietary preference")) {
+                    chosenRecipes.add(verifiedRecipe);
+                    break;
+                }
+            }
+
+            if (chosenRecipes.size() < i + 1) {
+                return new ResponseMessage("No dish is appropriate for " + mealName);
+            }
+        }
+
         String creationDate = new Date().toInstant().toString();
         dailyMenu.setCreationDate(creationDate);
 
-        dailyMenuRepo.save(dailyMenu);
-//        DailyMenu lastAddedDailyMenu = getDailyMenu().stream().filter(p -> p.getCreationDate().equals(creationDate)).findFirst().orElse(null);
-//        if (lastAddedDailyMenu != null) {
-//            return new ResponseMessage(lastAddedDailyMenu.getDailyMenuId() + " Daily Menu " + dailyMenuName + " has been added successfully");
-//        } else {
-            return new ResponseMessage("Daily Menu " + dailyMenuName + " has not been found");
-        }
+        dailyMenu = dailyMenuRepo.save(dailyMenu);
+
+        return new ResponseMessage("Daily Menu " + dailyMenu.getDailyMenuName() + " has been added successfully");
+    }
 
     @Override
     public ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest) {

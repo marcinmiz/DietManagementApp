@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -22,7 +23,7 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @GetMapping
-    public List<Recipes> getAllRecipes() {
+    public Set<Recipes> getAllRecipes() {
         return recipeService.getAllRecipes();
     }
 

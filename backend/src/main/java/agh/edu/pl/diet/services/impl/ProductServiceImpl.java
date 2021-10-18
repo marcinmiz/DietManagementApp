@@ -65,11 +65,11 @@ public class ProductServiceImpl implements ProductService {
                     return new ResponseMessage("Product calories are required");
                 }
 
-                Integer calories = Integer.parseInt(item.toString());
+                Double calories = Double.parseDouble(item.toString());
 
                 if (calories.toString().length() < 1 || calories.toString().length() > 10) {
                     return new ResponseMessage("Product calories has to have min 1 and max 10 characters");
-                } else if (!(calories.toString().matches("^0$") || calories.toString().matches("^(-)?[1-9]\\d*$"))) {
+                } else if (!(calories.toString().matches("^0(.\\d+)?$") || calories.toString().matches("^(-)?[1-9]\\d*(.\\d+)?$"))) {
                     return new ResponseMessage("Product calories has to contain only digits");
                 } else if (calories <= 0) {
                     return new ResponseMessage("Product calories has to be greater than 0");
@@ -100,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
                 String nutrientStatement = String.valueOf(item);
                 if (nutrientStatement.equals("")) {
                     return new ResponseMessage("Product nutrient has to be defined");
-                } else if (!(nutrientStatement.matches("^[a-zA-Z]+;0$") || nutrientStatement.matches("^[a-zA-Z]+;(-)?[1-9]\\d*$"))) {
+                } else if (!(nutrientStatement.matches("^[a-zA-Z]+;0(.\\d+)?$") || nutrientStatement.matches("^[a-zA-Z]+;(-)?[1-9]\\d*(.\\d+)?$"))) {
                     return new ResponseMessage("Product nutrient has to match format \"productName;productAmount\"");
                 } else {
                     return new ResponseMessage("Product nutrient statement is valid");
@@ -214,7 +214,7 @@ public class ProductServiceImpl implements ProductService {
             return responseMessage;
         }
 
-        Integer calories = productRequest.getCalories();
+        Double calories = productRequest.getCalories();
 
         ResponseMessage responseMessage2 = verify("add", "calories", calories);
 
@@ -318,7 +318,7 @@ public class ProductServiceImpl implements ProductService {
                 return responseMessage;
             }
 
-            Integer calories = productRequest.getCalories();
+            Double calories = productRequest.getCalories();
 
             ResponseMessage responseMessage2 = verify("update", "calories", calories);
 

@@ -87,16 +87,12 @@ export default function ViewerModal(props) {
             product_image: "",
             product_category: "",
             product_author: "",
-            product_calories: 0,
-            product_nutrients: [{nutrient_name: "Protein", nutrient_amount: 0, nutrient_unit: "mg/100g"}, {
-                nutrient_name: "Carbohydrates",
-                nutrient_amount: 0,
+            product_calories: 1,
+            product_nutrients: [{nutrient_name: "Protein", nutrient_amount: 1, nutrient_unit: "mg/100g"}, {
+                nutrient_name: "Carbohydrate",
+                nutrient_amount: 1,
                 nutrient_unit: "mg/100g"
-            }, {nutrient_name: "Fat", nutrient_amount: 0, nutrient_unit: "mg/100g"}, {
-                nutrient_name: "Salt",
-                nutrient_amount: 0,
-                nutrient_unit: "mg/100g"
-            }],
+            }, {nutrient_name: "Fat", nutrient_amount: 1, nutrient_unit: "mg/100g"}],
             creation_date: "",
             approval_status: "pending",
             assessment_date: "",
@@ -287,17 +283,17 @@ export default function ViewerModal(props) {
         } else {
             const values = [...state.selected_item.recipe_steps];
             const step_name = event.target.value;
-                values[index].step_name = step_name;
-                const item = {
-                    ...state.selected_item,
-                    "recipe_steps": values
-                };
+            values[index].step_name = step_name;
+            const item = {
+                ...state.selected_item,
+                "recipe_steps": values
+            };
 
-                setState({
-                    ...state,
-                    "selected_item": item
-                });
-            }
+            setState({
+                ...state,
+                "selected_item": item
+            });
+        }
     };
 
     const handleAddStep = () => {
@@ -1019,24 +1015,24 @@ export default function ViewerModal(props) {
                                     </div>
                             )}
                             {/*<div className="recipe_actions">*/}
-                                {/*<div className="recipe_ratings_header">*/}
-                                    {/*<div className="recipe_ratings">*/}
-                                        {/*General: {5.0} ({2} {"ratings"})*/}
-                                    {/*</div>*/}
-                                    {/*<Rating name="read-only" value={5.0} precision={0.1} readOnly/>*/}
-                                    {/*<div className="recipe_ratings_header">*/}
-                                        {/*Personal rating*/}
-                                    {/*</div>*/}
-                                    {/*<Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : 4.0}*/}
-                                             {/*aria-label="rate" placement="top">*/}
-                                        {/*<Rating name="half-rating" value={4.0} precision={0.1}*/}
-                                                {/*onChangeActive={(event, newHover) => setState({*/}
-                                                    {/*...state,*/}
-                                                    {/*"hover_rating": newHover*/}
-                                                {/*})}/>*/}
-                                    {/*</Tooltip>*/}
-                                {/*</div>*/}
-                                {/*{state.recipes[index].recipe_shared ? <Tooltip title="Cancel sharing" aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}*/}
+                            {/*<div className="recipe_ratings_header">*/}
+                            {/*<div className="recipe_ratings">*/}
+                            {/*General: {5.0} ({2} {"ratings"})*/}
+                            {/*</div>*/}
+                            {/*<Rating name="read-only" value={5.0} precision={0.1} readOnly/>*/}
+                            {/*<div className="recipe_ratings_header">*/}
+                            {/*Personal rating*/}
+                            {/*</div>*/}
+                            {/*<Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : 4.0}*/}
+                            {/*aria-label="rate" placement="top">*/}
+                            {/*<Rating name="half-rating" value={4.0} precision={0.1}*/}
+                            {/*onChangeActive={(event, newHover) => setState({*/}
+                            {/*...state,*/}
+                            {/*"hover_rating": newHover*/}
+                            {/*})}/>*/}
+                            {/*</Tooltip>*/}
+                            {/*</div>*/}
+                            {/*{state.recipes[index].recipe_shared ? <Tooltip title="Cancel sharing" aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}*/}
 
                             {/*</div>*/}
                         </div>
@@ -1047,46 +1043,46 @@ export default function ViewerModal(props) {
                                 <div className="product_nutrients_header">Ingredients</div>
                                 {state.selected_item.recipe_ingredients.length === 0 ? "No ingredients added. Add new ingredient" :
                                     state.selected_item.recipe_ingredients.map((ingredient, index) =>
-                                    <div key={index} className="product_nutrient">
-                                        <div
-                                            className="product_nutrient_name">{ingredient.ingredient_name}</div>
-                                        <div
-                                            className="product_nutrient_amount">{ingredient.ingredient_amount}</div>
-                                        <div
-                                            className="product_nutrient_unit">{ingredient.ingredient_unit}</div>
-                                    </div>
-                                )}
+                                        <div key={index} className="product_nutrient">
+                                            <div
+                                                className="product_nutrient_name">{ingredient.ingredient_name}</div>
+                                            <div
+                                                className="product_nutrient_amount">{ingredient.ingredient_amount}</div>
+                                            <div
+                                                className="product_nutrient_unit">{ingredient.ingredient_unit}</div>
+                                        </div>
+                                    )}
                             </div> :
                             <div className="ingredients">
                                 <div id="ingredients_list">
                                     <h4>Ingredients</h4>
                                     {state.selected_item.recipe_ingredients.length === 0 ? "No ingredients added. Add new ingredient" :
                                         state.selected_item.recipe_ingredients.map((ingredient, index) => (
-                                        <div key={index} className="ingredient_edit">
-                                            <TextField
-                                                name={ingredient.ingredient_name}
-                                                label={ingredient.ingredient_name}
-                                                type="number"
-                                                variant="filled"
-                                                value={ingredient.ingredient_amount}
-                                                size="small"
-                                                InputProps={{
-                                                    endAdornment: <InputAdornment
-                                                        position="end">
-                                                        <div>{ingredient.ingredient_unit}</div>
-                                                    </InputAdornment>,
-                                                }}
-                                                onChange={event => handleChangeIngredient(event, index)}
-                                            />
-                                            <Tooltip title="Delete ingredient" aria-label="delete ingredient">
-                                                <IconButton aria-label="delete ingredient"
-                                                            className="product_icon_button"
-                                                            onClick={() => handleDeleteIngredient(index)}>
-                                                    <DeleteIcon fontSize="small"/>
-                                                </IconButton>
-                                            </Tooltip>
-                                        </div>
-                                    ))}
+                                            <div key={index} className="ingredient_edit">
+                                                <TextField
+                                                    name={ingredient.ingredient_name}
+                                                    label={ingredient.ingredient_name}
+                                                    type="number"
+                                                    variant="filled"
+                                                    value={ingredient.ingredient_amount}
+                                                    size="small"
+                                                    InputProps={{
+                                                        endAdornment: <InputAdornment
+                                                            position="end">
+                                                            <div>{ingredient.ingredient_unit}</div>
+                                                        </InputAdornment>,
+                                                    }}
+                                                    onChange={event => handleChangeIngredient(event, index)}
+                                                />
+                                                <Tooltip title="Delete ingredient" aria-label="delete ingredient">
+                                                    <IconButton aria-label="delete ingredient"
+                                                                className="product_icon_button"
+                                                                onClick={() => handleDeleteIngredient(index)}>
+                                                        <DeleteIcon fontSize="small"/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </div>
+                                        ))}
                                 </div>
                                 <div className="add_ingredient">
                                     <div className={classes.ingredient_part}>
@@ -1146,35 +1142,35 @@ export default function ViewerModal(props) {
                                 <div className="product_nutrients_header">Steps</div>
                                 {state.selected_item.recipe_steps.length === 0 ? "No steps added. Add new step" :
                                     state.selected_item.recipe_steps.map((step, index) =>
-                                    <div key={index} className="recipe_step">
-                                        <div>{index+1}. </div>
-                                        <div>{step.step_name}</div>
-                                    </div>
-                                )}
+                                        <div key={index} className="recipe_step">
+                                            <div>{index+1}. </div>
+                                            <div>{step.step_name}</div>
+                                        </div>
+                                    )}
                             </div> :
                             <div className="steps">
                                 <div id="ingredients_list">
                                     <h4>Steps</h4>
                                     {state.selected_item.recipe_steps.length === 0 ? "No steps added. Add new step" :
                                         state.selected_item.recipe_steps.map((step, index) => (
-                                        <div key={index} className="ingredient_edit">
-                                            <TextField
-                                                name={index + 1 + ". Step"}
-                                                label={index + 1 + ". Step"}
-                                                variant="filled"
-                                                value={step.step_name}
-                                                size="small"
-                                                onChange={event => handleChangeStep(event, index)}
-                                            />
-                                            <Tooltip title="Delete step" aria-label="delete step">
-                                                <IconButton aria-label="delete step"
-                                                            className="product_icon_button"
-                                                            onClick={() => handleDeleteStep(index)}>
-                                                    <DeleteIcon fontSize="small"/>
-                                                </IconButton>
-                                            </Tooltip>
-                                        </div>
-                                    ))}
+                                            <div key={index} className="ingredient_edit">
+                                                <TextField
+                                                    name={index + 1 + ". Step"}
+                                                    label={index + 1 + ". Step"}
+                                                    variant="filled"
+                                                    value={step.step_name}
+                                                    size="small"
+                                                    onChange={event => handleChangeStep(event, index)}
+                                                />
+                                                <Tooltip title="Delete step" aria-label="delete step">
+                                                    <IconButton aria-label="delete step"
+                                                                className="product_icon_button"
+                                                                onClick={() => handleDeleteStep(index)}>
+                                                        <DeleteIcon fontSize="small"/>
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </div>
+                                        ))}
                                     <div className="add_ingredient">
                                         <TextField
                                             name="recipe_add_step_name"
@@ -1198,13 +1194,13 @@ export default function ViewerModal(props) {
                     </div>
 
                     {props.mode === 'edit' ?
-                            <div className={classes.center_button_group}>
-                                <Button className={classes.button} variant="contained" color="primary"
-                                        onClick={() => handleClose()}>Cancel</Button>
-                                <Button className={classes.button} variant="contained" color="primary" type="button"
-                                        onClick={() => handleSave()}>Save</Button>
-                            </div> :
-                            null}
+                        <div className={classes.center_button_group}>
+                            <Button className={classes.button} variant="contained" color="primary"
+                                    onClick={() => handleClose()}>Cancel</Button>
+                            <Button className={classes.button} variant="contained" color="primary" type="button"
+                                    onClick={() => handleSave()}>Save</Button>
+                        </div> :
+                        null}
                 </div>
             </Grid>;
             break;

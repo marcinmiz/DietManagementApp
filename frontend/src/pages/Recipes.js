@@ -732,13 +732,13 @@ export default function Recipes(props) {
                                     </div>
                                     <div className="recipe_description">
                                         {/*<div className="recipe_category">*/}
-                                            {/*<Chip*/}
-                                                {/*name="category"*/}
-                                                {/*size="small"*/}
-                                                {/*avatar={<CategoryIcon/>}*/}
-                                                {/*label={recipe.recipe_category}*/}
-                                                {/*onClick={handleCategory}*/}
-                                            {/*/>*/}
+                                        {/*<Chip*/}
+                                        {/*name="category"*/}
+                                        {/*size="small"*/}
+                                        {/*avatar={<CategoryIcon/>}*/}
+                                        {/*label={recipe.recipe_category}*/}
+                                        {/*onClick={handleCategory}*/}
+                                        {/*/>*/}
                                         {/*</div>*/}
                                         <div className="recipe_author" onClick={handleAuthor}>
                                             <Avatar/>
@@ -749,12 +749,12 @@ export default function Recipes(props) {
                                                 <div className="recipe_ratings">
                                                     General: {handleGeneralRating(index)} ({state.recipes[index].recipe_customer_satisfactions ? state.recipes[index].recipe_customer_satisfactions.length : 0} {state.recipes[index].recipe_customer_satisfactions ? (state.recipes[index].recipe_customer_satisfactions.length === 1 ? "rating" : "ratings") : "ratings"})
                                                 </div>
-                                                    <Rating name="read-only" value={handleGeneralRating(index)} precision={0.1} readOnly/>
+                                                <Rating name="read-only" value={handleGeneralRating(index)} precision={0.1} readOnly/>
                                                 <div className="recipe_ratings_header">
                                                     Personal rating
                                                 </div>
                                                 <Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : handlePersonalRating(index)} aria-label="rate" placement="top">
-                                                    <Rating name="half-rating" value={handlePersonalRating(index)} precision={0.1} onChange={(event, value) => handlePersonalRatingEdit(event,index, value)} onChangeActive={(event, newHover) => {
+                                                    <Rating name={`rating${index}`} value={handlePersonalRating(index)} precision={0.1} onChange={(event, value) => handlePersonalRatingEdit(event,index, value)} onChangeActive={(event, newHover) => {
                                                         // console.log(index);
                                                         // console.log(recipe);
                                                         setState({...state, "hover_rating": newHover})
@@ -912,19 +912,19 @@ export default function Recipes(props) {
                             />
                         </FormControl>
                         {/*<FormControl variant="filled" className={classes.formControl}>*/}
-                            {/*<InputLabel id="category_select_label" className="category_select">Category</InputLabel>*/}
-                            {/*<Select*/}
-                                {/*labelId="category_select_label"*/}
-                                {/*id="category_select"*/}
-                                {/*className="category_select"*/}
-                                {/*name="category"*/}
-                                {/*value={state.category}*/}
-                                {/*onChange={handleChange}*/}
-                            {/*>*/}
-                                {/*{state.categories.map((category, index) => (*/}
-                                    {/*<MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>*/}
-                                {/*))}*/}
-                            {/*</Select>*/}
+                        {/*<InputLabel id="category_select_label" className="category_select">Category</InputLabel>*/}
+                        {/*<Select*/}
+                        {/*labelId="category_select_label"*/}
+                        {/*id="category_select"*/}
+                        {/*className="category_select"*/}
+                        {/*name="category"*/}
+                        {/*value={state.category}*/}
+                        {/*onChange={handleChange}*/}
+                        {/*>*/}
+                        {/*{state.categories.map((category, index) => (*/}
+                        {/*<MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>*/}
+                        {/*))}*/}
+                        {/*</Select>*/}
                         {/*</FormControl>*/}
                     </div>
                     <Fab className="add_button" aria-label="add" onClick={handleAddNewProduct}>

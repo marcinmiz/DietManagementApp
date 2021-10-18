@@ -171,4 +171,29 @@ public class Recipes {
     public void addRecipeCustomerSatisfaction(RecipeCustomerSatisfaction recipeCustomerSatisfaction) {
         recipeCustomerSatisfactions.add(recipeCustomerSatisfaction);
     }
+
+    public Double getRecipeCalories() {
+        Double recipeCalories = 0.0;
+
+        for (RecipeProduct product: recipeProducts) {
+            recipeCalories += product.getProduct().getCalories();
+        }
+
+        return recipeCalories;
+    }
+
+    public Double getRecipeNutrients(String nutrientName) {
+        Double recipeNutrients = 0.0;
+
+        for (RecipeProduct product: recipeProducts) {
+            List<ProductNutrient> nutrients = product.getProduct().getNutrients();
+            for (ProductNutrient productNutrient: nutrients) {
+                if (productNutrient.getNutrient().getNutrientName().equals(nutrientName)) {
+                    recipeNutrients += productNutrient.getNutrientAmount();
+                }
+            }
+        }
+
+        return recipeNutrients;
+    }
 }

@@ -757,3 +757,17 @@
 .downThumb {
     color: darkred;
 }
+
+.dailyMenu {
+    height: 88%;
+    /*margin-top: 8%;*/
+}
+
+.menuImage {
+    width: 5rem;
+}
+
+.menuList {
+    overflow-y: scroll;
+    max-height: 90%;
+}

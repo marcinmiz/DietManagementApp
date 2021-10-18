@@ -141,7 +141,6 @@ export default function Products(props) {
                 .then(async resp => {
                     let table = [];
 
-                    console.log(resp.data);
                     for (let x in resp.data) {
                         table[x] = createProduct(resp.data, x);
                     }
@@ -152,9 +151,9 @@ export default function Products(props) {
 
                         for (let i = 0; i < table.length; i++) {
                             if (table[i]) {
-                               if (table[i].product_id === Number(productId)) {
-                                   product_index = i;
-                               }
+                                if (table[i].product_id === Number(productId)) {
+                                    product_index = i;
+                                }
                             }
                         }
 
@@ -164,7 +163,7 @@ export default function Products(props) {
                         if (product_index === 'new') {
                             switch (approvalStatus) {
                                 case 'accepted':
-                                        document.getElementById('first').click();
+                                    document.getElementById('first').click();
                                     break;
                                 case 'pending':
                                     document.getElementById('second').click();
@@ -184,7 +183,7 @@ export default function Products(props) {
                         history.push('/products');
                     }
 
-                        setState({
+                    setState({
                         ...state,
                         products: table,
                         categories: categoriesTable,
@@ -202,8 +201,6 @@ export default function Products(props) {
         let product = {};
         product.product_id = data[x].productId;
         product.product_name = data[x].productName;
-        console.log(data[x]);
-        console.log(data[x].owner);
         product.product_author_id = data[x].owner.userId;
         product.product_category = data[x].category.categoryName;
         product.product_author = data[x].owner.name + " " + data[x].owner.surname;

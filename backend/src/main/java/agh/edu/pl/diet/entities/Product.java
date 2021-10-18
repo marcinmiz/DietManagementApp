@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,7 +17,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long productId;
     private String productName;
-    private Integer calories;
+    private Double calories;
     @ManyToOne
     private User owner;
     @ManyToOne
@@ -23,7 +25,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
-    private Set<ProductNutrient> nutrients = new HashSet<>();
+    private List<ProductNutrient> nutrients = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
@@ -55,11 +57,11 @@ public class Product {
         this.productName = productName;
     }
 
-    public Integer getCalories() {
+    public Double getCalories() {
         return calories;
     }
 
-    public void setCalories(Integer calories) {
+    public void setCalories(Double calories) {
         this.calories = calories;
     }
 
@@ -79,11 +81,11 @@ public class Product {
         this.productImage = productImage;
     }
 
-    public Set<ProductNutrient> getNutrients() {
+    public List<ProductNutrient> getNutrients() {
         return nutrients;
     }
 
-    public void setNutrients(Set<ProductNutrient> nutrients) {
+    public void setNutrients(List<ProductNutrient> nutrients) {
         this.nutrients = nutrients;
     }
 

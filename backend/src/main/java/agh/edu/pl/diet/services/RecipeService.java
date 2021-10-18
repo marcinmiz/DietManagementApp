@@ -9,10 +9,11 @@ import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.payloads.response.UserCollectionRecipeResponse;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RecipeService {
 
-    List<Recipes> getAllRecipes();
+    Set<Recipes> getAllRecipes();
 
     Recipes getRecipe(Long recipe_id);
 

@@ -6,6 +6,7 @@ import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import {Switch, Route, useRouteMatch, useParams, Redirect, useHistory} from 'react-router-dom'
 import Preferences from "./pages/Preferences";
+import Menus from "./pages/Menus";
 
 function Topic() {
     let { settingsId, mode } = useParams();
@@ -53,7 +54,7 @@ export default function UserDashboard(props) {
                                 Dietary Programmes
                             </Route>
                             <Route path={`${path}menus`}>
-                                Daily menus
+                                <Menus/>
                             </Route>
                             <Route path={`${path}shopping`}>
                                 Shopping lists

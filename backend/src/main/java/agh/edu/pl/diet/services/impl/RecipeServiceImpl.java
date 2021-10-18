@@ -135,16 +135,17 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public List<Recipes> getAllRecipes() {
+    public Set<Recipes> getAllRecipes() {
         String item_type = "recipe";
-        List<Recipes> list = new ArrayList<>();
-        recipeRepo.findAll().forEach(list::add);
+        Set<Recipes> set = new HashSet<>();
+        recipeRepo.findAll().forEach(set::add);
 
-        for (Recipes recipe : list) {
+        for (Recipes recipe : set) {
+            System.out.println(recipe.getRecipeName());
             String url = imageService.getImageURL(item_type, recipe.getRecipeId());
             recipe.setRecipeImage(url);
         }
-        return list;
+        return set;
     }
 
     @Override
@@ -496,7 +497,8 @@ public class RecipeServiceImpl implements RecipeService {
 
         String phrase = recipeSearchRequest.getPhrase();
 
-        List<Recipes> recipes = getAllRecipes();
+        List<Recipes> recipes = new ArrayList<>();
+        recipes.addAll(getAllRecipes());
 
         if (!phrase.equals("")) {
             recipes = recipes.stream().filter(recipe -> recipe.getRecipeName().toLowerCase().contains(phrase.toLowerCase())).collect(Collectors.toList());

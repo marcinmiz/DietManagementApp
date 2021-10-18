@@ -19,30 +19,30 @@ public class DailyMenuController {
     private DailyMenuService dailyMenuService;
 
 
-    @GetMapping("/{id}")
-    public DailyMenu getDailyMenu(@PathVariable("id") Long dailyMenuId) {
-        return dailyMenuService.getDailyMenu(dailyMenuId);
-    }
+//    @GetMapping("/{id}")
+//    public DailyMenu getDailyMenu(@PathVariable("id") Long dailyMenuId) {
+//        return dailyMenuService.getDailyMenu(dailyMenuId);
+//    }
+//
+//    @GetMapping("/meal/{id}")
+//    public Meals getMeal(@PathVariable("id") Long dailyMenuId) {
+//        return dailyMenuService.getMeals(dailyMenuId);
+//    }
+//
+//    @GetMapping("/programme/{id}")
+//    public DietaryProgramme getDietaryProgramme(@PathVariable("id") Long dailyMenuId) {
+//        return dailyMenuService.getDietaryProgramme((dailyMenuId));
+//    }
 
-    @GetMapping("/meal/{id}")
-    public Meals getMeal(@PathVariable("id") Long dailyMenuId) {
-        return dailyMenuService.getMeals(dailyMenuId);
-    }
-
-    @GetMapping("/programme/{id}")
-    public DietaryProgramme getDietaryProgramme(@PathVariable("id") Long dailyMenuId) {
-        return dailyMenuService.getDietaryProgramme((dailyMenuId));
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {
-        ResponseMessage message = dailyMenuService.addNewDailyMenu(dailyMenuRequest);
-        if (message.getMessage().endsWith(" has been added successfully")) {
-            return ResponseEntity.status(HttpStatus.OK).body(message);
-        } else {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
-        }
-    }
+//    @PostMapping("/add")
+//    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {
+//        ResponseMessage message = dailyMenuService.addNewDailyMenu(dailyMenuRequest);
+//        if (message.getMessage().endsWith(" has been added successfully")) {
+//            return ResponseEntity.status(HttpStatus.OK).body(message);
+//        } else {
+//            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+//        }
+//    }
 
     @PutMapping("/update/{id}")
     public ResponseMessage updateDailyMenu(@PathVariable("id") Long dailyMenuId, @RequestBody DailyMenuRequest dailyMenuRequest) {
