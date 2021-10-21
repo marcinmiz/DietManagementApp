@@ -8,6 +8,7 @@ import agh.edu.pl.diet.repos.DailyMenuRepo;
 import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
 import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
+import agh.edu.pl.diet.services.MealService;
 import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private RecipeService recipeService;
+
+    @Autowired
+    private MealService mealService;
 
     @Autowired
     private MealRepo mealRepo;
@@ -140,11 +144,11 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 //    }
 
     @Override
-    public ResponseMessage verifyRecipe(Recipes recipe, List<Double> mealNutrientsScopes, Map<String, Double> totalDailyNutrients) {
+    public ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes) {
 
         Double ultimateForce = 1.0;
 
-        Set<String> keySet = totalDailyNutrients.keySet();
+        Set<String> keySet = dailyNutrientsScopes.keySet();
 
         String[] nutrientNames
                 = keySet.toArray(new String[keySet.size()]);
@@ -153,7 +157,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
             String nutrientName = nutrientNames[i];
 
-            if (recipe.getRecipeNutrients(nutrientName) < mealNutrientsScopes.get(0) * totalDailyNutrients.get(nutrientName) || recipe.getRecipeNutrients(nutrientName) > mealNutrientsScopes.get(1) * totalDailyNutrients.get(nutrientName)) {
+            if (recipe.getRecipeNutrients(nutrientName) < dailyNutrientsScopes.get(nutrientName).get(0) || recipe.getRecipeNutrients(nutrientName) > dailyNutrientsScopes.get(nutrientName).get(1)) {
                 return new ResponseMessage("Recipe has inappropriate amount of " + nutrientName);
             }
 
@@ -233,11 +237,31 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     }
 
     @Override
-    public ResponseMessage addNewDailyMenu(Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients) {
+    public ResponseMessage addNewDailyMenu(DietaryProgramme dietaryProgramme, Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients, Calendar startDate, Integer currentDay, Integer lastDay) {
         DailyMenu dailyMenu = new DailyMenu();
 
-        if (!(mealsQuantity.equals(4) || mealsQuantity.equals(5))) {
+        if (dietaryProgramme == null) {
+            return new ResponseMessage("DietaryProgramme is required");
+        } else if (totalDailyCalories <= 0) {
+            return new ResponseMessage("totalDailyCalories has to be greater than 0");
+        } else if (!(mealsQuantity.equals(4) || mealsQuantity.equals(5))) {
             return new ResponseMessage("Meals quantity has to be equal to 4 or 5");
+        } else if (totalDailyNutrients == null) {
+            return new ResponseMessage("totalDailyNutrients is required");
+        } else if (!totalDailyNutrients.keySet().equals(Set.of("Protein", "Carbohydrate", "Fat"))) {
+            return new ResponseMessage("totalDailyNutrients has to contain Protein, Carbohydrate and Fat");
+        } else if (startDate == null) {
+            return new ResponseMessage("startDate is required");
+        } else if (startDate.compareTo(Calendar.getInstance()) >= 0) {
+            return new ResponseMessage("startDate cannot be past");
+        } else if (currentDay == null) {
+            return new ResponseMessage("currentDay is required");
+        } else if (currentDay <= 0) {
+            return new ResponseMessage("currentDay has to be greater than 0");
+        } else if (lastDay == null) {
+            return new ResponseMessage("lastDay is required");
+        } else if (lastDay <= 0) {
+            return new ResponseMessage("lastDay has to be greater than 0");
         }
 
         RecipeGetRequest request = new RecipeGetRequest();
@@ -250,7 +274,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
         nutrientsScopes.put("lunch", List.of(0.05, 0.1));
         nutrientsScopes.put("dinner", List.of(0.35, 0.4));
         if (mealsQuantity.equals(5)) {
-            nutrientsScopes.put("highTea", List.of(0.05, 0.1));
+            nutrientsScopes.put("tea", List.of(0.05, 0.1));
             nutrientsScopes.put("supper", List.of(0.15, 0.2));
         } else {
             nutrientsScopes.put("supper", List.of(0.25, 0.3));
@@ -264,28 +288,179 @@ public class DailyMenuServiceImpl implements DailyMenuService {
         String[] mealNames
                 = keySet.toArray(new String[keySet.size()]);
 
+        Double caloriesDifference = 0.0;
+        Double proteinsDifference = 0.0;
+        Double carbohydratesDifference = 0.0;
+        Double fatsDifference = 0.0;
+        Double leftCalories = totalDailyCalories;
+        Double leftProteins = totalDailyNutrients.get("Protein");
+        Double leftCarbohydrates = totalDailyNutrients.get("Carbohydrate");
+        Double leftFats = totalDailyNutrients.get("Fat");
+        Double lowerCaloriesLimit, upperCaloriesLimit, lowerProteinsLimit, upperProteinsLimit, lowerCarbohydratesLimit, upperCarbohydratesLimit, lowerFatsLimit, upperFatsLimit;
+        Map<String, List<Double>> dailyNutrientsScopes = new LinkedHashMap<>();
+
         for (int i = 0; i < mealsQuantity; i++) {
             String mealName = mealNames[i];
-            potentialRecipes = recipes.stream().filter(recipe -> recipe.getRecipeCalories() >= nutrientsScopes.get(mealName).get(0) * totalDailyCalories && recipe.getRecipeCalories() <= nutrientsScopes.get(mealName).get(1) * totalDailyCalories).collect(Collectors.toList());
+
+            Long caloriesDiff = Math.round(caloriesDifference * 100);
+            Double caloriesDiff2 = Double.valueOf(caloriesDiff) / 100;
+
+            if (caloriesDiff2.equals(0.0)) {
+                lowerCaloriesLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyCalories;
+                upperCaloriesLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyCalories;
+            } else if (caloriesDiff2 > 0.0 || i == mealsQuantity - 1){
+                lowerCaloriesLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyCalories + caloriesDifference;
+                upperCaloriesLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyCalories + caloriesDifference;
+            } else {
+                lowerCaloriesLimit = (nutrientsScopes.get(mealName).get(0) - 0.025) * totalDailyCalories + caloriesDifference;
+                upperCaloriesLimit = (nutrientsScopes.get(mealName).get(1) - 0.025) * totalDailyCalories + caloriesDifference;
+            }
+
+            Long proteinsDiff = Math.round(proteinsDifference * 100);
+            Double proteinsDiff2 = Double.valueOf(proteinsDiff) / 100;
+
+            if (proteinsDiff2.equals(0.0)) {
+                lowerProteinsLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Protein");
+                upperProteinsLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Protein");
+            } else if (proteinsDiff2 > 0.0 || i == mealsQuantity - 1){
+                lowerProteinsLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
+                upperProteinsLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
+            } else {
+                lowerProteinsLimit = (nutrientsScopes.get(mealName).get(0) - 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
+                upperProteinsLimit = (nutrientsScopes.get(mealName).get(1) - 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
+            }
+            dailyNutrientsScopes.put("Protein", List.of(lowerProteinsLimit, upperProteinsLimit));
+
+            Long carbohydratesDiff = Math.round(carbohydratesDifference * 100);
+            Double carbohydratesDiff2 = Double.valueOf(carbohydratesDiff) / 100;
+
+            if (carbohydratesDiff2.equals(0.0)) {
+                lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Carbohydrate");
+                upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Carbohydrate");
+            } else if (carbohydratesDiff2 > 0.0 || i == mealsQuantity - 1){
+                lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
+                upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
+            } else {
+                lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0) - 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
+                upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1) - 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
+            }
+            dailyNutrientsScopes.put("Carbohydrate", List.of(lowerCarbohydratesLimit, upperCarbohydratesLimit));
+
+            Long fatsDiff = Math.round(fatsDifference * 100);
+            Double fatsDiff2 = Double.valueOf(fatsDiff) / 100;
+
+            if (fatsDiff2.equals(0.0)) {
+                lowerFatsLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Fat");
+                upperFatsLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Fat");
+            } else if (fatsDiff2 > 0.0 || i == mealsQuantity - 1){
+                lowerFatsLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
+                upperFatsLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
+            } else {
+                lowerFatsLimit = (nutrientsScopes.get(mealName).get(0) - 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
+                upperFatsLimit = (nutrientsScopes.get(mealName).get(1) - 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
+            }
+            dailyNutrientsScopes.put("Fat", List.of(lowerFatsLimit, upperFatsLimit));
+
+            System.out.println("lowerCaloriesLimit " + lowerCaloriesLimit);
+            System.out.println("upperCaloriesLimit " + upperCaloriesLimit);
+
+            {
+                Double finalLowerCaloriesLimit = lowerCaloriesLimit;
+                Double finalUpperCaloriesLimit = upperCaloriesLimit;
+
+                potentialRecipes = recipes.stream().filter(recipe -> recipe.getRecipeCalories() >= finalLowerCaloriesLimit && recipe.getRecipeCalories() <= finalUpperCaloriesLimit).collect(Collectors.toList());
+                System.out.println("id");
+                potentialRecipes.stream().map(Recipes::getRecipeId).forEach(System.out::println);
+            }
 
             for (Recipes verifiedRecipe: potentialRecipes) {
-                if (verifyRecipe(verifiedRecipe, nutrientsScopes.get(mealName), totalDailyNutrients).getMessage().equals("Recipe is appropriate in regard to dietary preference")) {
+
+                if (verifyRecipe(verifiedRecipe, dailyNutrientsScopes).getMessage().equals("Recipe is appropriate in regard to dietary preference") && !chosenRecipes.contains(verifiedRecipe)) {
+                    System.out.println(verifiedRecipe.getRecipeName());
                     chosenRecipes.add(verifiedRecipe);
+
+                    Double verifiedRecipeTotalCalories = verifiedRecipe.getRecipeCalories();
+                    Double averageMealTotalCalories = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyCalories;
+
+                    if (verifiedRecipeTotalCalories < averageMealTotalCalories) {
+                        caloriesDifference += averageMealTotalCalories - verifiedRecipeTotalCalories;
+                    } else {
+                        caloriesDifference -= verifiedRecipeTotalCalories - averageMealTotalCalories;
+                    }
+
+                    Double verifiedRecipeTotalProteins = verifiedRecipe.getRecipeNutrients("Protein");
+                    Double averageMealTotalProteins = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Protein");
+
+                    if (verifiedRecipeTotalProteins < averageMealTotalProteins) {
+                        proteinsDifference += averageMealTotalProteins - verifiedRecipeTotalProteins;
+                    } else {
+                        proteinsDifference -= verifiedRecipeTotalProteins - averageMealTotalProteins;
+                    }
+
+                    Double verifiedRecipeTotalCarbohydrates = verifiedRecipe.getRecipeNutrients("Carbohydrate");
+                    Double averageMealTotalCarbohydrates = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Carbohydrate");
+
+                    if (verifiedRecipeTotalCarbohydrates < averageMealTotalCarbohydrates) {
+                        carbohydratesDifference += averageMealTotalCarbohydrates - verifiedRecipeTotalCarbohydrates;
+                    } else {
+                        carbohydratesDifference -= verifiedRecipeTotalCarbohydrates - averageMealTotalCarbohydrates;
+                    }
+
+                    leftCalories = leftCalories - verifiedRecipeTotalCalories;
+                    leftProteins = leftProteins - verifiedRecipe.getRecipeNutrients("Protein");
+                    leftCarbohydrates = leftCarbohydrates - verifiedRecipe.getRecipeNutrients("Carbohydrate");
+                    leftFats = leftFats - verifiedRecipe.getRecipeNutrients("Fat");
+
+                    System.out.println("verifiedRecipeTotalCalories: " + verifiedRecipeTotalCalories);
+                    System.out.println("caloriesDifference " + caloriesDifference);
+                    System.out.println("leftCalories " + leftCalories);
+
+                    System.out.println("proteins: " + verifiedRecipe.getRecipeNutrients("Protein"));
+                    System.out.println("averageProteins " + (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Protein"));
+                    System.out.println("leftProteins " + leftProteins);
+                    System.out.println("proteinsDifference " + proteinsDifference);
+
+                    System.out.println("carbohydrates: " + verifiedRecipe.getRecipeNutrients("Carbohydrate"));
+                    System.out.println("averageCarbohydrates " + (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Carbohydrate"));
+                    System.out.println("leftCarbohydrates " + leftCarbohydrates);
+                    System.out.println("carbohydratesDifference " + carbohydratesDifference);
+
+                    System.out.println("fats: " + verifiedRecipe.getRecipeNutrients("Fat"));
+                    System.out.println("averageFats " + (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Fat"));
+                    System.out.println("leftFats " + leftFats);
+                    System.out.println("fatsDifference " + fatsDifference);
+
                     break;
                 }
             }
 
             if (chosenRecipes.size() < i + 1) {
-                return new ResponseMessage("No dish is appropriate for " + mealName);
+                return new ResponseMessage("No recipe is appropriate for " + mealName);
             }
         }
 
-        String creationDate = new Date().toInstant().toString();
-        dailyMenu.setCreationDate(creationDate);
+        System.out.println();
+        System.out.println();
+
+        for (int i = 0; i < chosenRecipes.size(); i++) {
+            String mealName = mealNames[i];
+            Recipes recipe = chosenRecipes.get(i);
+            mealService.addNewMeal(mealName, recipe, dailyMenu);
+        }
+
+        dailyMenu.setMealsQuantity(mealsQuantity);
+
+        dailyMenu.setDailyMenuName("Day " + currentDay + " of " + lastDay);
+
+        startDate.add(Calendar.DAY_OF_MONTH, currentDay - 1);
+
+        dailyMenu.setDailyMenuDate(startDate.toInstant().toString());
+
+        dailyMenu.setDietaryProgramme(dietaryProgramme);
 
         dailyMenu = dailyMenuRepo.save(dailyMenu);
 
-        return new ResponseMessage("Daily Menu " + dailyMenu.getDailyMenuName() + " has been added successfully");
+        return new ResponseMessage("Daily Menu " + dailyMenu.getDailyMenuName() + " has been added");
     }
 
     @Override

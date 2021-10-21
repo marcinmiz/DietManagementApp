@@ -8,6 +8,7 @@ import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import org.springframework.data.util.Pair;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +20,9 @@ public interface DailyMenuService {
 
 //    DietaryProgramme getDietaryProgramme(Long dailyMenuId);
 
-    ResponseMessage verifyRecipe(Recipes recipe, List<Double> mealNutrientsScopes, Map<String, Double> totalDailyNutrients);
+    ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes);
 
-    ResponseMessage addNewDailyMenu(Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients);
+    ResponseMessage addNewDailyMenu(DietaryProgramme dietaryProgramme, Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients, Calendar startDate, Integer currentDay, Integer lastDay);
 
     ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest);
 
