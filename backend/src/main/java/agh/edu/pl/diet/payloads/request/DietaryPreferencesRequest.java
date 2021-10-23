@@ -7,7 +7,7 @@ public class DietaryPreferencesRequest {
     @NotBlank
     private Boolean dietTypeSelected;
     @NotBlank
-    private Integer totalDailyCalories;
+    private String totalDailyCalories;
     @NotBlank
     private String dietType;
     @NotBlank
@@ -31,11 +31,11 @@ public class DietaryPreferencesRequest {
         this.dietTypeSelected = dietTypeSelected;
     }
 
-    public Integer getTotalDailyCalories() {
+    public String getTotalDailyCalories() {
         return totalDailyCalories;
     }
 
-    public void setTotalDailyCalories(Integer totalDailyCalories) {
+    public void setTotalDailyCalories(String totalDailyCalories) {
         this.totalDailyCalories = totalDailyCalories;
     }
 

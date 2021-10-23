@@ -572,7 +572,7 @@ export default function ViewerModal(props) {
                     "msg": "Product nutrient has to have min 1 and max 20 characters"
                 });
                 return "error";
-            } else if (!(/^0$/.test(nutrient.nutrient_amount) || /^(-)?[1-9]\d*$/.test(nutrient.nutrient_amount))) {
+            } else if (!(/^0(.\d+)?$/.test(nutrient.nutrient_amount) || /^(-)?[1-9]\d*(.\d+)?$/.test(nutrient.nutrient_amount))) {
                 setState({
                     ...state,
                     "msg": "Product nutrient has to contain only digits"
@@ -630,7 +630,7 @@ export default function ViewerModal(props) {
                     "msg": "Recipe ingredient has to have min 1 and max 20 characters"
                 });
                 return "error";
-            } else if (!(/^0$/.test(ingredient.ingredient_amount) || /^(-)?[1-9]\d*$/.test(ingredient.ingredient_amount))) {
+            } else if (!(/^0(.\d+)?$/.test(ingredient.ingredient_amount) || /^(-)?[1-9]\d*(.\d+)?$/.test(ingredient.ingredient_amount))) {
                 setState({
                     ...state,
                     "msg": "Recipe ingredient has to contain only digits"

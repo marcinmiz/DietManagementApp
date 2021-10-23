@@ -6,6 +6,7 @@ import org.springframework.data.util.Pair;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Entity
@@ -30,6 +31,10 @@ public class User {
     private String creationDate;
     @Transient
     private List<Pair<String, Float>> weights = new ArrayList<>();
+    @OneToOne
+    private DietaryProgramme currentDietaryProgramme = null;
+    private String dietaryProgrammeStartDate = null;
+    private Integer currentDietaryProgrammeDay = null;
 
     public Long getUserId() {
         return userId;
@@ -115,7 +120,31 @@ public class User {
         this.weights.add(weight);
     }
 
-//    public double getTargetWeight() {
+    public DietaryProgramme getCurrentDietaryProgramme() {
+        return currentDietaryProgramme;
+    }
+
+    public void setCurrentDietaryProgramme(DietaryProgramme currentDietaryProgramme) {
+        this.currentDietaryProgramme = currentDietaryProgramme;
+    }
+
+    public String getDietaryProgrammeStartDate() {
+        return dietaryProgrammeStartDate;
+    }
+
+    public void setDietaryProgrammeStartDate(String dietaryProgrammeStartDate) {
+        this.dietaryProgrammeStartDate = dietaryProgrammeStartDate;
+    }
+
+    public Integer getCurrentDietaryProgrammeDay() {
+        return currentDietaryProgrammeDay;
+    }
+
+    public void setCurrentDietaryProgrammeDay(Integer currentDietaryProgrammeDay) {
+        this.currentDietaryProgrammeDay = currentDietaryProgrammeDay;
+    }
+
+    //    public double getTargetWeight() {
 //        return targetWeight;
 //    }
 //

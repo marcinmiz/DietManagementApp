@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class RecipeServiceImpl implements RecipeService {
 
-    private final List<String> recipeProductUnits = Arrays.asList("kg", "dag", "g", "pcs", "ml", "l");
+    private final List<String> recipeProductUnits = Arrays.asList("kg", "dag", "g", "pcs", "ml", "l", "tsp", "tbsp");
 
     @Autowired
     private ProductRepo productRepo;

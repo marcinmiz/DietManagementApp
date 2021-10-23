@@ -4,7 +4,6 @@ import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
-import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.MealService;
 import agh.edu.pl.diet.services.RecipeService;
@@ -32,8 +31,6 @@ class DailyMenuServiceImplTest {
     private List<Category> categories = List.of(new Category("Fruit"), new Category("Vegetables"), new Category("Cereal"), new Category("Dairy"), new Category("Meat"), new Category("Fish"), new Category("Fats"), new Category("Sweets"), new Category("Nuts"));
     @Mock
     private RecipeService recipeService;
-    @Mock
-    private MealRepo mealRepo;
     @Mock
     private DailyMenuRepo dailyMenuRepo;
     @Mock
@@ -114,7 +111,7 @@ class DailyMenuServiceImplTest {
             products.add(product);
         }
 
-        for (Product currentProduct: products) {
+        for (Product currentProduct : products) {
             RecipeProduct recipeProduct = new RecipeProduct();
             recipeProducts.add(recipeProduct);
         }
@@ -137,7 +134,7 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         Double[] nutrient6 = {6.1, 24.8, 8.55};
         nutrientsAmounts[2] = nutrient6;
-        Double[] calories = {215.5, 123.0, 260.85};
+        Double[] calories = {216.0, 123.0, 262.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -178,7 +175,7 @@ class DailyMenuServiceImplTest {
             products.add(product);
         }
         recipeProducts = new ArrayList<>();
-        for (Product currentProduct: products) {
+        for (Product currentProduct : products) {
             RecipeProduct recipeProduct = new RecipeProduct();
             recipeProducts.add(recipeProduct);
         }
@@ -187,7 +184,7 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[0] = nutrient4;
         nutrient5 = new Double[]{2.1, 4.5, 1.25};
         nutrientsAmounts[1] = nutrient5;
-        nutrient6 = new Double[] {3.0, 4.7, 3.0};
+        nutrient6 = new Double[]{3.0, 4.7, 3.0};
         nutrientsAmounts[2] = nutrient6;
         calories = new Double[]{64.5, 50.0, 65.05};
 
@@ -230,7 +227,7 @@ class DailyMenuServiceImplTest {
             products.add(product);
         }
         recipeProducts = new ArrayList<>();
-        for (Product currentProduct: products) {
+        for (Product currentProduct : products) {
             RecipeProduct recipeProduct = new RecipeProduct();
             recipeProducts.add(recipeProduct);
         }
@@ -241,7 +238,7 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         nutrient6 = new Double[]{18.1, 25.8, 8.55};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{345.0, 288.8, 250.9};
+        calories = new Double[]{345.0, 289.0, 251.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -283,7 +280,7 @@ class DailyMenuServiceImplTest {
             products.add(product);
         }
         recipeProducts = new ArrayList<>();
-        for (Product currentProduct: products) {
+        for (Product currentProduct : products) {
             RecipeProduct recipeProduct = new RecipeProduct();
             recipeProducts.add(recipeProduct);
         }
@@ -294,7 +291,7 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         nutrient6 = new Double[]{8.0, 33.5, 7.85};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{247.3, 311.05, 114.0};
+        calories = new Double[]{248.0, 312.0, 114.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -336,7 +333,7 @@ class DailyMenuServiceImplTest {
             products.add(product);
         }
         recipeProducts = new ArrayList<>();
-        for (Product currentProduct: products) {
+        for (Product currentProduct : products) {
             RecipeProduct recipeProduct = new RecipeProduct();
             recipeProducts.add(recipeProduct);
         }
@@ -345,9 +342,9 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[0] = nutrient4;
         nutrient5 = new Double[]{2.1, 4.5, 1.25};
         nutrientsAmounts[1] = nutrient5;
-        nutrient6 = new Double[] {3.0, 4.7, 3.0};
+        nutrient6 = new Double[]{3.0, 4.7, 3.0};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{64.5, 109.05, 65.05};
+        calories = new Double[]{65.0, 109.0, 65.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -558,7 +555,7 @@ class DailyMenuServiceImplTest {
 
         //pizza compensates too little calories of spaghetti and paella compensates too little calories of guacamole
 
-        String expected = "Daily Menu Day 3 of 14 has been added";
+        String expected = "Daily Menu has been added";
         DietaryProgramme dietaryProgramme = new DietaryProgramme();
         Double totalDailyCalories = 2394.0;
         Integer mealsQuantity = 4;
@@ -570,7 +567,7 @@ class DailyMenuServiceImplTest {
         totalDailyNutrients.put("Carbohydrate", 288.0);
         totalDailyNutrients.put("Fat", 90.0);
 
-        for (Recipes qrecipe: allRecipes) {
+        for (Recipes qrecipe : allRecipes) {
 
             System.out.println(qrecipe.getRecipeName());
             System.out.println(qrecipe.getRecipeCalories());
@@ -581,11 +578,13 @@ class DailyMenuServiceImplTest {
 
         doReturn(allRecipes).when(recipeService).getRecipes(any(RecipeGetRequest.class));
 
+        doReturn(new ResponseMessage("Meal has been added")).when(mealService).addNewMeal(anyString(), any(Recipes.class), any(DailyMenu.class));
+
         doReturn(dailyMenu).when(dailyMenuRepo).save(any(DailyMenu.class));
 
         doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
 
-        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, startDate, currentDay, lastDay);
+        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
         assertEquals(expected, actual.getMessage());
     }
@@ -611,7 +610,7 @@ class DailyMenuServiceImplTest {
         //remove pizza from allRecipes to create lack of dish for lunch
         allRecipes.remove(4);
 
-        for (Recipes qrecipe: allRecipes) {
+        for (Recipes qrecipe : allRecipes) {
 
             System.out.println(qrecipe.getRecipeName());
             System.out.println(qrecipe.getRecipeCalories());
@@ -621,7 +620,7 @@ class DailyMenuServiceImplTest {
 
         doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
 
-        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, startDate, currentDay, lastDay);
+        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
         assertEquals(expected, actual.getMessage());
     }
@@ -644,7 +643,7 @@ class DailyMenuServiceImplTest {
         totalDailyNutrients.put("Carbohydrate", 288.0);
         totalDailyNutrients.put("Fat", 90.0);
 
-        for (Recipes qrecipe: allRecipes) {
+        for (Recipes qrecipe : allRecipes) {
 
             System.out.println(qrecipe.getRecipeName());
             System.out.println(qrecipe.getRecipeCalories());
@@ -656,8 +655,49 @@ class DailyMenuServiceImplTest {
 
         doReturn(new ResponseMessage("Recipe has inappropriate amount of Protein")).when(spyDailyMenuService).verifyRecipe(eq(allRecipes.get(2)), anyMap());
 
-        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, startDate, currentDay, lastDay);
+        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
         assertEquals(expected, actual.getMessage());
     }
+
+    @Test
+    void shouldFailDueToNotCreatedMeal() {
+        System.out.println();
+        System.out.println("shouldFailDueToNotCreatedMeal");
+        System.out.println();
+
+        //pizza compensates too little calories of spaghetti and paella compensates too little calories of guacamole
+
+        String expected = "Meal has not been created";
+        DietaryProgramme dietaryProgramme = new DietaryProgramme();
+        Double totalDailyCalories = 2394.0;
+        Integer mealsQuantity = 4;
+        Calendar startDate = Calendar.getInstance();
+        Integer currentDay = 3, lastDay = 14;
+
+        totalDailyNutrients.clear();
+        totalDailyNutrients.put("Protein", 108.0);
+        totalDailyNutrients.put("Carbohydrate", 288.0);
+        totalDailyNutrients.put("Fat", 90.0);
+
+        for (Recipes qrecipe : allRecipes) {
+
+            System.out.println(qrecipe.getRecipeName());
+            System.out.println(qrecipe.getRecipeCalories());
+        }
+
+        DailyMenu dailyMenu = new DailyMenu();
+        dailyMenu.setDailyMenuName("Day 3 of 14");
+
+        doReturn(allRecipes).when(recipeService).getRecipes(any(RecipeGetRequest.class));
+
+        doReturn(new ResponseMessage("Recipe is required")).when(mealService).addNewMeal(anyString(), any(Recipes.class), any(DailyMenu.class));
+
+        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
+
+        ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
+
+        assertEquals(expected, actual.getMessage());
+    }
+
 }

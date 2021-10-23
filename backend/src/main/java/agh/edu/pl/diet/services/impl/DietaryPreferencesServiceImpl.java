@@ -47,7 +47,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                     return new ResponseMessage("Dietary Preferences total daily calories has to be given");
                 }
 
-                Integer totalDailyCalories = Integer.parseInt(item.toString());
+                Double totalDailyCalories = Double.parseDouble(item.toString());
 
                 if (totalDailyCalories.toString().length() < 1 || totalDailyCalories.toString().length() > 6) {
                     return new ResponseMessage("Dietary Preferences total daily calories has to have min 1 and max 6 characters");
@@ -260,8 +260,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
 
     @Override
     public DietaryPreferences getDietaryPreferences(Long dietaryPreferencesId) {
-        DietaryPreferences dietaryPreferences = dietaryPreferencesRepo.findById(dietaryPreferencesId).get();
-        return dietaryPreferences;
+        return dietaryPreferencesRepo.findById(dietaryPreferencesId).orElse(null);
     }
 
     @Override
@@ -275,7 +274,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
             return responseMessage;
         }
 
-        Integer totalDailyCalories = dietaryPreferencesRequest.getTotalDailyCalories();
+        Double totalDailyCalories = Double.parseDouble(dietaryPreferencesRequest.getTotalDailyCalories());
 
         ResponseMessage responseMessage2 = verify("totalDailyCalories", totalDailyCalories);
 
@@ -491,7 +490,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
                 return responseMessage;
             }
 
-            Integer totalDailyCalories = dietaryPreferencesRequest.getTotalDailyCalories();
+            Double totalDailyCalories = Double.parseDouble(dietaryPreferencesRequest.getTotalDailyCalories());
 
             ResponseMessage responseMessage2 = verify("totalDailyCalories", totalDailyCalories);
 

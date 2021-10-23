@@ -14,9 +14,6 @@ public class DailyMenu {
     private Integer mealsQuantity;
     @ManyToOne
     private DietaryProgramme dietaryProgramme;
-//    @ManyToOne
-//    private Meals meal;
-    private String creationDate = null;
 
     public Long getDailyMenuId() {
         return dailyMenuId;
@@ -56,21 +53,5 @@ public class DailyMenu {
 
     public void setDietaryProgramme(DietaryProgramme dietaryProgramme) {
         this.dietaryProgramme = dietaryProgramme;
-    }
-
-//    public Meals getMeal() {
-//        return meal;
-//    }
-//
-//    public void setMeal(Meals meal) {
-//        this.meal = meal;
-//    }
-
-    public String getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(String creationDate) {
-        this.creationDate = creationDate;
     }
 }

@@ -7,9 +7,11 @@ import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.MealService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 
+@Service
 public class MealServiceImpl implements MealService {
 
     @Autowired
@@ -57,6 +59,8 @@ public class MealServiceImpl implements MealService {
         }
 
         meal.setDailyMenu(dailyMenu);
+
+        System.out.println(meal);
 
         mealRepo.save(meal);
 
