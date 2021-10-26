@@ -448,10 +448,6 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         dailyMenu.setDailyMenuName("Day " + currentDay + " of " + lastDay);
 
-//        startDate.add(Calendar.DAY_OF_MONTH, currentDay - 1);
-//
-//        dailyMenu.setDailyMenuDate(startDate.toInstant().toString());
-
         dailyMenu.setDietaryProgramme(dietaryProgramme);
 
         dailyMenuRepo.save(dailyMenu);

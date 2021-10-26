@@ -3,7 +3,10 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DietaryProgrammeRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.repos.DailyMenuRepo;
 import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
+import agh.edu.pl.diet.repos.MealRepo;
+import agh.edu.pl.diet.repos.UserRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.DietaryPreferencesService;
 import agh.edu.pl.diet.services.DietaryProgrammeService;
@@ -18,8 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -37,6 +39,12 @@ class DietaryProgrammeServiceImplTest {
     private DailyMenuService dailyMenuService;
     @Mock
     private DietaryProgrammeRepo dietaryProgrammeRepo;
+    @Mock
+    private UserRepo userRepo;
+    @Mock
+    private DailyMenuRepo dailyMenuRepo;
+    @Mock
+    private MealRepo mealRepo;
     @InjectMocks
     private DietaryProgrammeService dietaryProgrammeService = new DietaryProgrammeServiceImpl();
 
@@ -226,6 +234,131 @@ class DietaryProgrammeServiceImplTest {
         doReturn(new ResponseMessage("No recipe is appropriate for lunch")).when(dailyMenuService).addNewDailyMenu(any(DietaryProgramme.class), anyDouble(), anyInt(), anyMap(), anyInt(), anyInt());
 
         ResponseMessage actual = dietaryProgrammeService.addNewDietaryProgramme(request);
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldStartDietaryProgramme() {
+        Long programmeId = 980L;
+        String programmeName = "Amazing experience";
+        String type = "start";
+        User user = new User();
+        Integer programmeDays = 3;
+
+        String expected = "Dietary programme " + programmeName + " has been started";
+
+        doReturn(null).when(userRepo).save(any(User.class));
+        doReturn(null).when(dailyMenuRepo).save(any(DailyMenu.class));
+        doReturn(null).when(mealRepo).save(any(Meals.class));
+
+        DietaryProgramme programme = new DietaryProgramme();
+        programme.setDietaryProgrammeName(programmeName);
+        programme.setDietaryProgrammeDays(programmeDays);
+        programme.setOwner(user);
+        Optional<DietaryProgramme> programmeOptional = Optional.of(programme);
+
+        doReturn(programmeOptional).when(dietaryProgrammeRepo).findById(anyLong());
+
+        List<DailyMenu> menus = List.of(new DailyMenu(), new DailyMenu(), new DailyMenu());
+        doReturn(menus).when(dailyMenuRepo).findByDietaryProgramme(any(DietaryProgramme.class));
+
+        Meals meal1 = new Meals();
+        meal1.setMealsName("breakfast");
+        Meals meal2 = new Meals();
+        meal2.setMealsName("lunch");
+        Meals meal3 = new Meals();
+        meal3.setMealsName("dinner");
+        Meals meal4 = new Meals();
+        meal4.setMealsName("supper");
+
+        List<Meals> meals = List.of(meal1, meal2, meal3, meal4);
+        doReturn(meals).when(mealRepo).findByDailyMenu(any(DailyMenu.class));
+
+        ResponseMessage actual = dietaryProgrammeService.useDietaryProgramme(programmeId, type);
+
+        assertAll(
+                () -> assertEquals(expected, actual.getMessage()),
+                () -> assertNotNull(user.getCurrentDietaryProgramme()),
+                () -> assertNotNull(user.getCurrentDietaryProgrammeDay()),
+                () -> assertNotNull(user.getDietaryProgrammeStartDate())
+        );
+    }
+
+    @Test
+    void shouldAbandonDietaryProgramme() {
+        Long programmeId = 980L;
+        String programmeName = "Amazing experience";
+        String type = "abandon";
+
+        String expected = "Dietary programme " + programmeName + " has been abandoned";
+
+        doReturn(null).when(userRepo).save(any(User.class));
+        doReturn(null).when(dailyMenuRepo).save(any(DailyMenu.class));
+        doReturn(null).when(mealRepo).save(any(Meals.class));
+
+        DietaryProgramme programme = new DietaryProgramme();
+        programme.setDietaryProgrammeName(programmeName);
+        programme.setDietaryProgrammeDays(3);
+
+        User user = new User();
+        user.setDietaryProgrammeStartDate(Calendar.getInstance().toInstant().toString());
+        user.setCurrentDietaryProgramme(programme);
+        user.setCurrentDietaryProgrammeDay(2);
+
+        programme.setOwner(user);
+        Optional<DietaryProgramme> programmeOptional = Optional.of(programme);
+
+        doReturn(programmeOptional).when(dietaryProgrammeRepo).findById(anyLong());
+
+        List<DailyMenu> menus = List.of(new DailyMenu(), new DailyMenu(), new DailyMenu());
+        doReturn(menus).when(dailyMenuRepo).findByDietaryProgramme(any(DietaryProgramme.class));
+
+        Meals meal1 = new Meals();
+        meal1.setMealsName("breakfast");
+        Meals meal2 = new Meals();
+        meal2.setMealsName("lunch");
+        Meals meal3 = new Meals();
+        meal3.setMealsName("dinner");
+        Meals meal4 = new Meals();
+        meal4.setMealsName("supper");
+
+        List<Meals> meals = List.of(meal1, meal2, meal3, meal4);
+        doReturn(meals).when(mealRepo).findByDailyMenu(any(DailyMenu.class));
+
+        ResponseMessage actual = dietaryProgrammeService.useDietaryProgramme(programmeId, type);
+
+        assertAll(
+                () -> assertEquals(expected, actual.getMessage()),
+                () -> assertNull(user.getCurrentDietaryProgramme()),
+                () -> assertNull(user.getCurrentDietaryProgrammeDay()),
+                () -> assertNull(user.getDietaryProgrammeStartDate())
+        );
+    }
+
+    @Test
+    void shouldFailDueToWrongType() {
+        Long programmeId = 980L;
+        String type = "stop";
+
+        String expected = "Type should be equal to \"start\" or \"abandon\"";
+
+        ResponseMessage actual = dietaryProgrammeService.useDietaryProgramme(programmeId, type);
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldFailDueToNotFoundDietaryProgramme() {
+        Long programmeId = 950L;
+        String type = "start";
+
+        String expected = "Dietary programme with id " + programmeId + " has not been found";
+        Optional<DietaryProgramme> dietaryProgrammeOptional = Optional.empty();
+
+        doReturn(dietaryProgrammeOptional).when(dietaryProgrammeRepo).findById(anyLong());
+
+        ResponseMessage actual = dietaryProgrammeService.useDietaryProgramme(programmeId, type);
 
         assertEquals(expected, actual.getMessage());
     }

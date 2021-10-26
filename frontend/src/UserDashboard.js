@@ -7,6 +7,7 @@ import Recipes from "./pages/Recipes";
 import {Switch, Route, useRouteMatch, useParams, Redirect, useHistory} from 'react-router-dom'
 import Preferences from "./pages/Preferences";
 import Menus from "./pages/Menus";
+import Programmes from "./pages/Programmes";
 
 function Topic() {
     let { settingsId, mode } = useParams();
@@ -51,7 +52,7 @@ export default function UserDashboard(props) {
                                 <Preferences admin={admin} adminMode={adminMode}/>
                             </Route>
                             <Route path={`${path}programmes`}>
-                                Dietary Programmes
+                                <Programmes currentDietaryProgramme = {props.currentDietaryProgramme} handleUseDietaryProgramme={props.handleUseDietaryProgramme}/>
                             </Route>
                             <Route path={`${path}menus`}>
                                 <Menus/>

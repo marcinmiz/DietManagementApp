@@ -104,6 +104,15 @@ export default function Preferences(props) {
             preference.preferenceRecipes[i].recipePreferred = data[x].recipes[i].recipePreferred;
         }
 
+        preference.relatedDietaryProgramme = {};
+        preference.relatedDietaryProgramme.dietaryProgrammeName = "";
+
+        if (data[x].relatedDietaryProgramme) {
+            preference.relatedDietaryProgramme.dietaryProgrammeId = data[x].relatedDietaryProgramme.dietaryProgrammeId;
+            preference.relatedDietaryProgramme.dietaryProgrammeName = data[x].relatedDietaryProgramme.dietaryProgrammeName;
+            preference.relatedDietaryProgramme.dietaryProgrammeDays = data[x].relatedDietaryProgramme.dietaryProgrammeDays;
+        }
+
         return preference;
     };
 

@@ -1,5 +1,7 @@
 package agh.edu.pl.diet.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -10,6 +12,7 @@ public class DietaryProgramme {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dietaryProgrammeId;
     private String dietaryProgrammeName;
+    @JsonIgnore
     @ManyToOne
     private User owner;
     private Integer dietaryProgrammeDays;

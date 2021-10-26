@@ -21,6 +21,8 @@ public class DietaryPreferences {
     private Integer caloriesPerMeal;
     private Integer mealsQuantity;
     private Double targetWeight;
+    @OneToOne
+    private DietaryProgramme relatedDietaryProgramme;
 
     @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -144,4 +146,11 @@ public class DietaryPreferences {
         recipes.remove(recipe);
     }
 
+    public DietaryProgramme getRelatedDietaryProgramme() {
+        return relatedDietaryProgramme;
+    }
+
+    public void setRelatedDietaryProgramme(DietaryProgramme relatedDietaryProgramme) {
+        this.relatedDietaryProgramme = relatedDietaryProgramme;
+    }
 }

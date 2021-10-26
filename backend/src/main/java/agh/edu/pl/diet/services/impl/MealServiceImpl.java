@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.List;
 
 @Service
 public class MealServiceImpl implements MealService {
@@ -19,32 +20,14 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public ResponseMessage addNewMeal(String mealName, Recipes recipe, DailyMenu dailyMenu) {
+
+        List<String> mealNames = List.of("breakfast", "lunch", "dinner", "tea", "supper");
+
         Meals meal = new Meals();
-        Calendar mealHour = Calendar.getInstance();
 
-        switch (mealName) {
-            case "breakfast":
-                mealHour.set(Calendar.HOUR_OF_DAY, 8);
-                break;
-            case "lunch":
-                mealHour.set(Calendar.HOUR_OF_DAY, 11);
-                break;
-            case "dinner":
-                mealHour.set(Calendar.HOUR_OF_DAY, 14);
-                break;
-            case "tea":
-                mealHour.set(Calendar.HOUR_OF_DAY, 17);
-                break;
-            case "supper":
-                mealHour.set(Calendar.HOUR_OF_DAY, 20);
-                break;
-            default:
-                return new ResponseMessage("Wrong meal name");
+        if (!mealNames.contains(mealName)) {
+            return new ResponseMessage("Wrong meal name");
         }
-
-        mealHour.set(Calendar.MINUTE, 0);
-        mealHour.set(Calendar.SECOND, 0);
-        meal.setMealHourTime(mealHour.toInstant().toString());
 
         meal.setMealsName(mealName);
 

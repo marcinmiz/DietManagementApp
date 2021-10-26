@@ -692,7 +692,7 @@
     color: red;
 }
 
-.dietary_preferences_list {
+.dietary_preferences_list, .dietary_programmes_list {
     /*display: flex;*/
     /*flex-wrap: wrap;*/
     /*justify-content: center;*/
@@ -701,11 +701,16 @@
 }
 
 .dietary_preference {
-    min-height: 200px;
+    /*min-height: 200px;*/
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
+    background-color: #6f6f6f;
+    border-radius: 5px;
+    margin: 1%;
+    padding: 1%;
+    width: 100%;
 }
 
 .preference_nutrient, .preference_product, .preference_recipe {
@@ -714,9 +719,9 @@
     justify-content: space-evenly;
 }
 
-.preference_basic_info, .preference_details, .preference_nutrients, .preference_products, .preference_recipes {
+.preference_basic_info, .preference_nutrients, .preference_products, .preference_recipes {
     height: 200px !important;
-    width: 20%;
+    width: 30%;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -770,4 +775,36 @@
 .menuList {
     overflow-y: scroll;
     max-height: 90%;
+}
+
+.programme {
+    background-color: #484848;
+    border-radius: 5px;
+    width: 70%;
+    margin: 1% auto;
+}
+
+.programme_header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2%;
+}
+
+.programme_name {
+    font-size: 1.5rem;
+}
+
+.programme_ordinal {
+    font-size: 0.8rem;
+}
+
+.programme_header_part {
+    margin: 1.2%;
+}
+
+.programme_basic {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
 }
