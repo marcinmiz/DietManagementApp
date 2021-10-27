@@ -131,6 +131,7 @@ export default function App() {
                                                     loggedInStatus={state.loggedInStatus}
                                                     admin={state.admin} adminMode={state.adminMode}
                                                     currentDietaryProgramme={state.user.currentDietaryProgramme}
+                                                    currentDietaryProgrammeDay={state.user.currentDietaryProgrammeDay}
                                                     handleAdminMode={handleAdminMode}
                                                     handleLogout={handleLogout}
                                                     handleUseDietaryProgramme={handleUseDietaryProgramme}

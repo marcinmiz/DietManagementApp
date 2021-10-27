@@ -3,10 +3,7 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DietaryProgrammeRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.repos.DailyMenuRepo;
-import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
-import agh.edu.pl.diet.repos.MealRepo;
-import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.DietaryPreferencesService;
 import agh.edu.pl.diet.services.DietaryProgrammeService;
@@ -27,6 +24,8 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
     private UserRepo userRepo;
     @Autowired
     private DietaryProgrammeRepo dietaryProgrammeRepo;
+    @Autowired
+    private DietaryPreferencesRepo dietaryPreferencesRepo;
     @Autowired
     private UserService userService;
     @Autowired
@@ -62,6 +61,10 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
             return new ResponseMessage("Dietary preference with id " + dietaryProgrammeRequest.getPreferenceId() + " has not been found");
         }
 
+        if (dietaryPreference.getRelatedDietaryProgramme() != null) {
+            return new ResponseMessage("Dietary preference with id " + dietaryProgrammeRequest.getPreferenceId() + " has related dietary programme yet");
+        }
+
         Set<DietaryPreferencesNutrient> nutrients = dietaryPreference.getNutrients();
         Map<String, Double> totalDailyNutrients = new LinkedHashMap<>();
 
@@ -79,6 +82,8 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
             }
         }
 
+        dietaryPreference.setRelatedDietaryProgramme(dietaryProgramme);
+        dietaryPreferencesRepo.save(dietaryPreference);
         return new ResponseMessage("Dietary Programme has been added");
     }
 

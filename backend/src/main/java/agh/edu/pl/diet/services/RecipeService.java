@@ -6,7 +6,6 @@ import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.payloads.response.UserCollectionRecipeResponse;
 
 import java.util.List;
 import java.util.Set;

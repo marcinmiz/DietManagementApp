@@ -4,12 +4,15 @@ import agh.edu.pl.diet.entities.DailyMenu;
 import agh.edu.pl.diet.entities.DietaryProgramme;
 import agh.edu.pl.diet.entities.Meals;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
+import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.DailyMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/menus")
@@ -29,10 +32,15 @@ public class DailyMenuController {
 //        return dailyMenuService.getMeals(dailyMenuId);
 //    }
 //
-//    @GetMapping("/programme/{id}")
-//    public DietaryProgramme getDietaryProgramme(@PathVariable("id") Long dailyMenuId) {
-//        return dailyMenuService.getDietaryProgramme((dailyMenuId));
-//    }
+    @GetMapping("/{programmeId}")
+    public ResponseEntity<List<DailyMenuResponse>> getDietaryProgrammeDailyMenus(@PathVariable("programmeId") Long programmeId) {
+        List<DailyMenuResponse> menuResponses = dailyMenuService.getDietaryProgrammeDailyMenus(programmeId);
+        if (menuResponses.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(menuResponses);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(menuResponses);
+
+    }
 
 //    @PostMapping("/add")
 //    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {

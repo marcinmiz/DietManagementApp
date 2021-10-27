@@ -3,8 +3,10 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
+import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
+import agh.edu.pl.diet.repos.DietaryPreferencesRepo;
 import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
 import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
@@ -33,6 +35,9 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private DietaryProgrammeRepo dietaryProgrammeRepo;
+
+    @Autowired
+    private DietaryPreferencesRepo preferenceRepo;
 
 //    @Autowired
 //    private NutrientRepo nutrientRepo;
@@ -177,13 +182,13 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         List<RecipeProduct> recipeProducts = recipe.getRecipeProducts();
 
-        for (RecipeProduct recipeProduct: recipeProducts) {
+        for (RecipeProduct recipeProduct : recipeProducts) {
             String categoryName = recipeProduct.getProduct().getCategory().getCategoryName();
-            if(ingredientIncidence.containsKey(categoryName)) {
+            if (ingredientIncidence.containsKey(categoryName)) {
                 Integer newValue = ingredientIncidence.get(categoryName) + 1;
                 ingredientIncidence.put(categoryName, newValue);
             } else {
-                ingredientIncidence.put(categoryName,0);
+                ingredientIncidence.put(categoryName, 0);
             }
         }
 
@@ -310,7 +315,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             if (caloriesDiff2.equals(0.0)) {
                 lowerCaloriesLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyCalories;
                 upperCaloriesLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyCalories;
-            } else if (caloriesDiff2 > 0.0 || i == mealsQuantity - 1){
+            } else if (caloriesDiff2 > 0.0 || i == mealsQuantity - 1) {
                 lowerCaloriesLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyCalories + caloriesDifference;
                 upperCaloriesLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyCalories + caloriesDifference;
             } else {
@@ -324,7 +329,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             if (proteinsDiff2.equals(0.0)) {
                 lowerProteinsLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Protein");
                 upperProteinsLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Protein");
-            } else if (proteinsDiff2 > 0.0 || i == mealsQuantity - 1){
+            } else if (proteinsDiff2 > 0.0 || i == mealsQuantity - 1) {
                 lowerProteinsLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
                 upperProteinsLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Protein") + proteinsDifference;
             } else {
@@ -339,7 +344,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             if (carbohydratesDiff2.equals(0.0)) {
                 lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Carbohydrate");
                 upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Carbohydrate");
-            } else if (carbohydratesDiff2 > 0.0 || i == mealsQuantity - 1){
+            } else if (carbohydratesDiff2 > 0.0 || i == mealsQuantity - 1) {
                 lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
                 upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Carbohydrate") + carbohydratesDifference;
             } else {
@@ -354,7 +359,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             if (fatsDiff2.equals(0.0)) {
                 lowerFatsLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Fat");
                 upperFatsLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Fat");
-            } else if (fatsDiff2 > 0.0 || i == mealsQuantity - 1){
+            } else if (fatsDiff2 > 0.0 || i == mealsQuantity - 1) {
                 lowerFatsLimit = (nutrientsScopes.get(mealName).get(0) + 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
                 upperFatsLimit = (nutrientsScopes.get(mealName).get(1) + 0.025) * totalDailyNutrients.get("Fat") + fatsDifference;
             } else {
@@ -375,7 +380,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                 potentialRecipes.stream().map(Recipes::getRecipeId).forEach(System.out::println);
             }
 
-            for (Recipes verifiedRecipe: potentialRecipes) {
+            for (Recipes verifiedRecipe : potentialRecipes) {
 
                 if (verifyRecipe(verifiedRecipe, dailyNutrientsScopes).getMessage().equals("Recipe is appropriate in regard to dietary preference") && !chosenRecipes.contains(verifiedRecipe)) {
                     System.out.println(verifiedRecipe.getRecipeName());
@@ -464,6 +469,103 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     }
 
     @Override
+    public List<DailyMenuResponse> getDietaryProgrammeDailyMenus(Long dietaryProgrammeId) {
+
+        List<DailyMenuResponse> dietaryProgrammeMenus = new ArrayList<>();
+        DietaryProgramme programme = dietaryProgrammeRepo.findById(dietaryProgrammeId).orElse(null);
+
+        if (programme == null) {
+            System.out.println("programme");
+            return new ArrayList<>();
+        }
+
+        List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(programme);
+
+        for (DailyMenu menu : menus) {
+            DailyMenuResponse response = new DailyMenuResponse();
+
+            response.setDailyMenuId(menu.getDailyMenuId());
+            response.setDailyMenuName(menu.getDailyMenuName());
+            response.setDailyMenuDate(menu.getDailyMenuDate());
+            response.setMealsQuantity(menu.getMealsQuantity());
+
+            List<Meals> meals = mealRepo.findByDailyMenu(menu);
+
+            for (Meals meal : meals) {
+                String mealSentence = "";
+                mealSentence += meal.getMealsName() + ";";
+                mealSentence += meal.getMealHourTime() + ";";
+
+                Recipes recipe = recipeService.getRecipe(meal.getRecipe().getRecipeId());
+                System.out.println(recipe.getRecipeImage());
+                mealSentence += recipe.getRecipeImage() + ";";
+                mealSentence += recipe.getRecipeName() + ";";
+
+                Double calories = recipe.getRecipeCalories();
+                Long averageTemp = Math.round(calories * 100);
+                calories = Double.valueOf(averageTemp) / 100;
+
+                mealSentence += calories + ";";
+
+                Double proteins = recipe.getRecipeNutrients("Protein");
+                averageTemp = Math.round(proteins * 100);
+                proteins = Double.valueOf(averageTemp) / 100;
+
+                mealSentence += proteins + ";";
+
+                Double carbohydrates = recipe.getRecipeNutrients("Carbohydrate");
+                averageTemp = Math.round(carbohydrates * 100);
+                carbohydrates = Double.valueOf(averageTemp) / 100;
+
+                mealSentence += carbohydrates + ";";
+
+                Double fats = recipe.getRecipeNutrients("Fat");
+                averageTemp = Math.round(fats * 100);
+                fats = Double.valueOf(averageTemp) / 100;
+
+                mealSentence += fats + ";";
+
+                RecipeGetRequest request = new RecipeGetRequest();
+                request.setRecipesGroup("personal");
+                request.setPhrase("");
+                List<Recipes> collectionRecipes = recipeService.getRecipes(request);
+
+                if (collectionRecipes.contains(recipe)) {
+                    mealSentence += "Yes;";
+                } else {
+                    mealSentence += "No;";
+                }
+
+                DietaryPreferences preference = preferenceRepo.findByRelatedDietaryProgramme(programme);
+
+                if (preference == null) {
+                    System.out.println("preference");
+                    return new ArrayList<>();
+                }
+
+                Set<DietaryPreferencesRecipe> recipes = preference.getRecipes();
+
+                Boolean recipePreferred = recipes.stream().filter(preferenceRecipe -> preferenceRecipe.getRecipe().getRecipeId().equals(recipe.getRecipeId())).map(DietaryPreferencesRecipe::isRecipePreferred).findAny().orElse(null);
+                if (recipePreferred == null) {
+                    mealSentence += "Neutral";
+                } else {
+                    if (recipePreferred) {
+                        mealSentence += "Yes";
+                    } else {
+                        mealSentence += "No";
+                    }
+                }
+
+                response.addMeal(mealSentence);
+            }
+
+            dietaryProgrammeMenus.add(response);
+        }
+
+        return dietaryProgrammeMenus;
+    }
+
+    @Override
     public ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest) {
 
         String dailyMenuName = "";
@@ -473,7 +575,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             dailyMenuName = dailyMenuRequest.getDailyMenuName();
 
             ResponseMessage responseMessage = verify("update", "name", dailyMenuName);
-            if (responseMessage.getMessage().equals("Daily menu name is valid")){
+            if (responseMessage.getMessage().equals("Daily menu name is valid")) {
                 updatedDailyMenu.setDailyMenuName(dailyMenuName);
             } else {
                 return responseMessage;
@@ -507,7 +609,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                 return responseMessage4;
             }
 
-            for (String mealsStatement: meals) {
+            for (String mealsStatement : meals) {
 
                 ResponseMessage responseMessage5 = verify("update", "mealsStatement", mealsStatement);
 

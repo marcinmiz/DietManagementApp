@@ -243,7 +243,7 @@
     justify-content: space-evenly;
 }
 
-.product_name, .recipe_name {
+.product_name, .recipe_name, .programme_name {
     margin-left: auto;
     margin-right: auto;
     width: max-content;
@@ -710,7 +710,7 @@
     border-radius: 5px;
     margin: 1%;
     padding: 1%;
-    width: 100%;
+    width: 95%;
 }
 
 .preference_nutrient, .preference_product, .preference_recipe {
@@ -764,8 +764,22 @@
 }
 
 .dailyMenu {
-    height: 88%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 82%;
+    width: 100%;
     /*margin-top: 8%;*/
+}
+
+.dailyMenuContent {
+    height: 100%;
+    width: 90%;
+}
+
+.menuNotUsedProgramme {
+    margin-top: 15%;
+    font-size: 1.2em;
 }
 
 .menuImage {
@@ -805,6 +819,30 @@
 
 .programme_basic {
     display: flex;
+    flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
+}
+
+.choose_preference_container {
+    width: 75%;
+}
+
+.choose_preference_list {
+    overflow-y: scroll;
+    height: 15em;
+    width: 100%;
+}
+
+.add_programme_form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 70%;
+    margin: 1% auto;
+}
+
+.chosenPreference {
+    background-color: #283987;
+;
 }

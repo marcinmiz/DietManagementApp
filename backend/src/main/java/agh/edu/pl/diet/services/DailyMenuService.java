@@ -5,6 +5,7 @@ import agh.edu.pl.diet.entities.DietaryProgramme;
 import agh.edu.pl.diet.entities.Meals;
 import agh.edu.pl.diet.entities.Recipes;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
+import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import org.springframework.data.util.Pair;
 
@@ -23,6 +24,8 @@ public interface DailyMenuService {
     ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes);
 
     ResponseMessage addNewDailyMenu(DietaryProgramme dietaryProgramme, Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients, Integer currentDay, Integer lastDay);
+
+    List<DailyMenuResponse> getDietaryProgrammeDailyMenus(Long dietaryProgrammeId);
 
     ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest);
 

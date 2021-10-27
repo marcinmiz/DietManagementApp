@@ -22,7 +22,7 @@ public class DietaryPreferences {
     private Integer mealsQuantity;
     private Double targetWeight;
     @OneToOne
-    private DietaryProgramme relatedDietaryProgramme;
+    private DietaryProgramme relatedDietaryProgramme = null;
 
     @OneToMany(mappedBy = "dietaryPreferences", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})

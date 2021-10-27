@@ -11,10 +11,15 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Chip from "@material-ui/core/Chip";
 import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField/TextField";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
         minWidth: 110,
+    },
+    add_programme_container: {
+        display: "block",
+        width: "100%"
     }
 }));
 
@@ -24,6 +29,9 @@ export default function Programmes(props) {
     const [state, setState] = React.useState({
         programmes: [],
         preferences: [],
+        programmeName: "",
+        programmeDays: 1,
+        chosenPreferenceId: null,
         msg: "",
         loaded: false
     });
@@ -135,6 +143,31 @@ export default function Programmes(props) {
         return preference;
     };
 
+    const handleChangeBasicInfo = (event) => {
+
+        let value;
+
+        if (event.target.name === 'programmeDays') {
+            if (event.target.value <= 0) {
+                return;
+            }
+            value = Number(event.target.value);
+        } else {
+            value = event.target.value;
+        }
+
+        setState({
+            ...state,
+            [event.target.name]: value,
+        });
+    };
+
+    const handlePreferenceChoose = (event, preferenceId) => {
+        setState({
+            ...state,
+            chosenPreferenceId: preferenceId
+        });
+    };
     // const handleEdit = (event, preferenceId) => {
     //     if (!state.editPreferenceId) {
     //         setState({
@@ -191,6 +224,50 @@ export default function Programmes(props) {
             .catch(error => console.log(error));
     };
 
+    const validateProgramme = () => {
+        let programme = {};
+
+        programme.dietaryProgrammeName = state.programmeName;
+        programme.dietaryProgrammeDays = state.programmeDays;
+        programme.preferenceId = state.chosenPreferenceId;
+
+        return programme;
+    };
+
+    const handleSave = async () => {
+
+        let programme, item_id;
+
+        programme = await validateProgramme();
+
+        // item_id = state.programme.dietaryProgrammeId;
+
+        if (programme === "error")
+            return;
+
+        console.log(programme);
+        // if (mode === "add") {
+        try {
+            let response = await http.post("/api/programmes/add", programme);
+            handleSetMsg(response.data.message);
+            setTimeout(() => handleSetMsg(""), 3000);
+        } catch (e) {
+            handleSetMsg("Dietary Programme could not be added");
+            setTimeout(() => handleSetMsg(""), 3000);
+        }
+        // } else if (mode === "edit") {
+        //     http.put("/api/preferences/update/" + item_id, preference)
+        //         .then(resp => {
+        //             handleSetMsg(resp.data.message);
+        //             setTimeout(() => handleSetMsg(""), 3000);
+        //         })
+        //         .catch(error => console.log(error));
+        // } else {
+        //     console.error("wrong mode");
+        // }
+
+    };
+
     return (
         <Container id="main_container" maxWidth="lg">
             <div className="page_container">
@@ -206,103 +283,110 @@ export default function Programmes(props) {
                             Add new dietary programme
                         </AccordionSummary>
                         <AccordionDetails>
-                            {state.preferences.map((preference, index) => (
-                                <div key={index}>
-                                    <Divider variant="fullWidth"/>
-                                    <div id={"preference" + preference.preferenceId}
-                                         className="dietary_preference">
-                                        <div className="preference_basic_info">
-                                            <div>
-                                                {index + 1}. Dietary Preference
-                                            </div>
-                                            <div className="creation_date">
-                                                {"created " + preference.creationDate}
-                                            </div>
-                                            <div className="dietary_preference_diet_type">
-                                                Diet
-                                                type: {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
-                                            </div>
+                            <div className={classes.add_programme_container}>
+                                <div className="add_programme_form">
+                                    <div className="programme_basic">
+                                        <div className="programme_name">
+                                            <TextField className="category_select" id="programmeNameInput"
+                                                       name="programmeName"
+                                                       label="Programme name" variant="filled"
+                                                       value={state.programmeName}
+                                                       autoComplete="off"
+                                                       onChange={event => handleChangeBasicInfo(event)}
+                                            />
                                         </div>
-                                        <div className="preference_details">
-                                            <div className="dietary_preference_total_daily_calories">
-                                                Total daily calories: {preference.totalDailyCalories} kCal
-                                            </div>
-                                            <div className="dietary_preference_calories_per_meal">
-                                                Calories per meal: {preference.caloriesPerMeal} kCal
-                                            </div>
-                                            <div className="dietary_preference_meals_quantity">
-                                                Meals quantity: {preference.mealsQuantity}
-                                            </div>
-                                            <div className="dietary_preference_target_weight">
-                                                Target weight: {preference.targetWeight} kg
-                                            </div>
+                                        <div className="programme_name">
+                                            <TextField className="category_select" id="programmeDaysInput"
+                                                       name="programmeDays"
+                                                       type="number"
+                                                       label="Programme days" variant="filled"
+                                                       value={state.programmeDays}
+                                                       autoComplete="off"
+                                                       onChange={event => handleChangeBasicInfo(event)}
+                                            />
                                         </div>
-                                        <div className="preference_nutrients">
-                                            <div className="preference_nutrients_header">Nutrients</div>
-                                            {preference.preferenceNutrients.length === 0 ? "No nutrients" :
-                                                preference.preferenceNutrients.map((nutrient, index) => (
-                                                    <div key={index} className="preference_nutrient">
-                                                        <div>
-                                                            {nutrient.nutrientName}
+                                    </div>
+                                    <div className="choose_preference_container">
+                                        <div>Click preference to choose</div>
+                                        <div className="choose_preference_list">
+                                            {state.preferences.map((preference, index) => (
+                                                <div key={index} id={"preference" + preference.preferenceId}
+                                                     className={state.chosenPreferenceId === preference.preferenceId ? "dietary_preference chosenPreference" : "dietary_preference"}
+                                                     onClick={event => handlePreferenceChoose(event, preference.preferenceId)}>
+                                                    <div className="preference_basic_info">
+                                                        <div className="dietary_preference_diet_type">
+                                                            {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
                                                         </div>
-                                                        <div>
-                                                            {nutrient.nutrientRelation}
-                                                            {nutrient.nutrientAmount} g
+                                                        <div className="dietary_preference_total_daily_calories">
+                                                            {preference.totalDailyCalories} kcal daily
+                                                        </div>
+                                                        <div className="dietary_preference_meals_quantity">
+                                                            {preference.mealsQuantity} meals
+                                                        </div>
+                                                        <div className="dietary_preference_target_weight">
+                                                            target {preference.targetWeight} kg
                                                         </div>
                                                     </div>
-                                                ))}
-                                        </div>
-                                        <div className="preference_products">
-                                            <div className="preference_products_header">Products</div>
-                                            {preference.preferenceProducts.length === 0 ? "No preferred products" :
-                                                preference.preferenceProducts.map((product, index) => (
-                                                    <div key={index} className="preference_product">
-                                                        <div>
-                                                            {product.productName}
-                                                        </div>
-                                                        <div>
-                                                            {product.productPreferred ?
-                                                                <ThumbUpRoundedIcon className="upThumb"/> :
-                                                                <ThumbDownRoundedIcon className="downThumb"/>}
-                                                        </div>
+                                                    <div className="preference_nutrients">
+                                                        <div className="preference_nutrients_header">Nutrients</div>
+                                                        {preference.preferenceNutrients.length === 0 ? "No nutrients" :
+                                                            preference.preferenceNutrients.map((nutrient, index) => (
+                                                                <div key={index} className="preference_nutrient">
+                                                                    <div>
+                                                                        {nutrient.nutrientName}s
+                                                                    </div>
+                                                                    <div>
+                                                                        {nutrient.nutrientAmount} g
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                     </div>
-                                                ))}
-                                        </div>
-                                        <div className="preference_recipes">
-                                            <div className="preference_recipes_header">Recipes</div>
-                                            {preference.preferenceRecipes.length === 0 ? "No preferred recipes" :
-                                                preference.preferenceRecipes.map((recipe, index) => (
-                                                    <div key={index} className="preference_recipe">
-                                                        <div>
-                                                            {recipe.recipeName}
-                                                        </div>
-                                                        <div>
-                                                            {recipe.recipePreferred ?
-                                                                <ThumbUpRoundedIcon className="upThumb"/> :
-                                                                <ThumbDownRoundedIcon className="downThumb"/>}
-                                                        </div>
+                                                    <div className="preference_products">
+                                                        <div className="preference_products_header">Products</div>
+                                                        {preference.preferenceProducts.length === 0 ? "No preferred products" :
+                                                            preference.preferenceProducts.map((product, index) => (
+                                                                <div key={index} className="preference_product">
+                                                                    <div>
+                                                                        {product.productName}
+                                                                    </div>
+                                                                    <div>
+                                                                        {product.productPreferred ?
+                                                                            <ThumbUpRoundedIcon className="upThumb"/> :
+                                                                            <ThumbDownRoundedIcon
+                                                                                className="downThumb"/>}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                     </div>
-                                                ))}
-                                        </div>
-                                        <div className="product_buttons">
-                                            <Tooltip title="Delete" aria-label="delete">
-                                                <IconButton aria-label="delete" className="product_icon_button"
-                                                            onClick={event => handleRemove(event, preference.preferenceId)}
-                                                >
-                                                    <DeleteIcon fontSize="small"/>
-                                                </IconButton>
-                                            </Tooltip>
-                                            {/*<Tooltip title="Edit" aria-label="edit">*/}
-                                            {/*<IconButton type="button" aria-label="edit" className="product_icon_button"*/}
-                                            {/*onClick={(event) => handleEdit(event, preference.preferenceId)}*/}
-                                            {/*>*/}
-                                            {/*<EditIcon fontSize="small"/>*/}
-                                            {/*</IconButton>*/}
-                                            {/*</Tooltip>*/}
+                                                    <div className="preference_recipes">
+                                                        <div className="preference_recipes_header">Recipes</div>
+                                                        {preference.preferenceRecipes.length === 0 ? "No preferred recipes" :
+                                                            preference.preferenceRecipes.map((recipe, index) => (
+                                                                <div key={index} className="preference_recipe">
+                                                                    <div>
+                                                                        {recipe.recipeName}
+                                                                    </div>
+                                                                    <div>
+                                                                        {recipe.recipePreferred ?
+                                                                            <ThumbUpRoundedIcon className="upThumb"/> :
+                                                                            <ThumbDownRoundedIcon
+                                                                                className="downThumb"/>}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                                <Button className={classes.programmeSaveButton} variant="contained" color="primary"
+                                        type="button"
+                                        onClick={() => handleSave()}
+                                >
+                                    Save
+                                </Button>
+                            </div>
                         </AccordionDetails>
                     </Accordion>
                 </div>

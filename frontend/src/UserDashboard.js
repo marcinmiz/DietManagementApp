@@ -55,7 +55,7 @@ export default function UserDashboard(props) {
                                 <Programmes currentDietaryProgramme = {props.currentDietaryProgramme} handleUseDietaryProgramme={props.handleUseDietaryProgramme}/>
                             </Route>
                             <Route path={`${path}menus`}>
-                                <Menus/>
+                                <Menus currentDietaryProgramme = {props.currentDietaryProgramme} currentDietaryProgrammeDay={props.currentDietaryProgrammeDay}/>
                             </Route>
                             <Route path={`${path}shopping`}>
                                 Shopping lists
