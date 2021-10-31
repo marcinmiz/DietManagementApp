@@ -34,7 +34,7 @@ public class DietaryProgrammeController {
     @GetMapping
     public ResponseEntity<List<DietaryProgramme>> getUserDietaryProgrammes() {
         List<DietaryProgramme> userDietaryProgrammes = dietaryProgrammeService.getUserDietaryProgrammes();
-        if (!userDietaryProgrammes.isEmpty()) {
+        if (userDietaryProgrammes != null) {
             return ResponseEntity.status(HttpStatus.OK).body(userDietaryProgrammes);
         } else {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(userDietaryProgrammes);

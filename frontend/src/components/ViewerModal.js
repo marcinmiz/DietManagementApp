@@ -81,18 +81,21 @@ export default function ViewerModal(props) {
     const [state, setState] = React.useState({
         submitted: false,
         image_upload_item_id: -1,
+        product_types: ["by weight", "liquid", "pieces"],
         selected_item: type === "product" ? {
             product_id: 'new',
             product_name: "",
             product_image: "",
             product_category: "",
+            product_type: "",
+            average_weight: 1,
             product_author: "",
             product_calories: 1,
-            product_nutrients: [{nutrient_name: "Protein", nutrient_amount: 1, nutrient_unit: "mg/100g"}, {
+            product_nutrients: [{nutrient_name: "Protein", nutrient_amount: 1, nutrient_unit: "g"}, {
                 nutrient_name: "Carbohydrate",
                 nutrient_amount: 1,
-                nutrient_unit: "mg/100g"
-            }, {nutrient_name: "Fat", nutrient_amount: 1, nutrient_unit: "mg/100g"}],
+                nutrient_unit: "g"
+            }, {nutrient_name: "Fat", nutrient_amount: 1, nutrient_unit: "g"}],
             creation_date: "",
             approval_status: "pending",
             assessment_date: "",
@@ -122,6 +125,7 @@ export default function ViewerModal(props) {
         all_products: [],
         all_units: [],
         recipe_add_ingredient_name: "",
+        recipe_add_ingredient_type: "",
         recipe_add_ingredient_amount: 0,
         recipe_add_ingredient_unit: "",
         recipe_add_step_name: "",
@@ -144,7 +148,9 @@ export default function ViewerModal(props) {
                 let resp = await http.post("/api/products", products_parameters);
 
                 for (let x in resp.data) {
-                    products[x] = resp.data[x].productName;
+                    products[x] = {};
+                    products[x].productName = resp.data[x].productName;
+                    products[x].productType = resp.data[x].productType;
                 }
 
                 let resp2 = await http.get("/api/recipes/productUnits");
@@ -158,7 +164,8 @@ export default function ViewerModal(props) {
                 ...state,
                 all_products: products,
                 all_units: units,
-                recipe_add_ingredient_name: products[0],
+                recipe_add_ingredient_name: type === 'recipe' ? products[0].productName : "",
+                recipe_add_ingredient_type: type === 'recipe' ? products[0].productType : "",
                 recipe_add_ingredient_amount: 1,
                 recipe_add_ingredient_unit: units[0],
                 selected_item: item_index !== 'new' ? items[item_index] : state.selected_item,
@@ -170,7 +177,7 @@ export default function ViewerModal(props) {
 
         let value;
 
-        if (type === "product" && event.target.name === 'product_calories') {
+        if (type === "product" && (event.target.name === 'product_calories' || event.target.name === 'average_weight')) {
             if (event.target.value <= 0) {
                 return;
             }
@@ -191,7 +198,7 @@ export default function ViewerModal(props) {
 
     const handleChangeNutrient = (index, event) => {
         const values = [...state.selected_item.product_nutrients];
-        if (event.target.value > 0) {
+        if (event.target.value >= 0) {
             values[index].nutrient_amount = Number(event.target.value);
             let selected_item = {
                 ...state.selected_item,
@@ -205,12 +212,14 @@ export default function ViewerModal(props) {
         }
     };
 
-    const handleChangeIngredient = (event, index) => {
+    const handleChangeIngredient = (event, index, product_type = null) => {
         if (event.target.name === "recipe_add_ingredient_name") {
-
+            let productName = event.target.value;
+            let product_type = state.all_products.filter(product => product.productName === productName)[0].productType;
             setState({
                 ...state,
-                "recipe_add_ingredient_name": event.target.value
+                "recipe_add_ingredient_name": productName,
+                "recipe_add_ingredient_type": product_type
             });
         } else if (event.target.name === "recipe_add_ingredient_amount") {
 
@@ -550,6 +559,40 @@ export default function ViewerModal(props) {
         }
         product.calories = calories;
 
+        let productType = state.selected_item.product_type;
+        if (productType === "") {
+            setState({
+                ...state,
+                "msg": "Product type has to be chosen"
+            });
+            return "error";
+        }
+        product.productType = productType;
+
+        if (productType === "pieces") {
+            let averageWeight = state.selected_item.average_weight;
+            if (averageWeight.length < 1 || averageWeight.length > 6) {
+                setState({
+                    ...state,
+                    "msg": "Average weight has to have min 1 and max 6 characters"
+                });
+                return "error";
+            } else if (!(/^0$/.test(averageWeight) || /^(-)?[1-9]\d*$/.test(averageWeight))) {
+                setState({
+                    ...state,
+                    "msg": "Average weight has to contain only digits"
+                });
+                return "error";
+            } else if (averageWeight < 0) {
+                setState({
+                    ...state,
+                    "msg": "Average weight has to be greater or equal 0"
+                });
+                return "error";
+            }
+            product.averageWeight = averageWeight;
+        }
+
         let category = state.selected_item.product_category;
         if (category === "") {
             setState({
@@ -581,7 +624,7 @@ export default function ViewerModal(props) {
             } else if (nutrient.nutrient_amount < 0) {
                 setState({
                     ...state,
-                    "msg": "Product nutrient has to be greater or equal 0"
+                    "msg": "Product nutrient cannot be negative"
                 });
                 return "error";
             }
@@ -693,6 +736,7 @@ export default function ViewerModal(props) {
                 item_id = state.selected_item.product_id;
                 item_name = state.selected_item.product_name;
                 capitalized_type = "Product";
+                console.log(item);
                 break;
             case "recipe":
                 item = await validateRecipe();
@@ -832,32 +876,36 @@ export default function ViewerModal(props) {
                         </div>}
 
                     <div className="product_buttons">
-                        {state.selected_item.product_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
-                            <IconButton aria-label="delete" className="product_icon_button"
-                                        onClick={handleRemove} disabled={state.selected_item.product_id === 'new'}>
-                                <DeleteIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip> : null}
-                        {state.selected_item.product_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
-                            <IconButton type="button" aria-label="edit" className="product_icon_button"
-                                        onClick={(event) => handleEdit(event, state.selected_item.product_id)}>
-                                <EditIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip> : null}
+                        {state.selected_item.product_author_id === props.userId ?
+                            <Tooltip title="Delete" aria-label="delete">
+                                <IconButton aria-label="delete" className="product_icon_button"
+                                            onClick={handleRemove} disabled={state.selected_item.product_id === 'new'}>
+                                    <DeleteIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip> : null}
+                        {state.selected_item.product_author_id === props.userId ?
+                            <Tooltip title="Edit" aria-label="edit">
+                                <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                            onClick={(event) => handleEdit(event, state.selected_item.product_id)}>
+                                    <EditIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip> : null}
                     </div>
                 </div>
                 <div className="creation_date">
-                    {state.selected_item.product_id === "new" ? "No creation date" : "created " + state.selected_item.creation_date}
+                    {state.selected_item.product_id === "new" ? "" : "created " + state.selected_item.creation_date}
                 </div>
 
                 <div className="product_content">
                     <div className="product_image_container">
+                        {/*<img src={state.selected_item.product_image} alt={state.selected_item.product_name} className="product_image"/>*/}
 
                         {props.mode === 'view' ?
                             (state.selected_item.product_id !== 'new' ?
                                 (state.selected_item.product_image !== '' ?
-                                    <img src={state.selected_item.product_image} alt={state.selected_item.product_name}
-                                         className="product_image"/> :
+                                    <Avatar src={state.selected_item.product_image}
+                                            alt={state.selected_item.product_name} className="product_image"/>
+                                    :
                                     <div><SpaIcon className={classes.photo_placeholder}/></div>) :
                                 <div><SpaIcon className={classes.photo_placeholder}/></div>) :
                             <UploadImages submitted={state.submitted}
@@ -865,6 +913,49 @@ export default function ViewerModal(props) {
                                           type="product" id={state.image_upload_item_id}/>}
                     </div>
                     <div className="product_description">
+                        <div className="product_type_container">
+                            {props.mode === 'view' ?
+                                <div className="product_type">{state.selected_item.product_type}</div> :
+                                <FormControl variant="filled"
+                                             className={state.selected_item.product_type === "pieces" ? "product_type_narrow" : "product_type_wide"}>
+                                    <InputLabel id="category_select_label">Product type</InputLabel>
+                                    <Select
+                                        labelId="category_select_label"
+                                        id="product_type_select"
+                                        name="product_type"
+                                        value={state.selected_item.product_type}
+                                        size="small"
+                                        onChange={event => handleChangeItemId(event)}
+                                    >
+                                        {state.product_types.map((product_type, index) => (
+                                            <MenuItem key={index}
+                                                      value={product_type}>{product_type}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            }
+                            {state.selected_item.product_type === "pieces" ?
+                                (props.mode === 'view' ? <div className="product_type">{"average " + state.selected_item.average_weight + " g"}</div> :
+                                    <div className="product_type_narrow">
+                                        <TextField
+                                            name="average_weight"
+                                            label="Avg weight"
+                                            type="number"
+                                            variant="filled"
+                                            value={state.selected_item.average_weight}
+                                            size="small"
+                                            aria-label="average_weight"
+                                            InputProps={{
+                                                endAdornment: <InputAdornment
+                                                    position="end">
+                                                    <div>g</div>
+                                                </InputAdornment>,
+                                            }}
+                                            onChange={event => handleChangeItemId(event)}
+                                        />
+                                    </div>) : null
+                            }
+                        </div>
                         {props.mode === 'view' ?
                             <div className="product_category">
                                 {(state.selected_item.product_id !== 'new' ?
@@ -967,23 +1058,25 @@ export default function ViewerModal(props) {
                         </div>}
 
                     <div className="product_buttons">
-                        {state.selected_item.recipe_author_id === props.userId ? <Tooltip title="Delete" aria-label="delete">
-                            <IconButton aria-label="delete" className="product_icon_button"
-                                        onClick={handleRemove} disabled={state.selected_item.recipe_id === 'new'}>
-                                <DeleteIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip> : null}
-                        {state.selected_item.recipe_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
-                            <IconButton type="button" aria-label="edit" className="product_icon_button"
-                                        onClick={(event) => handleEdit(event, state.selected_item.recipe_id)}>
-                                <EditIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip> : null}
+                        {state.selected_item.recipe_author_id === props.userId ?
+                            <Tooltip title="Delete" aria-label="delete">
+                                <IconButton aria-label="delete" className="product_icon_button"
+                                            onClick={handleRemove} disabled={state.selected_item.recipe_id === 'new'}>
+                                    <DeleteIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip> : null}
+                        {state.selected_item.recipe_author_id === props.userId ?
+                            <Tooltip title="Edit" aria-label="edit">
+                                <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                            onClick={(event) => handleEdit(event, state.selected_item.recipe_id)}>
+                                    <EditIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip> : null}
                         {/*{state.loaded && handleFavouriteIcon(item_index)}*/}
                     </div>
                 </div>
                 <div className="creation_date">
-                    {state.selected_item.recipe_id === "new" ? "No creation date" : "created " + state.selected_item.creation_date}
+                    {state.selected_item.recipe_id === "new" ? "" : "created " + state.selected_item.creation_date}
                 </div>
 
                 <div className="recipe_content2">
@@ -1097,7 +1190,7 @@ export default function ViewerModal(props) {
                                         >
                                             {state.all_products.map((product, index) => (
                                                 <MenuItem key={index}
-                                                          value={product}>{product}</MenuItem>
+                                                          value={product.productName}>{product.productName}</MenuItem>
                                             ))}
                                         </Select>
                                     </div>
@@ -1121,10 +1214,19 @@ export default function ViewerModal(props) {
                                             size="small"
                                             onChange={event => handleChangeIngredient(event)}
                                         >
-                                            {state.all_units.map((unit, index) => (
-                                                <MenuItem key={index}
-                                                          value={unit}>{unit}</MenuItem>
-                                            ))}
+                                            {
+                                                state.recipe_add_ingredient_type === "by weight" ? state.all_units.slice(0, 3).map((unit, index) => (
+                                                        <MenuItem key={unit + index}
+                                                                  value={unit}>{unit}</MenuItem>
+                                                    )) :
+                                                    (state.recipe_add_ingredient_type === "pieces" ? state.all_units.slice(3, 4).map((unit, index) => (
+                                                        <MenuItem key={unit + index}
+                                                                  value={unit}>{unit}</MenuItem>
+                                                    )) : state.all_units.slice(4, 8).map((unit, index) => (
+                                                        <MenuItem key={unit + index}
+                                                                  value={unit}>{unit}</MenuItem>
+                                                    )))
+                                            }
                                         </Select>
                                     </div>
                                     <Tooltip title="Add ingredient" aria-label="add ingredient">
@@ -1143,7 +1245,7 @@ export default function ViewerModal(props) {
                                 {state.selected_item.recipe_steps.length === 0 ? "No steps added. Add new step" :
                                     state.selected_item.recipe_steps.map((step, index) =>
                                         <div key={index} className="recipe_step">
-                                            <div>{index+1}. </div>
+                                            <div>{index + 1}.</div>
                                             <div>{step.step_name}</div>
                                         </div>
                                     )}

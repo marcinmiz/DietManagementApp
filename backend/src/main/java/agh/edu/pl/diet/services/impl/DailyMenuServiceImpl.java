@@ -461,6 +461,16 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             String mealName = mealNames[i];
             Recipes recipe = chosenRecipes.get(i);
             if (!mealService.addNewMeal(mealName, recipe, dailyMenu).getMessage().equals("Meal has been added")) {
+
+                List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(dietaryProgramme);
+                for (DailyMenu menu: menus) {
+                    List<Meals> meals = mealRepo.findByDailyMenu(menu);
+                    for (Meals meal: meals) {
+                        mealRepo.delete(meal);
+                    }
+                    dailyMenuRepo.delete(menu);
+                }
+
                 return new ResponseMessage("Meal has not been created");
             }
         }

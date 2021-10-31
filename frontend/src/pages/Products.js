@@ -205,6 +205,10 @@ export default function Products(props) {
         product.product_category = data[x].category.categoryName;
         product.product_author = data[x].owner.name + " " + data[x].owner.surname;
         product.product_calories = data[x].calories;
+        product.product_type = data[x].productType;
+        if (product.product_type === "pieces") {
+            product.average_weight = data[x].averageWeight;
+        }
 
         let nutrients_quantity = data[x].nutrients.length;
         product.product_nutrients = [];
@@ -213,7 +217,7 @@ export default function Products(props) {
             product.product_nutrients[i] = {};
             product.product_nutrients[i].nutrient_name = data[x].nutrients[i].nutrient.nutrientName;
             product.product_nutrients[i].nutrient_amount = data[x].nutrients[i].nutrientAmount;
-            product.product_nutrients[i].nutrient_unit = "mg/100g";
+            product.product_nutrients[i].nutrient_unit = "g";
         }
 
         product.product_image = data[x].productImage;

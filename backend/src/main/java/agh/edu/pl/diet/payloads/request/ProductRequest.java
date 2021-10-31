@@ -11,8 +11,11 @@ public class ProductRequest {
     @NotBlank
     private String category;
     @NotBlank
+    private String productType;
+    @NotBlank
+    private Double averageWeight;
+    @NotBlank
     private List<String> nutrients;
-
 
     public String getProductName() {
         return productName;
@@ -36,6 +39,22 @@ public class ProductRequest {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
+    public Double getAverageWeight() {
+        return averageWeight;
+    }
+
+    public void setAverageWeight(Double averageWeight) {
+        this.averageWeight = averageWeight;
     }
 
     public List<String> getNutrients() {

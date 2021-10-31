@@ -3,10 +3,7 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DietaryProgrammeRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.repos.DailyMenuRepo;
-import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
-import agh.edu.pl.diet.repos.MealRepo;
-import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.DietaryPreferencesService;
 import agh.edu.pl.diet.services.DietaryProgrammeService;
@@ -39,6 +36,8 @@ class DietaryProgrammeServiceImplTest {
     private DailyMenuService dailyMenuService;
     @Mock
     private DietaryProgrammeRepo dietaryProgrammeRepo;
+    @Mock
+    private DietaryPreferencesRepo dietaryPreferencesRepo;
     @Mock
     private UserRepo userRepo;
     @Mock
@@ -101,6 +100,8 @@ class DietaryProgrammeServiceImplTest {
         doReturn(new ResponseMessage("Daily Menu has been added")).when(dailyMenuService).addNewDailyMenu(any(DietaryProgramme.class), anyDouble(), anyInt(), anyMap(), anyInt(), anyInt());
 
         doReturn(null).when(dietaryProgrammeRepo).save(any(DietaryProgramme.class));
+
+        doReturn(null).when(dietaryPreferencesRepo).save(any(DietaryPreferences.class));
 
         ResponseMessage actual = dietaryProgrammeService.addNewDietaryProgramme(request);
 

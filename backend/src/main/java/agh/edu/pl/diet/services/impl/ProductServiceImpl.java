@@ -6,10 +6,7 @@ import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.repos.CategoryRepo;
-import agh.edu.pl.diet.repos.NutrientRepo;
-import agh.edu.pl.diet.repos.ProductRepo;
-import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.ProductService;
 import agh.edu.pl.diet.services.UserService;
@@ -35,11 +32,13 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private CategoryRepo categoryRepo;
     @Autowired
-    private UserRepo userRepo;
+    private RecipeRepo recipeRepo;
     @Autowired
     private UserService userService;
     @Autowired
     private ImageService imageService;
+
+    private List productTypes = List.of("by weight", "liquid", "pieces");
 
     private ResponseMessage verify(String mode, String type, Object item) {
         switch (type) {
@@ -87,6 +86,33 @@ public class ProductServiceImpl implements ProductService {
                 } else {
                     return new ResponseMessage("Product category is valid");
                 }
+            case "productType":
+                String productType = String.valueOf(item);
+                if (productType == null) {
+                    return new ResponseMessage("Product type is required");
+                } else if (productType.equals("")) {
+                    return new ResponseMessage("Product type has to be chosen");
+                } else if (!productTypes.contains(productType)) {
+                    return new ResponseMessage("Product type does not exist");
+                } else {
+                    return new ResponseMessage("Product type is valid");
+                }
+            case "averageWeight":
+                if (item == null) {
+                    return new ResponseMessage("Average weight is required");
+                }
+
+                Double averageWeight = Double.parseDouble(item.toString());
+
+                if (averageWeight.toString().length() < 1 || averageWeight.toString().length() > 6) {
+                    return new ResponseMessage("Average weight has to have min 1 and max 6 characters");
+                } else if (!(averageWeight.toString().matches("^0(.\\d+)?$") || averageWeight.toString().matches("^(-)?[1-9]\\d*(.\\d+)?$"))) {
+                    return new ResponseMessage("Average weight has to contain only digits");
+                } else if (averageWeight <= 0) {
+                    return new ResponseMessage("Average weight has to be greater than 0");
+                } else {
+                    return new ResponseMessage("Average weight is valid");
+                }
             case "list":
                 List<String> nutrients = (List<String>) item;
                 if (nutrients == null) {
@@ -118,8 +144,8 @@ public class ProductServiceImpl implements ProductService {
 
                 if (nutrientAmount.toString().length() < 1 || nutrientAmount.toString().length() > 20) {
                     return new ResponseMessage("Product nutrient amount has to have min 1 and max 20 characters");
-                } else if (nutrientAmount <= 0) {
-                    return new ResponseMessage("Product nutrient amount has to be greater than 0");
+                } else if (nutrientAmount < 0) {
+                    return new ResponseMessage("Product nutrient amount cannot be negative");
                 } else {
                     return new ResponseMessage("Product nutrient amount is valid");
                 }
@@ -234,6 +260,31 @@ public class ProductServiceImpl implements ProductService {
             return responseMessage3;
         }
 
+        String productType = productRequest.getProductType();
+
+        ResponseMessage responseMessage8 = verify("add", "productType", productType);
+
+        if (responseMessage8.getMessage().equals("Product type is valid")) {
+            product.setProductType(productType);
+        } else {
+            return responseMessage8;
+        }
+
+        if (productType.equalsIgnoreCase("pieces")) {
+
+            Double averageWeight = productRequest.getAverageWeight();
+
+            ResponseMessage responseMessage9 = verify("add", "averageWeight", averageWeight);
+
+            if (responseMessage9.getMessage().equals("Average weight is valid")) {
+                product.setAverageWeight(averageWeight);
+            } else {
+                return responseMessage9;
+            }
+        } else {
+            product.setAverageWeight(null);
+        }
+
         List<String> nutrients = productRequest.getNutrients();
 
         ResponseMessage responseMessage4 = verify("add", "list", nutrients);
@@ -336,6 +387,52 @@ public class ProductServiceImpl implements ProductService {
                 updatedProduct.setCategory(categoryRepo.findByCategoryName(categoryName));
             } else {
                 return responseMessage3;
+            }
+
+            String productType = productRequest.getProductType();
+
+            ResponseMessage responseMessage8 = verify("update", "productType", productType);
+
+            if (responseMessage8.getMessage().equals("Product type is valid")) {
+                updatedProduct.setProductType(productType);
+                List<Recipes> allRecipes = new ArrayList<>();
+                recipeRepo.findAll().forEach(allRecipes::add);
+
+                for (Recipes recipe: allRecipes) {
+                    List<RecipeProduct> recipeProductsWithUpdatedProduct = recipe.getRecipeProducts().stream().filter(recipeProduct -> recipeProduct.getProduct().getProductId().equals(productId)).collect(Collectors.toList());
+                    for (RecipeProduct recipeProduct: recipeProductsWithUpdatedProduct) {
+//                        String oldProductType = recipeProduct.getProduct().getProductType();
+
+                        switch (productType) {
+                            case "by weight":
+                                recipeProduct.setProductUnit("g");
+                                break;
+                            case "liquid":
+                                recipeProduct.setProductUnit("ml");
+                                break;
+                            case "pieces":
+                                recipeProduct.setProductUnit("pcs");
+                                break;
+                        }
+                    }
+                }
+
+            } else {
+                return responseMessage8;
+            }
+
+            if (productType.equalsIgnoreCase("pieces")) {
+                Double averageWeight = productRequest.getAverageWeight();
+
+                ResponseMessage responseMessage9 = verify("update", "averageWeight", averageWeight);
+
+                if (responseMessage9.getMessage().equals("Average weight is valid")) {
+                    updatedProduct.setAverageWeight(averageWeight);
+                } else {
+                    return responseMessage9;
+                }
+            } else {
+                updatedProduct.setAverageWeight(null);
             }
 
             List<String> nutrients = productRequest.getNutrients();

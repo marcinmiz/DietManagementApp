@@ -13,7 +13,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import ThumbDownRoundedIcon from '@material-ui/icons/ThumbDownRounded';
 import ThumbUpRoundedIcon from '@material-ui/icons/ThumbUpRounded';
-import EditIcon from '@material-ui/icons/Edit';
 import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles((theme) => ({
@@ -44,14 +43,14 @@ export default function DietaryPreferenceEdit(props) {
                 carbohydrateCoefficient: 1,
                 fatCoefficient: 1
             },
-            totalDailyCalories: 1,
+            totalDailyCalories: 2394,
             caloriesPerMeal: 1,
-            mealsQuantity: 1,
-            targetWeight: 1,
+            mealsQuantity: 4,
+            targetWeight: 45,
             preferenceNutrients: [
-                {nutrientName: "Protein", nutrientAmount: 1, nutrientRelation: "<"},
-                {nutrientName: "Carbohydrate", nutrientAmount: 1, nutrientRelation: "<"},
-                {nutrientName: "Fat", nutrientAmount: 1, nutrientRelation: "<"}
+                {nutrientName: "Protein", nutrientAmount: 108, nutrientRelation: "<"},
+                {nutrientName: "Carbohydrate", nutrientAmount: 288, nutrientRelation: "<"},
+                {nutrientName: "Fat", nutrientAmount: 90, nutrientRelation: "<"}
             ],
             preferenceProducts: [],
             preferenceRecipes: []
@@ -106,20 +105,29 @@ export default function DietaryPreferenceEdit(props) {
                     recipes[x] = resp2.data[x].recipeName;
                 }
 
-                preference = mode === 'edit' ? item : state.preference;
+                if (mode === 'edit') {
+                    state.dietTypeSelected = item.dietTypeSelected;
+                    preference = item;
+                } else {
+                    preference = state.preference;
+                }
+
+                console.log(item);
 
                 if (mode === 'add') {
                     preference.preferenceDietType = dietTypesTable[0];
                 }
 
-                if (!(mode === 'edit' && preference.preferenceDietType === '')) {
+                console.log(!(mode === 'edit' && preference.preferenceDietType.dietTypeName === ''));
+
+                if (!(mode === 'edit' && preference.preferenceDietType.dietTypeName === '')) {
                     preference = await handleNutrientsComputing(preference);
                 }
 
                 await setState({
                     ...state,
-                    preferenceAddProductName: products[0],
-                    preferenceAddRecipeName: recipes[0],
+                    preferenceAddProductName: products > 0 ? products[0] : '',
+                    preferenceAddRecipeName: recipes.length > 0 ? recipes[0] : '',
                     allProducts: products,
                     allRecipes: recipes,
                     dietTypes: dietTypesTable,
@@ -140,8 +148,13 @@ export default function DietaryPreferenceEdit(props) {
 
         if (name !== 'preferenceDietType') {
             value = Number(event.target.value);
-            if (value < 1)
-                valid = false;
+            if (name === 'targetWeight') {
+                if (value < 45 || value > 120)
+                    valid = false;
+            } else {
+                if (value < 1)
+                    valid = false;
+            }
         } else {
             value = event.target.value;
         }
@@ -164,7 +177,7 @@ export default function DietaryPreferenceEdit(props) {
             }
 
             if (name === 'preferenceDietType' || (name === 'targetWeight' && state.dietTypeSelected)) {
-                preference = handleNutrientsComputing(preference);
+                preference = handleNutrientsComputing(preference, "all");
             }
 
             setState({
@@ -175,16 +188,12 @@ export default function DietaryPreferenceEdit(props) {
     };
 
     const handleChangeNutrient = (event, index) => {
-        let name = event.target.name, valid = true;
+        let valid = true;
         const values = [...state.preference.preferenceNutrients];
-        if (name !== 'preferenceAddRelation') {
-            if (event.target.value > 0) {
-                values[index].nutrientAmount = Number(event.target.value);
-            } else {
-                valid = false;
-            }
+        if (event.target.value > 0) {
+            values[index].nutrientAmount = Number(event.target.value);
         } else {
-            values[index].nutrientRelation = event.target.value;
+            valid = false;
         }
 
         if (valid) {
@@ -192,6 +201,10 @@ export default function DietaryPreferenceEdit(props) {
                 ...state.preference,
                 "preferenceNutrients": values
             };
+
+            if (!state.dietTypeSelected) {
+                preference = handleNutrientsComputing(preference, "calories");
+            }
 
             setState({
                 ...state,
@@ -264,27 +277,61 @@ export default function DietaryPreferenceEdit(props) {
         });
     };
 
-    const handleNutrientsComputing = (preference) => {
-        const targetWeight = preference.targetWeight;
-        let proteins = targetWeight * preference.preferenceDietType.proteinCoefficient;
-        let carbohydrates = targetWeight * preference.preferenceDietType.carbohydrateCoefficient;
-        let fats = targetWeight * preference.preferenceDietType.fatCoefficient;
-        let calories = 4 * proteins + 4 * carbohydrates + 9 * fats;
+    const handleNutrientsComputing = (preference, type) => {
+        let calories, targetWeight, proteins, carbohydrates, fats;
+        targetWeight = preference.targetWeight;
+
+        if (type != null) {
+
+            switch (type) {
+                case "calories":
+                    proteins = preference.preferenceNutrients[0].nutrientAmount;
+                    carbohydrates = preference.preferenceNutrients[1].nutrientAmount;
+                    fats = preference.preferenceNutrients[2].nutrientAmount;
+                    calories = 4 * proteins + 4 * carbohydrates + 9 * fats;
+                    break;
+                case "all":
+                    proteins = targetWeight * preference.preferenceDietType.proteinCoefficient;
+                    let averageProteins = Math.round(proteins * 100);
+                    proteins = (averageProteins) / 100;
+                    carbohydrates = targetWeight * preference.preferenceDietType.carbohydrateCoefficient;
+                    let averageCarbohydrates = Math.round(carbohydrates * 100);
+                    carbohydrates = (averageCarbohydrates) / 100;
+                    fats = targetWeight * preference.preferenceDietType.fatCoefficient;
+                    let averageFats = Math.round(fats * 100);
+                    fats = (averageFats) / 100;
+                    calories = 4 * proteins + 4 * carbohydrates + 9 * fats;
+                    break;
+                default:
+            }
+        }
+
+        calories = Math.round(calories);
 
         let nutrients = [
-            {nutrientName: "Protein", nutrientAmount: proteins, nutrientRelation: "="},
-            {nutrientName: "Carbohydrate", nutrientAmount: carbohydrates, nutrientRelation: "="},
-            {nutrientName: "Fat", nutrientAmount: fats, nutrientRelation: "="}
+            {
+                nutrientName: "Protein",
+                nutrientAmount: type === "all" ? proteins : preference.preferenceNutrients[0].nutrientAmount,
+                nutrientRelation: "="
+            },
+            {
+                nutrientName: "Carbohydrate",
+                nutrientAmount: type === "all" ? carbohydrates : preference.preferenceNutrients[1].nutrientAmount,
+                nutrientRelation: "="
+            },
+            {
+                nutrientName: "Fat",
+                nutrientAmount: type === "all" ? fats : preference.preferenceNutrients[2].nutrientAmount,
+                nutrientRelation: "="
+            }
         ];
 
-        let newPreference = {
+        return {
             ...preference,
             targetWeight: targetWeight,
-            totalDailyCalories: calories,
+            totalDailyCalories: type === "all" || type === "calories" ? calories : preference.totalDailyCalories,
             preferenceNutrients: nutrients
         };
-
-        return newPreference;
     };
 
     const validatePreference = () => {
@@ -292,7 +339,6 @@ export default function DietaryPreferenceEdit(props) {
         preference.dietTypeSelected = state.dietTypeSelected;
         preference.totalDailyCalories = state.preference.totalDailyCalories;
         preference.dietType = state.preference.preferenceDietType.dietTypeName;
-        preference.caloriesPerMeal = state.preference.caloriesPerMeal;
         preference.mealsQuantity = state.preference.mealsQuantity;
         preference.targetWeight = state.preference.targetWeight;
         preference.nutrients = [];
@@ -325,6 +371,8 @@ export default function DietaryPreferenceEdit(props) {
         if (preference === "error")
             return;
 
+        console.log(preference);
+
         if (mode === "add") {
             http.post("/api/preferences/add", preference)
                 .then(resp => {
@@ -349,26 +397,6 @@ export default function DietaryPreferenceEdit(props) {
     return (
         <div className="preference_edit">
             <div>
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={state.dietTypeSelected}
-                            onChange={() => {
-                                let newType = !state.dietTypeSelected, newPreference;
-                                // if (!newType)
-                                //     newPreference = handleNutrientsComputing(state.preference);
-                                setState({...state, dietTypeSelected: newType})
-
-                            }}
-                            name="dietTypeSelected"
-                            color="primary"
-                        />
-                    }
-                    label={state.dietTypeSelected ? "Defined" : "Customized"}
-                    labelPlacement="top"
-                />
-            </div>
-            <div className="preferenceLayout">
                 <FormControl variant="filled" className="preferenceDietType">
                     <InputLabel id="diet_type_select_label" className="diet_type_select preferenceDietTypePart">Diet
                         type</InputLabel>
@@ -387,33 +415,63 @@ export default function DietaryPreferenceEdit(props) {
                         ))}
                     </Select>
                 </FormControl>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={state.dietTypeSelected}
+                            onChange={() => {
+                                let newType = !state.dietTypeSelected, newPreference;
+                                // if (!newType)
+                                //     newPreference = handleNutrientsComputing(state.preference);
+                                let preference = {...state.preference};
+                                if (newType) {
+                                    preference.preferenceDietType = state.dietTypes[0];
+                                } else {
+                                    preference.preferenceDietType.dietTypeName = '';
+                                }
+                                setState({
+                                    ...state,
+                                    preference: preference,
+                                    dietTypeSelected: newType
+                                })
+
+                            }}
+                            name="dietTypeSelected"
+                            color="primary"
+                        />
+                    }
+                    label={state.dietTypeSelected ? "Defined" : "Customized"}
+                    labelPlacement="top"
+                />
+            </div>
+            <div className="preferenceLayout">
                 <div className="preferenceDetailsEdit">
+                    <FormControl variant="filled" className="preference_input">
+                        <InputLabel id="diet_type_select_label" className="diet_type_select preferenceDietTypePart">Meals
+                            quantity</InputLabel>
+                        <Select
+                            labelId="diet_type_select_label"
+                            id="mealsQuantity"
+                            className="diet_type_select preferenceDietTypePart preference_input"
+                            name="mealsQuantity"
+                            value={state.preference.mealsQuantity}
+                            onChange={event => handleChangeBasic(event)}
+                        >
+                            <MenuItem className={classes.mealsQuantitySelectItem} key="meals4" value={4}>4</MenuItem>
+                            <MenuItem key="meals5" value={5}>5</MenuItem>
+                        </Select>
+                    </FormControl>
                     <TextField name="totalDailyCalories" label="Total daily calories" variant="filled" type="number"
                                className="preference_input"
                                value={state.preference.totalDailyCalories}
-                               autoComplete="off" disabled={state.dietTypeSelected}
+                               autoComplete="off" disabled={true}
                                InputProps={{
                                    endAdornment: <InputAdornment
                                        position="end">
-                                       <div>kCal</div>
+                                       <div>kcal</div>
                                    </InputAdornment>,
                                }}
                                onChange={event => handleChangeBasic(event)}/>
-                    <TextField name="caloriesPerMeal" label="Calories per meal" variant="filled" type="number"
-                               className="preference_input"
-                               value={state.preference.caloriesPerMeal}
-                               autoComplete="off" disabled={state.dietTypeSelected}
-                               InputProps={{
-                                   endAdornment: <InputAdornment
-                                       position="end">
-                                       <div>kCal</div>
-                                   </InputAdornment>,
-                               }}
-                               onChange={event => handleChangeBasic(event)}/>
-                    <TextField name="mealsQuantity" label="Meals quantity" variant="filled" type="number"
-                               className="preference_input"
-                               value={state.preference.mealsQuantity}
-                               autoComplete="off" onChange={event => handleChangeBasic(event)}/>
                     <TextField name="targetWeight" label="Target weight" variant="filled" type="number"
                                className="preference_input"
                                value={state.preference.targetWeight}
@@ -447,20 +505,6 @@ export default function DietaryPreferenceEdit(props) {
                                         }}
                                         onChange={event => handleChangeNutrient(event, index)}
                                     />
-                                    <Select
-                                        id="preferred_relation_select"
-                                        name="preferenceAddRelation"
-                                        label="Relation"
-                                        value={preferenceNutrient.nutrientRelation}
-                                        size="small"
-                                        disabled={state.dietTypeSelected}
-                                        onChange={event => handleChangeNutrient(event, index)}
-                                    >
-                                        <MenuItem key="smaller" value="<">&#60;</MenuItem>{/*< sign*/}
-                                        <MenuItem key="equal" value="=">=</MenuItem>
-                                        <MenuItem key="greater" value=">">&#62;</MenuItem>{/*> sign*/}
-
-                                    </Select>
                                 </div>
                             ))}
                     </div>
@@ -468,7 +512,7 @@ export default function DietaryPreferenceEdit(props) {
                 <div className="preferredProducts">
                     <div id="preferredProducts_list">
                         <h4>Preferred products</h4>
-                        {state.preference.preferenceProducts.length === 0 ? "No preference products added" :
+                        {state.preference.preferenceProducts.length === 0 ? "No preferred products added" :
                             state.preference.preferenceProducts.map((preferenceProduct, index) => (
                                 <div key={index} className="preferenceProduct_edit">
                                     <div className={classes.nutrient_part}>
@@ -533,7 +577,7 @@ export default function DietaryPreferenceEdit(props) {
                 <div className="preferredRecipes">
                     <div id="preferredRecipes_list">
                         <h4>Preferred recipes</h4>
-                        {state.preference.preferenceRecipes.length === 0 ? "No preference recipes added" :
+                        {state.preference.preferenceRecipes.length === 0 ? "No preferred recipes added" :
                             state.preference.preferenceRecipes.map((preferenceRecipe, index) => (
                                 <div key={index} className="preferenceRecipe_edit">
                                     <div className={classes.nutrient_part}>
@@ -594,24 +638,15 @@ export default function DietaryPreferenceEdit(props) {
                         </Tooltip>
                     </div>
                 </div>
-                <div>
-                    {mode === 'edit' ?
-                        <Tooltip title="Edit" aria-label="edit">
-                            <IconButton type="button" aria-label="edit" className="product_icon_button"
-                                        onClick={(event) => handleEdit(event, state.preference.preferenceId)}
-                            >
-                                <EditIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip> : null
-                    }
-                    <Button className={classes.button} variant="contained" color="primary" type="button"
-                            onClick={() => handleSave()}
-                    >
-                        Save
-                    </Button>
-                </div>
-            </div>
 
+            </div>
+            <div>
+                <Button className={classes.button} variant="contained" color="primary" type="button"
+                        onClick={() => handleSave()}
+                >
+                    Save
+                </Button>
+            </div>
         </div>
     );
 }

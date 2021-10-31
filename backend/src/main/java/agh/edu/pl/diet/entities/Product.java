@@ -22,6 +22,8 @@ public class Product {
     private User owner;
     @ManyToOne
     private Category category;
+    private String productType;
+    private Double averageWeight;
 
     @OneToMany(mappedBy = "product", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     @Cascade({org.hibernate.annotations.CascadeType.SAVE_UPDATE})
@@ -139,5 +141,21 @@ public class Product {
 
     public void setDietaryPreferences(Set<DietaryPreferencesProduct> dietaryPreferences) {
         this.dietaryPreferences = dietaryPreferences;
+    }
+
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
+    public Double getAverageWeight() {
+        return averageWeight;
+    }
+
+    public void setAverageWeight(Double averageWeight) {
+        this.averageWeight = averageWeight;
     }
 }

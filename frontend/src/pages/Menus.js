@@ -303,7 +303,7 @@ export default function Menus(props) {
                             <NavigateNextRoundedIcon fontSize="large" onClick={handleNextDailyMenu}/>
                         </Fab>
                     </div> :
-                    <div className="menuNotUsedProgramme">Any dietary programme is used</div>}
+                    <div className="menuNotUsedProgramme">No dietary programme is used</div>}
             </div>
         </Container>
     );

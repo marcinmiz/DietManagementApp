@@ -78,6 +78,7 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
 
         for (int i = 1; i <= dietaryProgrammeDays; i++) {
             if (!dailyMenuService.addNewDailyMenu(dietaryProgramme, dietaryPreference.getTotalDailyCalories(), dietaryPreference.getMealsQuantity(), totalDailyNutrients, i, dietaryProgrammeDays).getMessage().equals("Daily Menu has been added")) {
+                dietaryProgrammeRepo.delete(dietaryProgramme);
                 return new ResponseMessage("Daily Menu has not been created");
             }
         }
@@ -92,7 +93,7 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
 
         User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
         if (currentLoggedUser == null) {
-            return new ArrayList<>();
+            return null;
         }
 
         return dietaryProgrammeRepo.findByOwnerUserId(currentLoggedUser.getUserId());

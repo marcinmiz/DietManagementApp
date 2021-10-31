@@ -176,7 +176,32 @@ public class Recipes {
         Double recipeCalories = 0.0;
 
         for (RecipeProduct product: recipeProducts) {
-            recipeCalories += product.getProduct().getCalories();
+            Double amount = product.getProductAmount();
+            String unit = product.getProductUnit();
+
+            switch (unit) {
+                case "kg":
+                    amount *= 1000;
+                    break;
+                case "dag":
+                    amount *= 10;
+                    break;
+                case "pcs":
+                    amount = amount * product.getProduct().getAverageWeight();
+                    break;
+                case "l":
+                    amount *= 1000;
+                    break;
+                case "tbsp":
+                    amount *= 15;
+                    break;
+                case "tsp":
+                    amount *= 5;
+                    break;
+                default:
+            }
+
+            recipeCalories += (amount/100) * product.getProduct().getCalories();
         }
 
         return recipeCalories;

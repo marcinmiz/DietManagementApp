@@ -57,10 +57,12 @@ export default function Preferences(props) {
         preference.totalDailyCalories = data[x].totalDailyCalories;
         preference.preferenceOwner = data[x].preferenceOwner.name + " " + data[x].preferenceOwner.surname;
 
+        preference.dietTypeSelected = false;
         preference.preferenceDietType = {};
         preference.preferenceDietType.dietTypeName = "";
 
         if (data[x].dietType) {
+            preference.dietTypeSelected = true;
             preference.preferenceDietType.dietTypeId = data[x].dietType.dietTypeId;
             preference.preferenceDietType.dietTypeName = data[x].dietType.dietTypeName;
             preference.preferenceDietType.proteinCoefficient = data[x].dietType.proteinCoefficient;
@@ -167,41 +169,152 @@ export default function Preferences(props) {
                 </div>
                 {state.preferences.length === 0 ?
                     <div className="loading">{!state.loaded ? "Loading" : "No dietary preferences found"}</div> : null}
-                <div className="dietary_preferences_list">
+                {/*<div className="dietary_preferences_list">*/}
 
+                {/*{state.preferences.map((preference, index) => (*/}
+                {/*<div key={index}>*/}
+                {/*<Divider variant="fullWidth"/>*/}
+                {/*{state.editPreferenceId === preference.preferenceId ?*/}
+                {/*<DietaryPreferenceEdit mode='edit' item={preference} handleEdit={handleEdit}*/}
+                {/*handleSetMsg={handleSetMsg}/>*/}
+                {/*:*/}
+                {/*<div id={"preference" + preference.preferenceId}*/}
+                {/*className="dietary_preference">*/}
+                {/*<div className="preference_basic_info">*/}
+                {/*<div>*/}
+                {/*{index + 1}. Dietary Preference*/}
+                {/*</div>*/}
+                {/*<div className="creation_date">*/}
+                {/*{"created " + preference.creationDate}*/}
+                {/*</div>*/}
+                {/*<div className="dietary_preference_diet_type">*/}
+                {/*Diet*/}
+                {/*type: {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}*/}
+                {/*</div>*/}
+                {/*</div>*/}
+                {/*<div className="preference_details">*/}
+                {/*<div className="dietary_preference_total_daily_calories">*/}
+                {/*Total daily calories: {preference.totalDailyCalories} kCal*/}
+                {/*</div>*/}
+                {/*<div className="dietary_preference_calories_per_meal">*/}
+                {/*Calories per meal: {preference.caloriesPerMeal} kCal*/}
+                {/*</div>*/}
+                {/*<div className="dietary_preference_meals_quantity">*/}
+                {/*Meals quantity: {preference.mealsQuantity}*/}
+                {/*</div>*/}
+                {/*<div className="dietary_preference_target_weight">*/}
+                {/*Target weight: {preference.targetWeight} kg*/}
+                {/*</div>*/}
+                {/*</div>*/}
+                {/*<div className="preference_nutrients">*/}
+                {/*<div className="preference_nutrients_header">Nutrients</div>*/}
+                {/*{preference.preferenceNutrients.length === 0 ? "No nutrients" :*/}
+                {/*preference.preferenceNutrients.map((nutrient, index) => (*/}
+                {/*<div key={index} className="preference_nutrient">*/}
+                {/*<div>*/}
+                {/*{nutrient.nutrientName}*/}
+                {/*</div>*/}
+                {/*<div>*/}
+                {/*{nutrient.nutrientRelation}*/}
+                {/*{nutrient.nutrientAmount} g*/}
+                {/*</div>*/}
+                {/*</div>*/}
+                {/*))}*/}
+                {/*</div>*/}
+                {/*<div className="preference_products">*/}
+                {/*<div className="preference_products_header">Products</div>*/}
+                {/*{preference.preferenceProducts.length === 0 ? "No preferred products" :*/}
+                {/*preference.preferenceProducts.map((product, index) => (*/}
+                {/*<div key={index} className="preference_product">*/}
+                {/*<div>*/}
+                {/*{product.productName}*/}
+                {/*</div>*/}
+                {/*<div>*/}
+                {/*{product.productPreferred ?*/}
+                {/*<ThumbUpRoundedIcon className="upThumb"/> :*/}
+                {/*<ThumbDownRoundedIcon className="downThumb"/>}*/}
+                {/*</div>*/}
+                {/*</div>*/}
+                {/*))}*/}
+                {/*</div>*/}
+                {/*<div className="preference_recipes">*/}
+                {/*<div className="preference_recipes_header">Recipes</div>*/}
+                {/*{preference.preferenceRecipes.length === 0 ? "No preferred recipes" :*/}
+                {/*preference.preferenceRecipes.map((recipe, index) => (*/}
+                {/*<div key={index} className="preference_recipe">*/}
+                {/*<div>*/}
+                {/*{recipe.recipeName}*/}
+                {/*</div>*/}
+                {/*<div>*/}
+                {/*{recipe.recipePreferred ?*/}
+                {/*<ThumbUpRoundedIcon className="upThumb"/> :*/}
+                {/*<ThumbDownRoundedIcon className="downThumb"/>}*/}
+                {/*</div>*/}
+                {/*</div>*/}
+                {/*))}*/}
+                {/*</div>*/}
+                {/*<div className="product_buttons">*/}
+                {/*<Tooltip title="Delete" aria-label="delete">*/}
+                {/*<IconButton aria-label="delete" className="product_icon_button"*/}
+                {/*onClick={event => handleRemove(event, preference.preferenceId)}*/}
+                {/*>*/}
+                {/*<DeleteIcon fontSize="small"/>*/}
+                {/*</IconButton>*/}
+                {/*</Tooltip>*/}
+                {/*<Tooltip title="Edit" aria-label="edit">*/}
+                {/*<IconButton type="button" aria-label="edit" className="product_icon_button"*/}
+                {/*onClick={(event) => handleEdit(event, preference.preferenceId)}*/}
+                {/*>*/}
+                {/*<EditIcon fontSize="small"/>*/}
+                {/*</IconButton>*/}
+                {/*</Tooltip>*/}
+                {/*</div>*/}
+                {/*</div>}*/}
+                {/*</div>*/}
+                {/*))}*/}
+                {/*</div>*/}
+                <div className="dietary_preferences_list">
                     {state.preferences.map((preference, index) => (
-                        <div key={index}>
-                            <Divider variant="fullWidth"/>
+                        <div key={index} className="preference_container">
+                            <div className="preference_header">
+                                <div className="preference_header_part">{index + 1}. Dietary Preference</div>
+                                <div className="product_buttons preference_header_part">
+                                    <Tooltip title="Delete" aria-label="delete">
+                                        <IconButton aria-label="delete" className="product_icon_button"
+                                                    onClick={event => handleRemove(event, preference.preferenceId)}
+                                        >
+                                            <DeleteIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Edit" aria-label="edit">
+                                        <IconButton type="button" aria-label="edit" className="product_icon_button"
+                                                    onClick={(event) => handleEdit(event, preference.preferenceId)}
+                                        >
+                                            <EditIcon fontSize="small"/>
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            </div>
                             {state.editPreferenceId === preference.preferenceId ?
                                 <DietaryPreferenceEdit mode='edit' item={preference} handleEdit={handleEdit}
                                                        handleSetMsg={handleSetMsg}/>
                                 :
+                            <div className="preference_basic">
                                 <div id={"preference" + preference.preferenceId}
-                                     className="dietary_preference">
+                                     className="dietary_preference"
+                                >
                                     <div className="preference_basic_info">
-                                        <div>
-                                            {index + 1}. Dietary Preference
-                                        </div>
-                                        <div className="creation_date">
-                                            {"created " + preference.creationDate}
-                                        </div>
                                         <div className="dietary_preference_diet_type">
-                                            Diet
-                                            type: {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
+                                            {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
                                         </div>
-                                    </div>
-                                    <div className="preference_details">
                                         <div className="dietary_preference_total_daily_calories">
-                                            Total daily calories: {preference.totalDailyCalories} kCal
-                                        </div>
-                                        <div className="dietary_preference_calories_per_meal">
-                                            Calories per meal: {preference.caloriesPerMeal} kCal
+                                            {preference.totalDailyCalories} kcal daily
                                         </div>
                                         <div className="dietary_preference_meals_quantity">
-                                            Meals quantity: {preference.mealsQuantity}
+                                            {preference.mealsQuantity} meals
                                         </div>
                                         <div className="dietary_preference_target_weight">
-                                            Target weight: {preference.targetWeight} kg
+                                            target {preference.targetWeight} kg
                                         </div>
                                     </div>
                                     <div className="preference_nutrients">
@@ -210,10 +323,9 @@ export default function Preferences(props) {
                                             preference.preferenceNutrients.map((nutrient, index) => (
                                                 <div key={index} className="preference_nutrient">
                                                     <div>
-                                                        {nutrient.nutrientName}
+                                                        {nutrient.nutrientName}s
                                                     </div>
                                                     <div>
-                                                        {nutrient.nutrientRelation}
                                                         {nutrient.nutrientAmount} g
                                                     </div>
                                                 </div>
@@ -230,7 +342,8 @@ export default function Preferences(props) {
                                                     <div>
                                                         {product.productPreferred ?
                                                             <ThumbUpRoundedIcon className="upThumb"/> :
-                                                            <ThumbDownRoundedIcon className="downThumb"/>}
+                                                            <ThumbDownRoundedIcon
+                                                                className="downThumb"/>}
                                                     </div>
                                                 </div>
                                             ))}
@@ -246,29 +359,16 @@ export default function Preferences(props) {
                                                     <div>
                                                         {recipe.recipePreferred ?
                                                             <ThumbUpRoundedIcon className="upThumb"/> :
-                                                            <ThumbDownRoundedIcon className="downThumb"/>}
+                                                            <ThumbDownRoundedIcon
+                                                                className="downThumb"/>}
                                                     </div>
                                                 </div>
                                             ))}
                                     </div>
-                                    <div className="product_buttons">
-                                        <Tooltip title="Delete" aria-label="delete">
-                                            <IconButton aria-label="delete" className="product_icon_button"
-                                                        onClick={event => handleRemove(event, preference.preferenceId)}
-                                            >
-                                                <DeleteIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Edit" aria-label="edit">
-                                            <IconButton type="button" aria-label="edit" className="product_icon_button"
-                                                        onClick={(event) => handleEdit(event, preference.preferenceId)}
-                                            >
-                                                <EditIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip>
-                                    </div>
-                                </div>}
+                                </div>
+                            </div>}
                         </div>
+
                     ))}
                 </div>
             </div>

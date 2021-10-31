@@ -282,7 +282,8 @@
 }
 
 .product_image, .recipe_image {
-    width: 12rem;
+    width: 10rem !important;
+    height: 10rem !important;
     border-radius: 100%;
     cursor: pointer;
 }
@@ -700,6 +701,11 @@
     max-height: 77%;
 }
 
+.preference_header {
+    display: flex;
+    justify-content: center;
+}
+
 .dietary_preference {
     /*min-height: 200px;*/
     display: flex;
@@ -735,6 +741,7 @@
 .preferenceDietTypePart {
     margin-left: auto;
     margin-right: auto;
+    padding: 2%;
 }
 
 #preferredProducts_list {
@@ -743,16 +750,18 @@
 
 .preference_edit {
     width: 100%;
+    padding: 1%;
 }
 
 .preferenceLayout {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+    align-items: start;
 }
 
 .preference_input {
-    width: 80%;
+    width: 100%;
 }
 
 .upThumb {
@@ -791,7 +800,7 @@
     max-height: 90%;
 }
 
-.programme {
+.programme, .preference_container {
     background-color: #484848;
     border-radius: 5px;
     width: 70%;
@@ -813,11 +822,11 @@
     font-size: 0.8rem;
 }
 
-.programme_header_part {
+.programme_header_part, .preference_header_part {
     margin: 1.2%;
 }
 
-.programme_basic {
+.programme_basic, .preference_basic {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -845,4 +854,24 @@
 .chosenPreference {
     background-color: #283987;
 ;
+}
+
+.product_type_wide {
+    width: 100%;
+}
+
+.product_type_narrow {
+    width: 50%;
+}
+
+.product_type_container {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.product_type {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2%;
 }

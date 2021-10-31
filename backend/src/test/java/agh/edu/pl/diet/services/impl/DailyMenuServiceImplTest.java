@@ -135,6 +135,9 @@ class DailyMenuServiceImplTest {
         Double[] nutrient6 = {6.1, 24.8, 8.55};
         nutrientsAmounts[2] = nutrient6;
         Double[] calories = {216.0, 123.0, 262.0};
+        Double[] amounts = {4.0, 100.0, 0.1};
+        String[] units = {"pcs", "g", "l"};
+        Double[] averageWeights = {25.0, null, null};
 
         for (int i = 0; i < 3; i++) {
 
@@ -143,10 +146,16 @@ class DailyMenuServiceImplTest {
             }
             products.get(i).setCalories(calories[i]);
             products.get(i).setNutrients(productNutrients.get(i));
+            if (units[i].equalsIgnoreCase("pcs")) {
+                products.get(i).setAverageWeight(averageWeights[i]);
+            }
         }
 
         for (int i = 0; i < recipeProducts.size(); i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(amounts[i]);
+            recipeProducts.get(i).setProductUnit(units[i]);
+
         }
 
         Recipes recipe = new Recipes();
@@ -187,6 +196,9 @@ class DailyMenuServiceImplTest {
         nutrient6 = new Double[]{3.0, 4.7, 3.0};
         nutrientsAmounts[2] = nutrient6;
         calories = new Double[]{64.5, 50.0, 65.05};
+        amounts = new Double[]{0.1, 10.0, 100.0};
+        units = new String[]{"kg", "tsp", "ml"};
+        averageWeights = new Double[]{null, null, null};
 
         for (int i = 0; i < 3; i++) {
 
@@ -199,6 +211,8 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < 3; i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(amounts[i]);
+            recipeProducts.get(i).setProductUnit(units[i]);
         }
 
         recipe = new Recipes();
@@ -238,7 +252,10 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         nutrient6 = new Double[]{18.1, 25.8, 8.55};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{345.0, 289.0, 251.0};
+        calories = new Double[]{23.0, 144.5, 251.0};
+        amounts = new Double[]{100.0, 20.0, 100.0};
+        units = new String[]{"tbsp", "dag", "ml"};
+        averageWeights = new Double[]{null, null, null};
 
         for (int i = 0; i < 3; i++) {
 
@@ -252,6 +269,8 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < 3; i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(amounts[i]);
+            recipeProducts.get(i).setProductUnit(units[i]);
         }
 
         recipe = new Recipes();
@@ -291,7 +310,10 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         nutrient6 = new Double[]{8.0, 33.5, 7.85};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{248.0, 312.0, 114.0};
+        calories = new Double[]{62.0, 39.0, 100.0};
+        amounts = new Double[]{400.0, 20.0, 57.0};
+        units = new String[]{"g", "pcs", "pcs"};
+        averageWeights = new Double[]{null, 40.0, 2.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -301,10 +323,15 @@ class DailyMenuServiceImplTest {
 
             products.get(i).setCalories(calories[i]);
             products.get(i).setNutrients(productNutrients.get(i));
+            if (units[i].equalsIgnoreCase("pcs")) {
+                products.get(i).setAverageWeight(averageWeights[i]);
+            }
         }
 
         for (int i = 0; i < 3; i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(amounts[i]);
+            recipeProducts.get(i).setProductUnit(units[i]);
         }
 
         recipe = new Recipes();
@@ -344,7 +371,10 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient5;
         nutrient6 = new Double[]{3.0, 4.7, 3.0};
         nutrientsAmounts[2] = nutrient6;
-        calories = new Double[]{65.0, 109.0, 65.0};
+        calories = new Double[]{13.0, 4.0, 10.0};
+        amounts = new Double[]{100.0, 2.725, 5.0};
+        units = new String[]{"tsp", "kg", "pcs"};
+        averageWeights = new Double[]{null, null, 130.0};
 
         for (int i = 0; i < 3; i++) {
 
@@ -353,10 +383,15 @@ class DailyMenuServiceImplTest {
             }
             products.get(i).setCalories(calories[i]);
             products.get(i).setNutrients(productNutrients.get(i));
+            if (units[i].equalsIgnoreCase("pcs")) {
+                products.get(i).setAverageWeight(averageWeights[i]);
+            }
         }
 
         for (int i = 0; i < 3; i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(amounts[i]);
+            recipeProducts.get(i).setProductUnit(units[i]);
         }
 
         recipe = new Recipes();

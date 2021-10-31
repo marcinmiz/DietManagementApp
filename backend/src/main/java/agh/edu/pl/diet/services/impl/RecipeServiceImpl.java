@@ -45,6 +45,7 @@ public class RecipeServiceImpl implements RecipeService {
     private UserService userService;
     @Autowired
     private ImageService imageService;
+    private Product ingredient = null;
 
     private ResponseMessage verify(String type, Object item) {
         switch (type) {
@@ -89,6 +90,7 @@ public class RecipeServiceImpl implements RecipeService {
                 if (productRepo.findByProductName(recipeProductName) == null) {
                     return new ResponseMessage("Recipe product name has to be proper");
                 } else {
+                    ingredient = productRepo.findByProductName(recipeProductName);
                     return new ResponseMessage("Recipe product name is valid");
                 }
             case "recipeProductAmount":
@@ -103,12 +105,42 @@ public class RecipeServiceImpl implements RecipeService {
                 }
             case "recipeProductUnit":
                 String recipeProductUnit = String.valueOf(item);
+                String productType = null;
+                if (ingredient != null) {
+                    productType = ingredient.getProductType();
+                    List<String> units;
 
-                if (!recipeProductUnits.contains(recipeProductUnit)) {
-                    return new ResponseMessage("Recipe product unit has to be proper");
-                } else {
+                    switch (productType) {
+                        case "by weight":
+                            units = recipeProductUnits.subList(0, 3);
+                            if (!units.contains(recipeProductUnit)) {
+                                return new ResponseMessage("By weight product might have one of units: \"g\", \"dag\" or \"kg\"");
+                            }
+                            break;
+                        case "pieces":
+                            units = recipeProductUnits.subList(3, 4);
+                            if (!units.contains(recipeProductUnit)) {
+                                return new ResponseMessage("Pieces product might have unit: \"pcs\"");
+                            }
+                            break;
+                        case "liquid":
+                            units = recipeProductUnits.subList(4, 8);
+                            if (!units.contains(recipeProductUnit)) {
+                                return new ResponseMessage("Liquid product might have one of units: \"ml\", \"l\", \"tbsp\" or \"tsp\"");
+                            }
+                            break;
+                        default:
+                            return new ResponseMessage("Wrong product type. Proper product types: \"by weight\", \"pieces\" and \"liquid\"");
+                    }
+//
+//                if (!recipeProductUnits.contains(recipeProductUnit)) {
+//                    return new ResponseMessage("Recipe product unit has to be proper");
+//                }
+                    ingredient = null;
                     return new ResponseMessage("Recipe product unit is valid");
                 }
+                return new ResponseMessage("Checked product is null");
+
             case "recipeSteps":
                 List<String> recipeSteps = (List<String>) item;
                 if (recipeSteps == null) {
@@ -122,8 +154,8 @@ public class RecipeServiceImpl implements RecipeService {
                 String recipeStepStatement = String.valueOf(item);
                 if (recipeStepStatement.equals("")) {
                     return new ResponseMessage("Recipe step has to be defined");
-                } else if (recipeStepStatement.length() < 3 || recipeStepStatement.length() > 50) {
-                    return new ResponseMessage("Recipe step has to have min 3 and max 50 characters");
+                } else if (recipeStepStatement.length() < 3 || recipeStepStatement.length() > 100) {
+                    return new ResponseMessage("Recipe step has to have min 3 and max 100 characters");
                 } else if (!(recipeStepStatement.matches("^[a-zA-Z,. 0-9]+$"))) {
                     return new ResponseMessage("Recipe step has to match format \"recipeStep\" and contains only digits, lowercase and uppercase letters with spaces, commas and dots");
                 } else {
@@ -141,7 +173,6 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepo.findAll().forEach(set::add);
 
         for (Recipes recipe : set) {
-            System.out.println(recipe.getRecipeName());
             String url = imageService.getImageURL(item_type, recipe.getRecipeId());
             recipe.setRecipeImage(url);
         }
