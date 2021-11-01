@@ -8,6 +8,7 @@ import {Switch, Route, useRouteMatch, useParams, Redirect, useHistory} from 'rea
 import Preferences from "./pages/Preferences";
 import Menus from "./pages/Menus";
 import Programmes from "./pages/Programmes";
+import ShoppingLists from "./pages/ShoppingLists";
 
 function Topic() {
     let { settingsId, mode } = useParams();
@@ -58,7 +59,8 @@ export default function UserDashboard(props) {
                                 <Menus currentDietaryProgramme = {props.currentDietaryProgramme} currentDietaryProgrammeDay={props.currentDietaryProgrammeDay}/>
                             </Route>
                             <Route path={`${path}shopping`}>
-                                Shopping lists
+                                <ShoppingLists currentDietaryProgramme = {props.currentDietaryProgramme} currentDietaryProgrammeDay={props.currentDietaryProgrammeDay} dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}
+                                />
                             </Route>
                             <Route path={`${path}settings/:settingsId?/:mode?`}>
                                 <Topic/>

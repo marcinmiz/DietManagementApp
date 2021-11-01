@@ -59,6 +59,10 @@ const useStyles = makeStyles({
     },
     greenFont: {
         color: 'darkgreen'
+    },
+    centralContainer: {
+        width: '80%',
+        marginLeft: '0',
     }
 });
 
@@ -231,73 +235,75 @@ export default function Menus(props) {
                             <NavigateBeforeRoundedIcon fontSize="large" onClick={handlePrevDailyMenu}/>
                         </Fab>
                         <div className="dailyMenuContent">
-                            <div>
-                                <h3>{state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].dailyMenuName}</h3>
-                            </div>
-                            <Timeline position="alternate" className="menuList">
-                                {state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].meals.map((meal, index) => (
-                                    <TimelineItem key={index} className={classes.item}>
-                                        <TimelineOppositeContent
-                                            className={classes.meal_hour}
-                                        >
-                                            {meal.mealTime}
-                                        </TimelineOppositeContent>
-                                        <TimelineSeparator>
-                                            <TimelineConnector/>
-                                            <TimelineDot>
-                                            </TimelineDot>
-                                            <TimelineConnector/>
-                                        </TimelineSeparator>
-                                        <TimelineContent className={classes.meal_description}>
-                                            <Typography variant="h6" component="span">
-                                                {meal.mealName}
-                                            </Typography>
-                                            <Typography>
-                                                <div className={classes.recipe_description}>
-                                                    <div className={classes.recipe_row}>
-                                                        {meal.recipeImage !== '' ?
-                                                            <Avatar className="menuImage" src={meal.recipeImage}/>
-                                                            : <ReceiptIcon className={classes.photo_placeholder}/>}
-                                                        <div className={classes.recipe_name}>
-                                                            {meal.recipeName}
+                            <div className={classes.centralContainer}>
+                                <div>
+                                    <h3>{state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].dailyMenuName}</h3>
+                                </div>
+                                <Timeline position="alternate" className="menuList">
+                                    {state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].meals.map((meal, index) => (
+                                        <TimelineItem key={index} className={classes.item}>
+                                            <TimelineOppositeContent
+                                                className={classes.meal_hour}
+                                            >
+                                                {meal.mealTime}
+                                            </TimelineOppositeContent>
+                                            <TimelineSeparator>
+                                                <TimelineConnector/>
+                                                <TimelineDot>
+                                                </TimelineDot>
+                                                <TimelineConnector/>
+                                            </TimelineSeparator>
+                                            <TimelineContent className={classes.meal_description}>
+                                                <Typography variant="h6" component="span">
+                                                    {meal.mealName}
+                                                </Typography>
+                                                <Typography>
+                                                    <div className={classes.recipe_description}>
+                                                        <div className={classes.recipe_row}>
+                                                            {meal.recipeImage !== '' ?
+                                                                <Avatar className="menuImage" src={meal.recipeImage}/>
+                                                                : <ReceiptIcon className={classes.photo_placeholder}/>}
+                                                            <div className={classes.recipe_name}>
+                                                                {meal.recipeName}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className={classes.recipe_row}>
-                                                        {meal.recipeCalories} kCal
-                                                        <div className={classes.recipe_nutrients}>
+                                                        <div className={classes.recipe_row}>
+                                                            {meal.recipeCalories} kCal
+                                                            <div className={classes.recipe_nutrients}>
+                                                                <div>
+                                                                    Proteins: {meal.recipeProteins} g
+                                                                </div>
+                                                                <div className={classes.nutrient}>
+                                                                    Carbohydrates: {meal.recipeCarbohydrates} g
+                                                                </div>
+                                                                <div className={classes.nutrient}>
+                                                                    Fats: {meal.recipeFats} g
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className={classes.recipe_row}>
                                                             <div>
-                                                                Proteins: {meal.recipeProteins} g
-                                                            </div>
-                                                            <div className={classes.nutrient}>
-                                                                Carbohydrates: {meal.recipeCarbohydrates} g
-                                                            </div>
-                                                            <div className={classes.nutrient}>
-                                                                Fats: {meal.recipeFats} g
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className={classes.recipe_row}>
-                                                        <div>
-                                                            belongs to collection:
-                                                            <span
-                                                                className={meal.belongsToCollection === "Yes" ? classes.greenFont : classes.redFont}>
+                                                                belongs to collection:
+                                                                <span
+                                                                    className={meal.belongsToCollection === "Yes" ? classes.greenFont : classes.redFont}>
                     {meal.belongsToCollection}
                     </span>
-                                                        </div>
-                                                        <div className={classes.recipe_name}>
-                                                            liked in preference:
-                                                            <span
-                                                                className={meal.likedInPreference === "Yes" ? classes.greenFont : (meal.likedInPreference === "No" ? classes.redFont : "")}>
+                                                            </div>
+                                                            <div className={classes.recipe_name}>
+                                                                liked in preference:
+                                                                <span
+                                                                    className={meal.likedInPreference === "Yes" ? classes.greenFont : (meal.likedInPreference === "No" ? classes.redFont : "")}>
                     {meal.likedInPreference}
                     </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </Typography>
-                                        </TimelineContent>
-                                    </TimelineItem>
-                                ))}
-                            </Timeline>
+                                                </Typography>
+                                            </TimelineContent>
+                                        </TimelineItem>
+                                    ))}
+                                </Timeline>
+                            </div>
                         </div>
                         <Fab className="next_button" aria-label="next">
                             <NavigateNextRoundedIcon fontSize="large" onClick={handleNextDailyMenu}/>

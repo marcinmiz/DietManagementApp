@@ -798,6 +798,7 @@
 .menuList {
     overflow-y: scroll;
     max-height: 90%;
+    padding: 5%;
 }
 
 .programme, .preference_container {
@@ -874,4 +875,5 @@
     margin-left: auto;
     margin-right: auto;
     padding: 2%;
+    /*background-color: #8a7666;*/
 }

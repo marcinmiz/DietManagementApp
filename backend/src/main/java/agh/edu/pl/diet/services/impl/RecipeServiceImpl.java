@@ -1,24 +1,18 @@
 package agh.edu.pl.diet.services.impl;
 
-import agh.edu.pl.diet.controllers.ImageController;
 import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
-import agh.edu.pl.diet.payloads.response.*;
+import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.RecipeService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -390,7 +384,7 @@ public class RecipeServiceImpl implements RecipeService {
                 return responseMessage4;
             }
 
-            for (String recipeProductStatement: recipeProducts) {
+            for (String recipeProductStatement : recipeProducts) {
 
                 ResponseMessage responseMessage5 = verify("recipeProductStatement", recipeProductStatement);
 
@@ -429,13 +423,13 @@ public class RecipeServiceImpl implements RecipeService {
                 products.add(recipeProduct);
             }
 
-            for (RecipeProduct recipeProduct: currentRecipeProducts) {
+            for (RecipeProduct recipeProduct : currentRecipeProducts) {
                 System.out.println(recipeProduct.getProduct().getProductName());
                 recipeProduct.removeRecipe(updatedRecipe);
                 recipeProductsRepo.delete(recipeProduct);
             }
 
-            for (RecipeProduct recipeProduct: products) {
+            for (RecipeProduct recipeProduct : products) {
                 recipeProductsRepo.save(recipeProduct);
             }
 
@@ -464,13 +458,13 @@ public class RecipeServiceImpl implements RecipeService {
                 recipeStep.setRecipe(updatedRecipe);
                 steps.add(recipeStep);
             }
-            for (RecipeStep recipeStep: currentSteps) {
+            for (RecipeStep recipeStep : currentSteps) {
                 System.out.println(recipeStep.getRecipeStepDescription());
                 recipeStep.removeRecipe(updatedRecipe);
                 recipeStepsRepo.delete(recipeStep);
             }
 
-            for (RecipeStep recipeStep: steps) {
+            for (RecipeStep recipeStep : steps) {
                 recipeStepsRepo.save(recipeStep);
             }
 
