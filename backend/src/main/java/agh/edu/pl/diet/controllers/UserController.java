@@ -1,8 +1,7 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.User;
-import agh.edu.pl.diet.payloads.request.UserLoginRequest;
-import agh.edu.pl.diet.payloads.request.UserRequest;
+import agh.edu.pl.diet.payloads.request.*;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/users")
@@ -70,4 +71,21 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<ResponseMessage> processForgotPassword(@RequestBody ForgotPasswordRequest request) {
+        ResponseMessage message = userService.processForgotPassword(request.getEmail());
+        return ResponseEntity.ok(message);
+    }
+
+    @PostMapping("/checkTokenValidity")
+    public ResponseEntity<ResponseMessage> checkTokenValidity(@RequestBody CheckTokenValidityRequest request) {
+        ResponseMessage message = userService.checkTokenValidity(request.getToken());
+        return ResponseEntity.ok(message);
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<ResponseMessage> resetPassword(@RequestBody ResetPasswordRequest request, BindingResult bindingResult) {
+        ResponseMessage message = userService.resetPassword(request, bindingResult);
+        return ResponseEntity.ok(message);
+    }
 }

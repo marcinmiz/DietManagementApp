@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .cors(Customizer.withDefaults()).csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/resources/**", "/api/users/register", "/api/users/login").permitAll()
+                .antMatchers(HttpMethod.POST,"/resources/**", "/api/users/register", "/api/users/login", "/api/users/forgotPassword", "/api/users/checkTokenValidity", "/api/users/resetPassword").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/users/loggedUser", "/api/users/existsUser/{username}").permitAll()
                 .antMatchers(HttpMethod.POST,"/api/products/assess", "/api/recipes/assess").hasRole("ADMIN")
                 .antMatchers(HttpMethod.OPTIONS,"/**")

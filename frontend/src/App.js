@@ -2,8 +2,10 @@ import React, {useEffect} from 'react';
 import './App.css';
 import Authentication from "./pages/Authentication";
 import UserDashboard from "./UserDashboard";
-import {BrowserRouter as Router, Redirect, Route, Switch, useHistory} from 'react-router-dom'
+import {BrowserRouter as Router, useRouteMatch, Redirect, Route, Switch, useHistory} from 'react-router-dom'
 import http from "./http-common";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 export default function App() {
 
@@ -121,6 +123,33 @@ export default function App() {
                                }
                                }
                         />
+                        <Route exact path="/forgotPassword"
+                               render={(props) => {
+
+                                   return state.loggedInStatus === "NOT_LOGGED_IN"
+                                       ? (<ForgotPassword loaded={state.loaded}
+                                                          loggedInStatus={state.loggedInStatus}
+                                                          admin={state.admin} adminMode={state.adminMode}
+                                                          handleInit={handleInit} {...props} />)
+                                       :
+                                       (<Redirect to={{pathname: "/dashboard", state: {from: props.location}}}/>)
+                               }
+                               }
+                        />
+                        <Route path={`/resetPassword`}
+                               render={(props) => {
+
+                                   return state.loggedInStatus === "NOT_LOGGED_IN"
+                                       ? (<ResetPasswordPage loaded={state.loaded}
+                                                             loggedInStatus={state.loggedInStatus}
+                                                             admin={state.admin} adminMode={state.adminMode}
+                                                             handleInit={handleInit} {...props} />)
+                                       :
+                                       (<Redirect to={{pathname: "/dashboard", state: {from: props.location}}}/>)
+                               }
+                               }
+                        />
+
                         <Route path="/">
 
                             {

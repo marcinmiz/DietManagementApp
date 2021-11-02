@@ -877,3 +877,16 @@
     padding: 2%;
     /*background-color: #8a7666;*/
 }
+
+.setting_header {
+    margin-bottom: 10px;
+    padding: 2%;
+    font-size: x-large;
+    color: rgba(210, 180, 140, 0.76);
+    /*color: rgba(216, 191, 216, 0.81);*/
+}
+
+.resetPasswordContainer {
+    display: flex;
+    flex-direction: column;
+}

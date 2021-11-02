@@ -395,6 +395,7 @@ export default function Authentication(props) {
                         </button>
 
                     </form>
+                    <a href="http://localhost:3000/forgotPassword">Forgot password?</a>
                 </div>
             </div>
         );

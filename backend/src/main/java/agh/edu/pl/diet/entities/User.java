@@ -35,6 +35,8 @@ public class User {
     private DietaryProgramme currentDietaryProgramme = null;
     private String dietaryProgrammeStartDate = null;
     private Integer currentDietaryProgrammeDay = null;
+    @JsonIgnore
+    private String resetPasswordToken;
 
     public Long getUserId() {
         return userId;
@@ -142,6 +144,14 @@ public class User {
 
     public void setCurrentDietaryProgrammeDay(Integer currentDietaryProgrammeDay) {
         this.currentDietaryProgrammeDay = currentDietaryProgrammeDay;
+    }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
     }
 
     //    public double getTargetWeight() {

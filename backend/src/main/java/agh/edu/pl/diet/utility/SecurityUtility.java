@@ -4,12 +4,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.SecureRandom;
 import java.util.Random;
 
 @Component
 public class SecurityUtility {
     private static final String SALT = "salt"; // Salt should be protected carefully
+    private final static String siteURL = "http://localhost:3000";
 
     @Bean
     public static BCryptPasswordEncoder passwordEncoder() {
@@ -28,5 +30,9 @@ public class SecurityUtility {
         }
         String saltStr = salt.toString();
         return saltStr;
+    }
+
+    public static String getSiteURL() {
+        return siteURL;
     }
 }
