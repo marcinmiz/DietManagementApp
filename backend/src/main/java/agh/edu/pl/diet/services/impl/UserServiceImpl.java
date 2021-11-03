@@ -2,14 +2,17 @@ package agh.edu.pl.diet.services.impl;
 
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
+import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
 import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
 import agh.edu.pl.diet.payloads.request.UserLoginRequest;
 import agh.edu.pl.diet.payloads.request.UserRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.payloads.validators.EmailValidator;
 import agh.edu.pl.diet.payloads.validators.PasswordValidator;
 import agh.edu.pl.diet.payloads.validators.UserValidator;
 import agh.edu.pl.diet.repos.RoleRepo;
 import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.SecurityService;
 import agh.edu.pl.diet.services.UserService;
 import agh.edu.pl.diet.utility.SecurityUtility;
@@ -43,6 +46,9 @@ public class UserServiceImpl implements UserService {
     private PasswordValidator passwordValidator;
 
     @Autowired
+    private EmailValidator emailValidator;
+
+    @Autowired
     private RoleRepo roleRepo;
 
     @Autowired
@@ -50,6 +56,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    private ImageService imageService;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -107,6 +116,9 @@ public class UserServiceImpl implements UserService {
         if (username != null) {
             User user = userRepo.findByUsername(username);
             if (user != null) {
+                String item_type = "avatar";
+                String url = imageService.getImageURL(item_type, user.getUserId());
+                user.setAvatarImage(url);
                 return user;
             }
             return null;
@@ -133,8 +145,6 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByResetPasswordToken(token);
     }
 
-
-
     public ResponseMessage resetPassword(ResetPasswordRequest request, BindingResult bindingResult) {
         String resetType = request.getResetType();
         String token = request.getToken();
@@ -143,8 +153,7 @@ public class UserServiceImpl implements UserService {
 
         if (resetType.equalsIgnoreCase("forgot")) {
             user = getByResetPasswordToken(token);
-        }
-        else {
+        } else {
             user = findByUsername(getLoggedUser().getUsername());
         }
 
@@ -165,6 +174,8 @@ public class UserServiceImpl implements UserService {
 
             String encodedPassword = encoder.encode(password);
             user.setPassword(encodedPassword);
+
+            System.out.println("encodedPassword: " + user.getPassword());
 
             user.setResetPasswordToken(null);
             userRepo.save(user);
@@ -223,5 +234,27 @@ public class UserServiceImpl implements UserService {
             return new ResponseMessage("Token is invalid");
         }
         return new ResponseMessage("Token is valid");
+    }
+
+    @Override
+    public ResponseMessage resetEmail(ForgotPasswordRequest request, BindingResult bindingResult) {
+        String email = request.getEmail();
+        User user = findByUsername(getLoggedUser().getUsername());
+
+        if (user == null) {
+            return new ResponseMessage("Logged user has not been found");
+        } else {
+
+            emailValidator.validate(request, bindingResult);
+
+            if (bindingResult.hasErrors()) {
+                String message = bindingResult.getFieldError().getDefaultMessage();
+                return new ResponseMessage(message);
+            }
+
+            user.setEmail(email);
+            userRepo.save(user);
+            return new ResponseMessage("You have successfully changed your e-mail");
+        }
     }
 }

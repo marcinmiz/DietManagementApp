@@ -1,6 +1,9 @@
 import React from "react";
 import UploadService from "../services/UploadFiles";
-import {Typography, Button} from '@material-ui/core';
+import {Button, Typography} from '@material-ui/core';
+import Avatar from "@material-ui/core/Avatar";
+import SpaIcon from '@material-ui/icons/Spa';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 
 export default function UploadImages({currentImage, submitted, type, id}) {
     const [state, setState] = React.useState({
@@ -9,17 +12,17 @@ export default function UploadImages({currentImage, submitted, type, id}) {
 
         message: "",
         isError: false,
-    })
+    });
 
     React.useEffect(() => {
 
             if (currentImage !== "" && !state.currentFile) {
-            setState({
-                ...state,
-                previewImage: currentImage
-            });
+                setState({
+                    ...state,
+                    previewImage: currentImage
+                });
 
-        }
+            }
 
             if (submitted && currentFile) {
                 upload();
@@ -54,6 +57,7 @@ export default function UploadImages({currentImage, submitted, type, id}) {
                 });
             });
     }
+
     const {
         currentFile,
         previewImage,
@@ -64,11 +68,17 @@ export default function UploadImages({currentImage, submitted, type, id}) {
     return (
         <div id="upload_container" className="upload_container">
 
-            {previewImage && (
-                <div>
-                    <img className="upload_image" src={previewImage} alt=""/>
-                </div>
-            )}
+            {type === 'product' && !previewImage ?
+                <SpaIcon className="upload_image"/> :
+                (
+                    type === 'recipe' && !previewImage ?
+                        <ReceiptIcon className="upload_image"/> :
+                        (
+                            <div>
+                                <Avatar className="upload_image" src={previewImage} alt=""/>
+                            </div>
+                        )
+                )}
 
             <div>
                 {currentFile ? currentFile.name : null}

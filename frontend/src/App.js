@@ -157,11 +157,14 @@ export default function App() {
                                     ?
                                     (<UserDashboard userId={state.user.userId} name={state.user.name}
                                                     surname={state.user.surname}
+                                                    username={state.user.username}
                                                     loggedInStatus={state.loggedInStatus}
                                                     admin={state.admin} adminMode={state.adminMode}
                                                     currentDietaryProgramme={state.user.currentDietaryProgramme}
                                                     currentDietaryProgrammeDay={state.user.currentDietaryProgrammeDay}
                                                     dietaryProgrammeStartDate={state.user.dietaryProgrammeStartDate}
+                                                    userId={state.user.userId}
+                                                    avatarImage={state.user.avatarImage}
                                                     handleAdminMode={handleAdminMode}
                                                     handleLogout={handleLogout}
                                                     handleUseDietaryProgramme={handleUseDietaryProgramme}

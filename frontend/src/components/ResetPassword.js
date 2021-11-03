@@ -60,10 +60,11 @@ export default function ResetPassword(props) {
         try {
             let result, credentials;
             console.log(state.password);
+            console.log(props.resetType);
 
             if (validatePassword() !== "error") {
                 credentials = {
-                    "resetType": "forgot",
+                    "resetType": props.resetType,
                     "token": props.token,
                     "password": state.password,
                     "passwordConfirmation": state.passwordConfirmation

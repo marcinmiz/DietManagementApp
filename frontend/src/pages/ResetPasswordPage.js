@@ -54,7 +54,7 @@ export default function ResetPasswordPage(props) {
                     <div className="logo">
                         DIETIX
                     </div>
-                    <ResetPassword token={token}/>
+                    <ResetPassword resetType="forgot" token={token}/>
                     <button className="form_button" name="back_login_button" type="button"
                             onClick={() => history.push('/login')}>
                         Back to login page

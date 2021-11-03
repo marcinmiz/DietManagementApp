@@ -2,6 +2,7 @@ package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
+import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
 import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
 import agh.edu.pl.diet.payloads.request.UserLoginRequest;
 import agh.edu.pl.diet.payloads.request.UserRequest;
@@ -36,5 +37,7 @@ public interface UserService {
     void sendEmail(String recipientEmail, String link) throws MessagingException, UnsupportedEncodingException;
 
     ResponseMessage checkTokenValidity(String token);
+
+    ResponseMessage resetEmail(ForgotPasswordRequest request, BindingResult bindingResult);
 
 }

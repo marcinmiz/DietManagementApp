@@ -37,6 +37,8 @@ public class User {
     private Integer currentDietaryProgrammeDay = null;
     @JsonIgnore
     private String resetPasswordToken;
+    @Transient
+    private String avatarImage;
 
     public Long getUserId() {
         return userId;
@@ -152,6 +154,14 @@ public class User {
 
     public void setResetPasswordToken(String resetPasswordToken) {
         this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public String getAvatarImage() {
+        return avatarImage;
+    }
+
+    public void setAvatarImage(String avatarImage) {
+        this.avatarImage = avatarImage;
     }
 
     //    public double getTargetWeight() {

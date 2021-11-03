@@ -21,11 +21,11 @@ export default function Appbar(props) {
 
     return (
         <div className="app_bar">
-            <div className="logo">
+            <div className="logo logoAvatarPointer" onClick={() => history.push("http://localhost:3000")}>
                 DIETIX
             </div>
-            <div>
-                <Avatar className="user_avatar" alt="template user avatar" src=""/>
+            <div className="logoAvatarPointer" onClick={() => history.push('/settings')}>
+                <Avatar className="user_avatar" alt="template user avatar" src={props.avatarImage}/>
                 <div>{props.name + " " + props.surname}</div>
             </div>
             {(props.admin === true) ?

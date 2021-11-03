@@ -88,4 +88,10 @@ public class UserController {
         ResponseMessage message = userService.resetPassword(request, bindingResult);
         return ResponseEntity.ok(message);
     }
+
+    @PostMapping("/resetEmail")
+    public ResponseEntity<ResponseMessage> resetEmail(@RequestBody ForgotPasswordRequest request, BindingResult bindingResult) {
+        ResponseMessage message = userService.resetEmail(request, bindingResult);
+        return ResponseEntity.ok(message);
+    }
 }
