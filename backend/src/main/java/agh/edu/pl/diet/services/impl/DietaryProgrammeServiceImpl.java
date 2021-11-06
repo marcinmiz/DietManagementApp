@@ -123,6 +123,10 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
 
         User programmeOwner = programme.getOwner();
 
+        if (programmeOwner == null) {
+            return new ResponseMessage("Dietary programme owner has not been found");
+        }
+
         if (type.equalsIgnoreCase("start")) {
             programmeOwner.setCurrentDietaryProgramme(programme);
             programmeOwner.setCurrentDietaryProgrammeDay(1);
@@ -142,7 +146,7 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
             DailyMenu menu = menus.get(i);
 
             if (type.equalsIgnoreCase("start")) {
-                startDate.add(Calendar.DAY_OF_MONTH, i);
+                startDate.add(Calendar.DAY_OF_MONTH, i == 0 ? 0 : 1);
                 menu.setDailyMenuDate(startDate.toInstant().toString());
             } else {
                 menu.setDailyMenuDate(null);
@@ -191,6 +195,33 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
             return new ResponseMessage("Dietary programme " + programme.getDietaryProgrammeName() + " has been started");
         } else {
             return new ResponseMessage("Dietary programme " + programme.getDietaryProgrammeName() + " has been abandoned");
+        }
+
+    }
+
+    @Override
+    public ResponseMessage finishDietaryProgramme(Long programmeId) {
+
+        String type = "abandon";
+
+        DietaryProgramme programme = dietaryProgrammeRepo.findById(programmeId).orElse(null);
+        if (programme == null) {
+            return new ResponseMessage("Dietary programme with id " + programmeId + " has not been found");
+        }
+
+        if (useDietaryProgramme(programmeId, type).getMessage().endsWith(" has been abandoned")) {
+
+            User programmeOwner = programme.getOwner();
+            Double improvementStep = 0.05;
+
+            if (programmeOwner.getDietImprovement() > improvementStep) {
+                programmeOwner.setDietImprovement(programmeOwner.getDietImprovement() - improvementStep);
+                userRepo.save(programmeOwner);
+            }
+            return new ResponseMessage("Dietary programme " + programme.getDietaryProgrammeName() + " has been finished");
+
+        } else {
+            return new ResponseMessage("Dietary programme " + programme.getDietaryProgrammeName() + " has not been finished");
         }
 
     }

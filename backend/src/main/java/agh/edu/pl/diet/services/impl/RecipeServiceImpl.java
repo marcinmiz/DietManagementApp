@@ -163,12 +163,15 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Set<Recipes> getAllRecipes() {
         String item_type = "recipe";
+        String recipe_owner_type = "avatar";
         Set<Recipes> set = new HashSet<>();
         recipeRepo.findAll().forEach(set::add);
 
         for (Recipes recipe : set) {
             String url = imageService.getImageURL(item_type, recipe.getRecipeId());
             recipe.setRecipeImage(url);
+            String avatarUrl = imageService.getImageURL(recipe_owner_type, recipe.getRecipeOwner().getUserId());
+            recipe.getRecipeOwner().setAvatarImage(avatarUrl);
         }
         return set;
     }
@@ -176,9 +179,12 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public Recipes getRecipe(Long recipeId) {
         String item_type = "recipe";
+        String recipe_owner_type = "avatar";
         String url = imageService.getImageURL(item_type, recipeId);
         Recipes recipe = recipeRepo.findById(recipeId).get();
         recipe.setRecipeImage(url);
+        String avatarUrl = imageService.getImageURL(recipe_owner_type, recipe.getRecipeOwner().getUserId());
+        recipe.getRecipeOwner().setAvatarImage(avatarUrl);
         return recipe;
     }
 

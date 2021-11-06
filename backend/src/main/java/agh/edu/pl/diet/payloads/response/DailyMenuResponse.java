@@ -1,8 +1,8 @@
 package agh.edu.pl.diet.payloads.response;
 
-import agh.edu.pl.diet.entities.DietaryProgramme;
+import agh.edu.pl.diet.entities.RecipeProduct;
+import agh.edu.pl.diet.entities.RecipeStep;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,53 +12,163 @@ public class DailyMenuResponse {
     private String dailyMenuName;
     private String dailyMenuDate;
     private Integer mealsQuantity;
-    private List<String> meals;
+    private List<Meal> meals;
 
-    public DailyMenuResponse() {
+    public DailyMenuResponse(Long dailyMenuId, String dailyMenuName, String dailyMenuDate, Integer mealsQuantity) {
+        this.dailyMenuId = dailyMenuId;
+        this.dailyMenuName = dailyMenuName;
+        this.dailyMenuDate = dailyMenuDate;
+        this.mealsQuantity = mealsQuantity;
         this.meals = new ArrayList<>();
+    }
+
+    private class Meal {
+        private String mealName;
+        private String mealHourTime;
+        private Recipe recipe;
+
+        private Meal(String mealName, String mealHourTime, Recipe recipe) {
+            this.mealName = mealName;
+            this.mealHourTime = mealHourTime;
+            this.recipe = recipe;
+        }
+
+        public String getMealName() {
+            return mealName;
+        }
+
+        public String getMealHourTime() {
+            return mealHourTime;
+        }
+
+        public Recipe getRecipe() {
+            return recipe;
+        }
+    }
+
+    public class Recipe {
+        private Long recipeId;
+        private String recipeName;
+        private String creationDate;
+        private Long recipeAuthorId;
+        private String recipeAuthor;
+        private String recipeAuthorImage;
+        private String recipeImage;
+        private Double recipeCalories;
+        private Double recipeProteins;
+        private Double recipeCarbohydrates;
+        private Double recipeFats;
+        private String inCollection;
+        private String likedInPreference;
+        private List<RecipeProduct> recipeIngredients;
+        private List<RecipeStep> recipeSteps;
+
+        private Recipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
+            this.recipeId = recipeId;
+            this.recipeName = recipeName;
+            this.creationDate = creationDate;
+            this.recipeAuthorId = recipeAuthorId;
+            this.recipeAuthor = recipeAuthor;
+            this.recipeAuthorImage = recipeAuthorImage;
+            this.recipeImage = recipeImage;
+            this.recipeCalories = recipeCalories;
+            this.recipeProteins = recipeProteins;
+            this.recipeCarbohydrates = recipeCarbohydrates;
+            this.recipeFats = recipeFats;
+            this.inCollection = inCollection;
+            this.likedInPreference = likedInPreference;
+            this.recipeIngredients = recipeIngredients;
+            this.recipeSteps = recipeSteps;
+        }
+
+        public Long getRecipeId() {
+            return recipeId;
+        }
+
+        public String getRecipeName() {
+            return recipeName;
+        }
+
+        public String getCreationDate() {
+            return creationDate;
+        }
+
+        public Long getRecipeAuthorId() {
+            return recipeAuthorId;
+        }
+
+        public String getRecipeAuthor() {
+            return recipeAuthor;
+        }
+
+        public String getRecipeAuthorImage() {
+            return recipeAuthorImage;
+        }
+
+        public String getRecipeImage() {
+            return recipeImage;
+        }
+
+        public Double getRecipeCalories() {
+            return recipeCalories;
+        }
+
+        public Double getRecipeProteins() {
+            return recipeProteins;
+        }
+
+        public Double getRecipeCarbohydrates() {
+            return recipeCarbohydrates;
+        }
+
+        public Double getRecipeFats() {
+            return recipeFats;
+        }
+
+        public String getInCollection() {
+            return inCollection;
+        }
+
+        public String getLikedInPreference() {
+            return likedInPreference;
+        }
+
+        public List<RecipeProduct> getRecipeIngredients() {
+            return recipeIngredients;
+        }
+
+        public List<RecipeStep> getRecipeSteps() {
+            return recipeSteps;
+        }
     }
 
     public Long getDailyMenuId() {
         return dailyMenuId;
     }
 
-    public void setDailyMenuId(Long dailyMenuId) {
-        this.dailyMenuId = dailyMenuId;
-    }
-
     public String getDailyMenuName() {
         return dailyMenuName;
-    }
-
-    public void setDailyMenuName(String dailyMenuName) {
-        this.dailyMenuName = dailyMenuName;
     }
 
     public String getDailyMenuDate() {
         return dailyMenuDate;
     }
 
-    public void setDailyMenuDate(String dailyMenuDate) {
-        this.dailyMenuDate = dailyMenuDate;
-    }
-
     public Integer getMealsQuantity() {
         return mealsQuantity;
     }
 
-    public void setMealsQuantity(Integer mealsQuantity) {
-        this.mealsQuantity = mealsQuantity;
-    }
-
-    public List<String> getMeals() {
+    public List<Meal> getMeals() {
         return meals;
     }
 
-    public void setMeals(List<String> meals) {
-        this.meals = meals;
+    public void addMeal(String mealName, String mealHourTime, Recipe recipe) {
+        this.meals.add(new Meal(mealName, mealHourTime, recipe));
     }
 
-    public void addMeal(String meal) {
-        this.meals.add(meal);
+    public Recipe createRecipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
+
+        return new Recipe(recipeId, recipeName, creationDate, recipeAuthorId, recipeAuthor, recipeAuthorImage, recipeImage, recipeCalories, recipeProteins, recipeCarbohydrates, recipeFats, inCollection, likedInPreference, recipeIngredients, recipeSteps);
     }
+
 }

@@ -175,10 +175,9 @@ public class Recipes {
     public Double getRecipeCalories() {
         Double recipeCalories = 0.0;
 
-        for (RecipeProduct product: recipeProducts) {
+        for (RecipeProduct product : recipeProducts) {
             Double amount = product.getProductAmount();
             String unit = product.getProductUnit();
-
             switch (unit) {
                 case "kg":
                     amount *= 1000;
@@ -201,7 +200,7 @@ public class Recipes {
                 default:
             }
 
-            recipeCalories += (amount/100) * product.getProduct().getCalories();
+            recipeCalories += (amount / 100) * product.getProduct().getCalories();
         }
 
         return recipeCalories;
@@ -210,11 +209,36 @@ public class Recipes {
     public Double getRecipeNutrients(String nutrientName) {
         Double recipeNutrients = 0.0;
 
-        for (RecipeProduct product: recipeProducts) {
+        for (RecipeProduct product : recipeProducts) {
             List<ProductNutrient> nutrients = product.getProduct().getNutrients();
-            for (ProductNutrient productNutrient: nutrients) {
+            for (ProductNutrient productNutrient : nutrients) {
                 if (productNutrient.getNutrient().getNutrientName().equals(nutrientName)) {
-                    recipeNutrients += productNutrient.getNutrientAmount();
+                    Double amount = product.getProductAmount();
+                    String unit = product.getProductUnit();
+
+                    switch (unit) {
+                        case "kg":
+                            amount *= 1000;
+                            break;
+                        case "dag":
+                            amount *= 10;
+                            break;
+                        case "pcs":
+                            amount = amount * product.getProduct().getAverageWeight();
+                            break;
+                        case "l":
+                            amount *= 1000;
+                            break;
+                        case "tbsp":
+                            amount *= 15;
+                            break;
+                        case "tsp":
+                            amount *= 5;
+                            break;
+                        default:
+                    }
+
+                    recipeNutrients += (amount / 100) * productNutrient.getNutrientAmount();
                 }
             }
         }

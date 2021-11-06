@@ -1,8 +1,6 @@
 package agh.edu.pl.diet.payloads.validators;
 
-import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
-import agh.edu.pl.diet.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import agh.edu.pl.diet.payloads.request.ChangePasswordRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -13,12 +11,12 @@ public class PasswordValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return ResetPasswordRequest.class.equals(aClass);
+        return ChangePasswordRequest.class.equals(aClass);
     }
 
     @Override
     public void validate(Object o, Errors errors) {
-        ResetPasswordRequest password = (ResetPasswordRequest) o;
+        ChangePasswordRequest password = (ChangePasswordRequest) o;
 
         if (password.getPassword() == null) {
             errors.rejectValue("password", "Null.userForm.password", "Password has to to be given");

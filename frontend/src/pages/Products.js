@@ -156,27 +156,27 @@ export default function Products(props) {
                                 }
                             }
                         }
-
-                        let resp = await http.get("/api/products/checkProductApprovalStatus/" + productId);
-                        let approvalStatus = resp.data.message;
-
-                        if (product_index === 'new') {
-                            switch (approvalStatus) {
-                                case 'accepted':
-                                    document.getElementById('first').click();
-                                    break;
-                                case 'pending':
-                                    document.getElementById('second').click();
-                                    break;
-                                case 'rejected':
-                                    if (props.adminMode) {
-                                        document.getElementById('third').click();
-                                    } else {
-                                        document.getElementById('second').click();
-                                    }
-                                    break;
-                            }
-                        }
+                        //
+                        // let resp = await http.get("/api/products/checkProductApprovalStatus/" + productId);
+                        // let approvalStatus = resp.data.message;
+                        //
+                        // if (product_index === 'new') {
+                        //     switch (approvalStatus) {
+                        //         case 'accepted':
+                        //             document.getElementById('first').click();
+                        //             break;
+                        //         case 'pending':
+                        //             document.getElementById('second').click();
+                        //             break;
+                        //         case 'rejected':
+                        //             if (props.adminMode) {
+                        //                 document.getElementById('third').click();
+                        //             } else {
+                        //                 document.getElementById('second').click();
+                        //             }
+                        //             break;
+                        //     }
+                        // }
                     }
 
                     if ((!Number.isInteger(Number(productId)) && productId !== 'new') || (mode !== 'view' && mode !== 'edit')) {
@@ -201,7 +201,9 @@ export default function Products(props) {
         let product = {};
         product.product_id = data[x].productId;
         product.product_name = data[x].productName;
+        product.product_image = data[x].productImage;
         product.product_author_id = data[x].owner.userId;
+        product.product_author_image = data[x].owner.avatarImage;
         product.product_category = data[x].category.categoryName;
         product.product_author = data[x].owner.name + " " + data[x].owner.surname;
         product.product_calories = data[x].calories;
@@ -220,7 +222,6 @@ export default function Products(props) {
             product.product_nutrients[i].nutrient_unit = "g";
         }
 
-        product.product_image = data[x].productImage;
         let creationDate = new Date(data[x].creationDate);
         product.creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
         product.approval_status = data[x].approvalStatus;
@@ -423,7 +424,7 @@ export default function Products(props) {
                                         />
                                     </div>
                                     <div className="product_author" onClick={handleAuthor}>
-                                        <Avatar/>
+                                        <Avatar src={product.product_author_image}/>
                                         <div className="product_author_name">{product.product_author}</div>
                                     </div>
                                 </div>
@@ -534,7 +535,7 @@ export default function Products(props) {
                                             />
                                         </div>
                                         <div className="product_author" onClick={handleAuthor}>
-                                            <Avatar/>
+                                            <Avatar src={product.product_author_image}/>
                                             <div className="product_author_name">{product.product_author}</div>
                                         </div>
                                     </div>
@@ -591,7 +592,7 @@ export default function Products(props) {
                                                 />
                                             </div>
                                             <div className="product_author" onClick={handleAuthor}>
-                                                <Avatar/>
+                                                <Avatar src={product.product_author_image}/>
                                                 <div className="product_author_name">{product.product_author}</div>
                                             </div>
                                         </div>

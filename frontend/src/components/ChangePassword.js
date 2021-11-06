@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import "../Authentication.css";
 import http from "../http-common";
 
-export default function ResetPassword(props) {
+export default function ChangePassword(props) {
 
     const [state, setState] = React.useState({
         password: "",
@@ -70,7 +70,7 @@ export default function ResetPassword(props) {
                     "passwordConfirmation": state.passwordConfirmation
                 };
 
-                result = await http.post("/api/users/resetPassword", credentials);
+                result = await http.post("/api/users/changePassword", credentials);
 
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                 setState({
@@ -95,7 +95,7 @@ export default function ResetPassword(props) {
             {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
             <form className="form">
-                <div className="setting_header">Reset Password</div>
+                <div className="setting_header">Change Password</div>
                 <label htmlFor="password">Enter your new password</label>
                 <input
                     className="input_field"

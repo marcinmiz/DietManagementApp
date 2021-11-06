@@ -1,10 +1,7 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Recipes;
-import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
-import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
-import agh.edu.pl.diet.payloads.request.RecipeRequest;
-import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
+import agh.edu.pl.diet.payloads.request.*;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;

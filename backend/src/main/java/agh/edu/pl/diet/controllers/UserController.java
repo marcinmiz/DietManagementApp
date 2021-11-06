@@ -11,8 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = {"http://localhost:3000"})
@@ -83,15 +81,15 @@ public class UserController {
         return ResponseEntity.ok(message);
     }
 
-    @PostMapping("/resetPassword")
-    public ResponseEntity<ResponseMessage> resetPassword(@RequestBody ResetPasswordRequest request, BindingResult bindingResult) {
-        ResponseMessage message = userService.resetPassword(request, bindingResult);
+    @PostMapping("/changePassword")
+    public ResponseEntity<ResponseMessage> resetPassword(@RequestBody ChangePasswordRequest request, BindingResult bindingResult) {
+        ResponseMessage message = userService.changePassword(request, bindingResult);
         return ResponseEntity.ok(message);
     }
 
-    @PostMapping("/resetEmail")
+    @PostMapping("/changeEmail")
     public ResponseEntity<ResponseMessage> resetEmail(@RequestBody ForgotPasswordRequest request, BindingResult bindingResult) {
-        ResponseMessage message = userService.resetEmail(request, bindingResult);
+        ResponseMessage message = userService.changeEmail(request, bindingResult);
         return ResponseEntity.ok(message);
     }
 }

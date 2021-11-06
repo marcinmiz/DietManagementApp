@@ -3,7 +3,7 @@ package agh.edu.pl.diet.services.impl;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
 import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
-import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
+import agh.edu.pl.diet.payloads.request.ChangePasswordRequest;
 import agh.edu.pl.diet.payloads.request.UserLoginRequest;
 import agh.edu.pl.diet.payloads.request.UserRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
@@ -31,7 +31,14 @@ import org.springframework.validation.BindingResult;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -88,6 +95,7 @@ public class UserServiceImpl implements UserService {
         String creationDate = new Date().toInstant().toString();
         user.setCreationDate(creationDate);
         user.setRole(roleRepo.findByName("USER"));
+        user.setDietImprovement(1.0);
 
         userRepo.save(user);
 
@@ -103,6 +111,29 @@ public class UserServiceImpl implements UserService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            User loggedUser = userRepo.findByUsername(userLoginRequest.getUsername());
+            //compute daysDifference
+            //if daysDifference is bigger than programmeDay, set programmeDay as daysDifference + 1, save
+            //else do nothing
+            if (loggedUser.getDietaryProgrammeStartDate() != null) {
+                Calendar now = Calendar.getInstance();
+                Instant startDateInstant = Instant.parse(loggedUser.getDietaryProgrammeStartDate());
+                Calendar startDate = GregorianCalendar.from(ZonedDateTime.ofInstant(startDateInstant, ZoneId.systemDefault()));
+                startDate.set(Calendar.HOUR_OF_DAY, 0);
+                startDate.set(Calendar.MINUTE, 0);
+                startDate.set(Calendar.SECOND, 0);
+
+                if (now.after(startDate)) {
+                    long end = now.getTimeInMillis();
+                    long start = startDate.getTimeInMillis();
+                    Integer daysBetween = Math.toIntExact(TimeUnit.MILLISECONDS.toDays(Math.abs(end - start)));
+                    System.out.println(daysBetween);
+                    if (daysBetween >= loggedUser.getCurrentDietaryProgrammeDay() && daysBetween + 1 <= loggedUser.getCurrentDietaryProgramme().getDietaryProgrammeDays()) {
+                        loggedUser.setCurrentDietaryProgrammeDay(daysBetween + 1);
+                        userRepo.save(loggedUser);
+                    }
+                }
+            }
             return new ResponseMessage("User has been logged in");
 
         }
@@ -145,7 +176,7 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByResetPasswordToken(token);
     }
 
-    public ResponseMessage resetPassword(ResetPasswordRequest request, BindingResult bindingResult) {
+    public ResponseMessage changePassword(ChangePasswordRequest request, BindingResult bindingResult) {
         String resetType = request.getResetType();
         String token = request.getToken();
         String password = request.getPassword();
@@ -237,7 +268,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseMessage resetEmail(ForgotPasswordRequest request, BindingResult bindingResult) {
+    public ResponseMessage changeEmail(ForgotPasswordRequest request, BindingResult bindingResult) {
         String email = request.getEmail();
         User user = findByUsername(getLoggedUser().getUsername());
 

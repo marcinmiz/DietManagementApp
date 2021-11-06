@@ -151,6 +151,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     @Override
     public ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes) {
 
+        System.out.println(recipe.getRecipeName() + " verification");
+
         Double ultimateForce = 1.0;
 
         Set<String> keySet = dailyNutrientsScopes.keySet();
@@ -163,6 +165,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             String nutrientName = nutrientNames[i];
 
             if (recipe.getRecipeNutrients(nutrientName) < dailyNutrientsScopes.get(nutrientName).get(0) || recipe.getRecipeNutrients(nutrientName) > dailyNutrientsScopes.get(nutrientName).get(1)) {
+                System.out.println(nutrientName + ": actual: " + recipe.getRecipeNutrients(nutrientName) + ", lower: " + dailyNutrientsScopes.get(nutrientName).get(0) + ", upper: " + dailyNutrientsScopes.get(nutrientName).get(1));
                 return new ResponseMessage("Recipe has inappropriate amount of " + nutrientName);
             }
 
@@ -177,6 +180,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             ultimateForce *= 0.7;
         else
             ultimateForce *= 0.3;
+
+        System.out.println("ultimateForce after collection check: " + ultimateForce);
 
         Map<String, Integer> ingredientIncidence = new LinkedHashMap<>();
 
@@ -218,6 +223,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                 ultimateForce *= 1.0;
         }
 
+        System.out.println("ultimateForce after pyramid check: " + ultimateForce);
+
         List<RecipeCustomerSatisfaction> recipeRatings = recipe.getRecipeCustomerSatisfactions().stream().filter(satisfaction -> satisfaction.getRecipeRating() != null).collect(Collectors.toList());
 
         if (!recipeRatings.isEmpty()) {
@@ -233,6 +240,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
             }
         }
+
+        System.out.println("ultimateForce after ratings check (end): " + ultimateForce);
 
         if (ultimateForce < 0.15) {
             return new ResponseMessage("Recipe is inappropriate in regard to dietary preference");
@@ -492,60 +501,45 @@ public class DailyMenuServiceImpl implements DailyMenuService {
         List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(programme);
 
         for (DailyMenu menu : menus) {
-            DailyMenuResponse response = new DailyMenuResponse();
-
-            response.setDailyMenuId(menu.getDailyMenuId());
-            response.setDailyMenuName(menu.getDailyMenuName());
-            response.setDailyMenuDate(menu.getDailyMenuDate());
-            response.setMealsQuantity(menu.getMealsQuantity());
+            DailyMenuResponse response = new DailyMenuResponse(menu.getDailyMenuId(), menu.getDailyMenuName(), menu.getDailyMenuDate(), menu.getMealsQuantity());
 
             List<Meals> meals = mealRepo.findByDailyMenu(menu);
 
             for (Meals meal : meals) {
-                String mealSentence = "";
-                mealSentence += meal.getMealsName() + ";";
-                mealSentence += meal.getMealHourTime() + ";";
 
                 Recipes recipe = recipeService.getRecipe(meal.getRecipe().getRecipeId());
-                System.out.println(recipe.getRecipeImage());
-                mealSentence += recipe.getRecipeImage() + ";";
-                mealSentence += recipe.getRecipeName() + ";";
+
+                String recipeAuthor = recipe.getRecipeOwner().getName() + " " + recipe.getRecipeOwner().getSurname();
 
                 Double calories = recipe.getRecipeCalories();
                 Long averageTemp = Math.round(calories * 100);
                 calories = Double.valueOf(averageTemp) / 100;
 
-                mealSentence += calories + ";";
-
                 Double proteins = recipe.getRecipeNutrients("Protein");
                 averageTemp = Math.round(proteins * 100);
                 proteins = Double.valueOf(averageTemp) / 100;
-
-                mealSentence += proteins + ";";
 
                 Double carbohydrates = recipe.getRecipeNutrients("Carbohydrate");
                 averageTemp = Math.round(carbohydrates * 100);
                 carbohydrates = Double.valueOf(averageTemp) / 100;
 
-                mealSentence += carbohydrates + ";";
-
                 Double fats = recipe.getRecipeNutrients("Fat");
                 averageTemp = Math.round(fats * 100);
                 fats = Double.valueOf(averageTemp) / 100;
 
-                mealSentence += fats + ";";
-
+                String inCollection;
                 RecipeGetRequest request = new RecipeGetRequest();
                 request.setRecipesGroup("personal");
                 request.setPhrase("");
                 List<Recipes> collectionRecipes = recipeService.getRecipes(request);
 
                 if (collectionRecipes.contains(recipe)) {
-                    mealSentence += "Yes;";
+                    inCollection = "Yes";
                 } else {
-                    mealSentence += "No;";
+                    inCollection = "No";
                 }
 
+                String likedInPreference;
                 DietaryPreferences preference = preferenceRepo.findByRelatedDietaryProgramme(programme);
 
                 if (preference == null) {
@@ -557,16 +551,18 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
                 Boolean recipePreferred = recipes.stream().filter(preferenceRecipe -> preferenceRecipe.getRecipe().getRecipeId().equals(recipe.getRecipeId())).map(DietaryPreferencesRecipe::isRecipePreferred).findAny().orElse(null);
                 if (recipePreferred == null) {
-                    mealSentence += "Neutral";
+                    likedInPreference = "Neutral";
                 } else {
                     if (recipePreferred) {
-                        mealSentence += "Yes";
+                        likedInPreference = "Yes";
                     } else {
-                        mealSentence += "No";
+                        likedInPreference = "No";
                     }
                 }
 
-                response.addMeal(mealSentence);
+                DailyMenuResponse.Recipe createdRecipe = response.createRecipe(recipe.getRecipeId(), recipe.getRecipeName(), recipe.getCreationDate(), recipe.getRecipeOwner().getUserId(), recipeAuthor, recipe.getRecipeOwner().getAvatarImage(), recipe.getRecipeImage(), calories, proteins, carbohydrates, fats, inCollection, likedInPreference, recipe.getRecipeProducts(), recipe.getRecipeSteps());
+
+                response.addMeal(meal.getMealsName(), meal.getMealHourTime(), createdRecipe);
             }
 
             dietaryProgrammeMenus.add(response);

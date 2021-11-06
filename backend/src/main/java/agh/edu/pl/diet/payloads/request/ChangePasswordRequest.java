@@ -2,7 +2,7 @@ package agh.edu.pl.diet.payloads.request;
 
 import javax.validation.constraints.NotBlank;
 
-public class ResetPasswordRequest {
+public class ChangePasswordRequest {
     @NotBlank
     private String resetType;
     @NotBlank

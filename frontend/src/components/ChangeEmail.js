@@ -59,7 +59,7 @@ export default function ResetPassword(props) {
                     "email": state.email
                 };
 
-                result = await http.post("/api/users/resetEmail", credentials);
+                result = await http.post("/api/users/changeEmail", credentials);
 
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                 setState({
@@ -84,7 +84,7 @@ export default function ResetPassword(props) {
             {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
             <form className="form">
-                <div className="setting_header">Reset E-mail</div>
+                <div className="setting_header">Change E-mail</div>
                 <label htmlFor="email">Enter your new e-mail</label>
                 <input
                     className="input_field"

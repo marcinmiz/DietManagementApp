@@ -1,9 +1,9 @@
 import React from 'react'
 import {Container, makeStyles} from "@material-ui/core";
-import ResetPassword from "../components/ResetPassword";
+import ChangePassword from "../components/ChangePassword";
 import UploadImages from "../components/UploadImages";
 import Button from "@material-ui/core/Button";
-import ResetEmail from "../components/ResetEmail";
+import ResetEmail from "../components/ChangeEmail";
 
 const useStyles = makeStyles({
     product: {
@@ -98,7 +98,7 @@ export default function Settings(props) {
                         </div>
                         <div className={classes.emailPasswordContainer}>
                             <div className={classes.emailPassword}>
-                                <ResetPassword resetType="settings"/>
+                                <ChangePassword resetType="settings"/>
                             </div>
                             <div className={classes.emailPassword}>
                                 <ResetEmail/>

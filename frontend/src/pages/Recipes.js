@@ -25,6 +25,7 @@ import ViewerModal from "../components/ViewerModal";
 import ArrowDownwardRoundedIcon from '@material-ui/icons/ArrowDownwardRounded';
 import CloudDownloadRoundedIcon from '@material-ui/icons/CloudDownloadRounded';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 
 const useStyles = makeStyles({
     paper: {
@@ -168,6 +169,7 @@ export default function Recipes(props) {
         recipe.recipe_name = data[x].recipeName;
         recipe.recipe_author = data[x].recipeOwner.name + " " + data[x].recipeOwner.surname;
         recipe.recipe_author_id = data[x].recipeOwner.userId;
+        recipe.recipe_author_image = data[x].recipeOwner.avatarImage;
 
         let ingredients_quantity = data[x].recipeProducts.length;
         recipe.recipe_ingredients = [];
@@ -200,6 +202,7 @@ export default function Recipes(props) {
 
         recipe.recipe_shared = data[x].recipeShared;
         recipe.recipe_image = data[x].recipeImage;
+
         let creationDate = new Date(data[x].creationDate);
         recipe.creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
         recipe.approval_status = data[x].approvalStatus;
@@ -603,7 +606,8 @@ export default function Recipes(props) {
 
                             <div className="recipe_content">
                                 <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                    <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                    {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                        <ReceiptIcon className={classes.photo_placeholder}/>}
                                 </div>
                                 <div className="recipe_description">
                                     {/*<div className="recipe_category">*/}
@@ -616,7 +620,7 @@ export default function Recipes(props) {
                                     {/*/>*/}
                                     {/*</div>*/}
                                     <div className="recipe_author" onClick={handleAuthor}>
-                                        <Avatar/>
+                                        <Avatar src={recipe.recipe_author_image}/>
                                         <div className="recipe_author_name">{recipe.recipe_author}</div>
                                     </div>
                                 </div>
@@ -728,7 +732,8 @@ export default function Recipes(props) {
 
                                 <div className="recipe_content">
                                     <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                        <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                        {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                            <ReceiptIcon className={classes.photo_placeholder}/>}
                                     </div>
                                     <div className="recipe_description">
                                         {/*<div className="recipe_category">*/}
@@ -741,7 +746,7 @@ export default function Recipes(props) {
                                         {/*/>*/}
                                         {/*</div>*/}
                                         <div className="recipe_author" onClick={handleAuthor}>
-                                            <Avatar/>
+                                            <Avatar src={recipe.recipe_author_image}/>
                                             <div className="recipe_author_name">{recipe.recipe_author}</div>
                                         </div>
                                         <div className="recipe_actions">
@@ -809,7 +814,8 @@ export default function Recipes(props) {
 
                                     <div className="recipe_content">
                                         <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                            <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/>
+                                            {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                                <ReceiptIcon className={classes.photo_placeholder}/>}
                                         </div>
                                         <div className="recipe_description">
                                             {/*<div className="recipe_category">*/}
@@ -822,7 +828,7 @@ export default function Recipes(props) {
                                             {/*/>*/}
                                             {/*</div>*/}
                                             <div className="recipe_author" onClick={handleAuthor}>
-                                                <Avatar/>
+                                                <Avatar src={recipe.recipe_author_image}/>
                                                 <div className="recipe_author_name">{recipe.recipe_author}</div>
                                             </div>
                                         </div>
@@ -868,7 +874,7 @@ export default function Recipes(props) {
 
     return (
         <Container id="main_container" maxWidth="lg">
-            <div className="page_container">
+            <div className={(state.open_viewer_modal || state.open_confirmation_modal) && state.msg === '' ? "background_blur page_container" : "page_container"}>
                 <h2>Recipes</h2>
                 <div className="toolbar_container">
 

@@ -1,7 +1,6 @@
 package agh.edu.pl.diet.payloads.validators;
 
 import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
-import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;

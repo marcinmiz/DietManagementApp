@@ -14,6 +14,8 @@ import ReceiptIcon from '@material-ui/icons/Receipt';
 import Fab from "@material-ui/core/Fab";
 import NavigateBeforeRoundedIcon from '@material-ui/icons/NavigateBeforeRounded';
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded';
+import ViewerModal from "../components/ViewerModal";
+import {useHistory, useParams} from "react-router-dom";
 
 const useStyles = makeStyles({
     meal_hour: {
@@ -23,7 +25,10 @@ const useStyles = makeStyles({
     meal_description: {
         marginTop: 'auto',
         marginBottom: 'auto',
-        textAlign: 'left'
+        marginLeft: '1%',
+        textAlign: 'left',
+        backgroundColor: '#8a7666',
+        borderRadius: '5px'
     },
     timeline: {
         marginTop: 'auto',
@@ -54,20 +59,16 @@ const useStyles = makeStyles({
     item: {
         minHeight: '140px'
     },
-    redFont: {
-        color: 'darkred'
-    },
-    greenFont: {
-        color: 'darkgreen'
-    },
     centralContainer: {
-        width: '80%',
-        marginLeft: '0',
+        width: '87%',
+        marginLeft: '0'
     }
 });
 
 export default function Menus(props) {
     const classes = useStyles();
+    const history = useHistory();
+    let {recipeId} = useParams();
 
     const [state, setState] = React.useState({
         // menu: {
@@ -142,31 +143,62 @@ export default function Menus(props) {
         //     ]
         // },
         menus: [],
+        menuRecipes: [],
         currentDietaryProgrammeDay: null,
+        openViewerModal: false,
+        recipe_index: 'new',
         msg: "",
         loaded: false
     });
+
     useEffect(
         async () => {
             if (props.currentDietaryProgramme) {
-                http.get("/api/menus/" + props.currentDietaryProgramme.dietaryProgrammeId)
-                    .then(async resp => {
-                        let table = [];
+                try {
+                    let response = await http.get("/api/menus/" + props.currentDietaryProgramme.dietaryProgrammeId);
+                    let menus = [], menuRecipes = [];
+                    let currentDietaryProgrammeDay = props.currentDietaryProgrammeDay - 1;
 
-                        for (let x in resp.data) {
-                            table[x] = createMenu(resp.data, x);
+                    for (let x in response.data) {
+                        menus[x] = createMenu(response.data, x);
+                    }
+
+                    for (let i in menus[currentDietaryProgrammeDay].meals) {
+                        menuRecipes[i] = menus[currentDietaryProgrammeDay].meals[i].recipe;
+                    }
+
+                    let recipe_index = 'new';
+                    if (recipeId !== 'new') {
+                        for (let i = 0; i < menuRecipes.length; i++) {
+                            if (menuRecipes[i]) {
+                                if (menuRecipes[i].recipe_id === Number(recipeId)) {
+                                    console.log("dwd");
+                                    recipe_index = i;
+                                }
+                            }
                         }
+                    }
+                    console.log(menus);
 
-                        setState({
-                            ...state,
-                            menus: table,
-                            currentDietaryProgrammeDay: props.currentDietaryProgrammeDay - 1,
-                            loaded: true,
-                        });
-                    })
-                    .catch(error => console.log(error))
+                    if (!Number.isInteger(Number(recipeId))) {
+                        history.push('/menus');
+                    }
+
+                    setState({
+                        ...state,
+                        menus: menus,
+                        menuRecipes: menuRecipes,
+                        openViewerModal: Number.isInteger(Number(recipeId)),
+                        recipe_index: recipe_index,
+                        currentDietaryProgrammeDay: currentDietaryProgrammeDay,
+                        loaded: true,
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+
             }
-        }, [props.adminMode]
+        }, [props.adminMode, recipeId]
     );
 
     const createMenu = (data, x) => {
@@ -174,10 +206,7 @@ export default function Menus(props) {
 
         menu.dailyMenuId = data[x].dailyMenuId;
         menu.dailyMenuName = data[x].dailyMenuName;
-
-        let menuDate = new Date(data[x].dailyMenuDate);
-        menu.dailyMenuDate = menuDate.toLocaleDateString();
-
+        menu.dailyMenuDate = data[x].dailyMenuDate;
         menu.mealsQuantity = data[x].mealsQuantity;
 
         let meals = data[x].meals;
@@ -185,18 +214,41 @@ export default function Menus(props) {
 
         for (let i in meals) {
             menu.meals[i] = {};
-            let parts = meals[i].split(";");
-            menu.meals[i].mealName = parts[0];
-            let mealTime = new Date(parts[1]);
-            menu.meals[i].mealTime = mealTime.toLocaleTimeString();
-            menu.meals[i].recipeImage = parts[2];
-            menu.meals[i].recipeName = parts[3];
-            menu.meals[i].recipeCalories = parts[4];
-            menu.meals[i].recipeProteins = parts[5];
-            menu.meals[i].recipeCarbohydrates = parts[6];
-            menu.meals[i].recipeFats = parts[7];
-            menu.meals[i].belongsToCollection = parts[8];
-            menu.meals[i].likedInPreference = parts[9];
+            menu.meals[i].mealName = meals[i].mealName;
+            menu.meals[i].mealTime = meals[i].mealHourTime;
+
+            menu.meals[i].recipe = {};
+            menu.meals[i].recipe.recipe_id = meals[i].recipe.recipeId;
+            menu.meals[i].recipe.recipe_name = meals[i].recipe.recipeName;
+            menu.meals[i].recipe.creation_date = meals[i].recipe.creationDate;
+            menu.meals[i].recipe.recipe_author_id = meals[i].recipe.recipeAuthorId;
+            menu.meals[i].recipe.recipe_author = meals[i].recipe.recipeAuthor;
+            menu.meals[i].recipe.recipe_author_image = meals[i].recipe.recipeAuthorImage;
+            menu.meals[i].recipe.recipe_image = meals[i].recipe.recipeImage;
+            menu.meals[i].recipe.recipe_calories = meals[i].recipe.recipeCalories;
+            menu.meals[i].recipe.recipe_proteins = meals[i].recipe.recipeProteins;
+            menu.meals[i].recipe.recipe_carbohydrates = meals[i].recipe.recipeCarbohydrates;
+            menu.meals[i].recipe.recipe_fats = meals[i].recipe.recipeFats;
+            menu.meals[i].recipe.in_collection = meals[i].recipe.inCollection;
+            menu.meals[i].recipe.liked_in_preference = meals[i].recipe.likedInPreference;
+
+            let ingredients_quantity = meals[i].recipe.recipeIngredients.length;
+            menu.meals[i].recipe.recipe_ingredients = [];
+
+            for (let j = 0; j < ingredients_quantity; j++) {
+                menu.meals[i].recipe.recipe_ingredients[j] = {};
+                menu.meals[i].recipe.recipe_ingredients[j].ingredient_name = meals[i].recipe.recipeIngredients[j].product.productName;
+                menu.meals[i].recipe.recipe_ingredients[j].ingredient_amount = Number(meals[i].recipe.recipeIngredients[j].productAmount);
+                menu.meals[i].recipe.recipe_ingredients[j].ingredient_unit = meals[i].recipe.recipeIngredients[j].productUnit;
+            }
+
+            let steps_quantity = meals[i].recipe.recipeSteps.length;
+            menu.meals[i].recipe.recipe_steps = [];
+
+            for (let j = 0; j < steps_quantity; j++) {
+                menu.meals[i].recipe.recipe_steps[j] = {};
+                menu.meals[i].recipe.recipe_steps[j].step_name = meals[i].recipe.recipeSteps[j].recipeStepDescription;
+            }
         }
 
         return menu;
@@ -223,9 +275,47 @@ export default function Menus(props) {
         });
     };
 
+    const handleOpenRecipe = (event, recipe_id) => {
+        history.push("/menus/" + recipe_id);
+    };
+
+    const handleCloseViewerModal = () => {
+        history.push("/menus");
+    };
+
+    const handlePrevRecipe = () => {
+
+        let new_index = state.recipe_index;
+        let index = new_index - 1;
+
+        if (index < 0) {
+            index = state.menuRecipes.length - 1;
+        }
+
+        new_index = index;
+
+        history.push('/menus/' + state.menuRecipes[new_index].recipe_id);
+
+    };
+
+    const handleNextRecipe = () => {
+
+        let new_index = state.recipe_index;
+        let index = new_index + 1;
+
+        if (index > state.menuRecipes.length - 1) {
+            index = 0;
+        }
+
+        new_index = index;
+
+        history.push('/menus/' + state.menuRecipes[new_index].recipe_id);
+
+    };
+
     return (
         <Container id="main_container" maxWidth="lg">
-            <div className="page_container">
+            <div className={state.openViewerModal ? "background_blur page_container" : "page_container"}>
                 <div>
                     <h2>Daily Menus</h2>
                 </div>
@@ -237,7 +327,7 @@ export default function Menus(props) {
                         <div className="dailyMenuContent">
                             <div className={classes.centralContainer}>
                                 <div>
-                                    <h3>{state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].dailyMenuName}</h3>
+                                    <h3>{state.menus[state.currentDietaryProgrammeDay] ? new Date(state.menus[state.currentDietaryProgrammeDay].dailyMenuDate).toLocaleDateString() + " (" + state.menus[state.currentDietaryProgrammeDay].dailyMenuName + ")" : ""}</h3>
                                 </div>
                                 <Timeline position="alternate" className="menuList">
                                     {state.menus[state.currentDietaryProgrammeDay] && state.menus[state.currentDietaryProgrammeDay].meals.map((meal, index) => (
@@ -245,7 +335,7 @@ export default function Menus(props) {
                                             <TimelineOppositeContent
                                                 className={classes.meal_hour}
                                             >
-                                                {meal.mealTime}
+                                                {new Date(meal.mealTime).toLocaleTimeString()}
                                             </TimelineOppositeContent>
                                             <TimelineSeparator>
                                                 <TimelineConnector/>
@@ -260,41 +350,39 @@ export default function Menus(props) {
                                                 <Typography>
                                                     <div className={classes.recipe_description}>
                                                         <div className={classes.recipe_row}>
-                                                            {meal.recipeImage !== '' ?
-                                                                <Avatar className="menuImage" src={meal.recipeImage}/>
-                                                                : <ReceiptIcon className={classes.photo_placeholder}/>}
-                                                            <div className={classes.recipe_name}>
-                                                                {meal.recipeName}
+                                                            {meal.recipe.recipe_image !== '' ?
+                                                                <Avatar className="menuImage"
+                                                                        src={meal.recipe.recipe_image}
+                                                                        onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>
+                                                                : <ReceiptIcon className={classes.photo_placeholder}
+                                                                               onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>}
+                                                            <div className={classes.recipe_name}
+                                                                 onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}>
+                                                                {meal.recipe.recipe_name}
                                                             </div>
                                                         </div>
                                                         <div className={classes.recipe_row}>
-                                                            {meal.recipeCalories} kCal
+                                                            {meal.recipe.recipe_calories} kCal
                                                             <div className={classes.recipe_nutrients}>
                                                                 <div>
-                                                                    Proteins: {meal.recipeProteins} g
+                                                                    Proteins: {meal.recipe.recipe_proteins} g
                                                                 </div>
                                                                 <div className={classes.nutrient}>
-                                                                    Carbohydrates: {meal.recipeCarbohydrates} g
+                                                                    Carbohydrates: {meal.recipe.recipe_carbohydrates} g
                                                                 </div>
                                                                 <div className={classes.nutrient}>
-                                                                    Fats: {meal.recipeFats} g
+                                                                    Fats: {meal.recipe.recipe_fats} g
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div className={classes.recipe_row}>
                                                             <div>
                                                                 belongs to collection:
-                                                                <span
-                                                                    className={meal.belongsToCollection === "Yes" ? classes.greenFont : classes.redFont}>
-                    {meal.belongsToCollection}
-                    </span>
+                                                                <span>{meal.recipe.in_collection}</span>
                                                             </div>
                                                             <div className={classes.recipe_name}>
                                                                 liked in preference:
-                                                                <span
-                                                                    className={meal.likedInPreference === "Yes" ? classes.greenFont : (meal.likedInPreference === "No" ? classes.redFont : "")}>
-                    {meal.likedInPreference}
-                    </span>
+                                                                <span>{meal.recipe.liked_in_preference}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -310,6 +398,23 @@ export default function Menus(props) {
                         </Fab>
                     </div> :
                     <div className="menuNotUsedProgramme">No dietary programme is used</div>}
+                {/*{state.menus.length === 0 && !state.loaded ?*/}
+                    {/*<div className="loading">{"Loading"}</div> : null}*/}
+                {recipeId && state.recipe_index !== 'new' && state.menuRecipes.length > 0 && <ViewerModal
+                    open={state.openViewerModal}
+                    onClose={handleCloseViewerModal}
+                    type="menu"
+                    item_index={state.recipe_index}
+                    items={state.menuRecipes}
+                    mode="view"
+                    loggedInStatus={props.loggedInStatus}
+                    handlePrevProduct={handlePrevRecipe}
+                    handleNextProduct={handleNextRecipe}
+                    header={state.menus[state.currentDietaryProgrammeDay].dailyMenuName}
+                    name={props.name}
+                    surname={props.surname}
+                    userId={props.userId}
+                />}
             </div>
         </Container>
     );

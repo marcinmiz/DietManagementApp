@@ -59,6 +59,15 @@ public class DietaryProgrammeController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
+    @PutMapping("/finishDietaryProgramme/{id}")
+    public ResponseEntity<ResponseMessage> finishDietaryProgramme(@PathVariable("id") Long dietaryProgrammeId) {
+        ResponseMessage responseMessage = dietaryProgrammeService.finishDietaryProgramme(dietaryProgrammeId);
+        if (!responseMessage.getMessage().endsWith(" has been finished")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
 //    @PutMapping("/update/{id}")
 //    public ResponseMessage updateDailyMenu(@PathVariable("id") Long dailyMenuId, @RequestBody DailyMenuRequest dailyMenuRequest) {
 //        return dailyMenuService.updateDailyMenu(dailyMenuId, dailyMenuRequest);

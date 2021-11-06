@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import "../Authentication.css";
 import {useHistory} from "react-router-dom";
-import ResetPassword from "../components/ResetPassword";
+import ChangePassword from "../components/ChangePassword";
 import http from "../http-common";
 
 export default function ResetPasswordPage(props) {
@@ -54,7 +54,7 @@ export default function ResetPasswordPage(props) {
                     <div className="logo">
                         DIETIX
                     </div>
-                    <ResetPassword resetType="forgot" token={token}/>
+                    <ChangePassword resetType="forgot" token={token}/>
                     <button className="form_button" name="back_login_button" type="button"
                             onClick={() => history.push('/login')}>
                         Back to login page

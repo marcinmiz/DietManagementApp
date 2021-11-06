@@ -3,14 +3,13 @@ package agh.edu.pl.diet.services;
 import agh.edu.pl.diet.entities.User;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
 import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
-import agh.edu.pl.diet.payloads.request.ResetPasswordRequest;
+import agh.edu.pl.diet.payloads.request.ChangePasswordRequest;
 import agh.edu.pl.diet.payloads.request.UserLoginRequest;
 import agh.edu.pl.diet.payloads.request.UserRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import org.springframework.validation.BindingResult;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 
 
@@ -30,7 +29,7 @@ public interface UserService {
 
     User getByResetPasswordToken(String token);
 
-    ResponseMessage resetPassword(ResetPasswordRequest request, BindingResult bindingResult);
+    ResponseMessage changePassword(ChangePasswordRequest request, BindingResult bindingResult);
 
     ResponseMessage processForgotPassword(String email);
 
@@ -38,6 +37,6 @@ public interface UserService {
 
     ResponseMessage checkTokenValidity(String token);
 
-    ResponseMessage resetEmail(ForgotPasswordRequest request, BindingResult bindingResult);
+    ResponseMessage changeEmail(ForgotPasswordRequest request, BindingResult bindingResult);
 
 }

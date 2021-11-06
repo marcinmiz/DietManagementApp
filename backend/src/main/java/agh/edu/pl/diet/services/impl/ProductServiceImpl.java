@@ -6,7 +6,10 @@ import agh.edu.pl.diet.payloads.request.ProductGetRequest;
 import agh.edu.pl.diet.payloads.request.ProductRequest;
 import agh.edu.pl.diet.payloads.request.ProductSearchRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
-import agh.edu.pl.diet.repos.*;
+import agh.edu.pl.diet.repos.CategoryRepo;
+import agh.edu.pl.diet.repos.NutrientRepo;
+import agh.edu.pl.diet.repos.ProductRepo;
+import agh.edu.pl.diet.repos.RecipeRepo;
 import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.ProductService;
 import agh.edu.pl.diet.services.UserService;
@@ -158,11 +161,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getAllProducts() {
         String item_type = "product";
+        String product_owner_type = "avatar";
         List<Product> list = new ArrayList<>();
         productRepo.findAll().forEach(list::add);
         for (Product product : list) {
             String url = imageService.getImageURL(item_type, product.getProductId());
             product.setProductImage(url);
+            String avatarUrl = imageService.getImageURL(product_owner_type, product.getOwner().getUserId());
+            product.getOwner().setAvatarImage(avatarUrl);
         }
         return list;
     }
@@ -170,9 +176,12 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProduct(Long productId) {
         String item_type = "product";
+        String product_owner_type = "avatar";
         String url = imageService.getImageURL(item_type, productId);
         Product product = productRepo.findById(productId).get();
         product.setProductImage(url);
+        String avatarUrl = imageService.getImageURL(product_owner_type, product.getOwner().getUserId());
+        product.getOwner().setAvatarImage(avatarUrl);
         return product;
     }
 
@@ -398,22 +407,27 @@ public class ProductServiceImpl implements ProductService {
                 List<Recipes> allRecipes = new ArrayList<>();
                 recipeRepo.findAll().forEach(allRecipes::add);
 
-                for (Recipes recipe: allRecipes) {
+                for (Recipes recipe : allRecipes) {
                     List<RecipeProduct> recipeProductsWithUpdatedProduct = recipe.getRecipeProducts().stream().filter(recipeProduct -> recipeProduct.getProduct().getProductId().equals(productId)).collect(Collectors.toList());
-                    for (RecipeProduct recipeProduct: recipeProductsWithUpdatedProduct) {
-//                        String oldProductType = recipeProduct.getProduct().getProductType();
+                    for (RecipeProduct recipeProduct : recipeProductsWithUpdatedProduct) {
 
-                        switch (productType) {
-                            case "by weight":
-                                recipeProduct.setProductUnit("g");
-                                break;
-                            case "liquid":
-                                recipeProduct.setProductUnit("ml");
-                                break;
-                            case "pieces":
-                                recipeProduct.setProductUnit("pcs");
-                                break;
+                        String oldProductType = recipeProduct.getProduct().getProductType();
+
+                        if (!oldProductType.equalsIgnoreCase(productType)) {
+
+                            switch (productType) {
+                                case "by weight":
+                                    recipeProduct.setProductUnit("g");
+                                    break;
+                                case "liquid":
+                                    recipeProduct.setProductUnit("ml");
+                                    break;
+                                case "pieces":
+                                    recipeProduct.setProductUnit("pcs");
+                                    break;
+                            }
                         }
+
                     }
                 }
 

@@ -39,6 +39,7 @@ public class User {
     private String resetPasswordToken;
     @Transient
     private String avatarImage;
+    private Double dietImprovement = 1.0;
 
     public Long getUserId() {
         return userId;
@@ -162,6 +163,14 @@ public class User {
 
     public void setAvatarImage(String avatarImage) {
         this.avatarImage = avatarImage;
+    }
+
+    public Double getDietImprovement() {
+        return dietImprovement;
+    }
+
+    public void setDietImprovement(Double dietImprovement) {
+        this.dietImprovement = dietImprovement;
     }
 
     //    public double getTargetWeight() {

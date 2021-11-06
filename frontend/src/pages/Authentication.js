@@ -185,6 +185,8 @@ export default function Authentication(props) {
                     "password": state.password,
                 };
 
+                console.log(state.password);
+
                 http.post("/api/users/login", credentials)
                     .then(
                         async () => {

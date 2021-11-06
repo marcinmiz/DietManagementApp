@@ -141,6 +141,10 @@
     /*overflow: auto;*/
 }
 
+.dashboard_page_container {
+    background-color: #232323 !important;
+}
+
 .toolbar_container {
     display: flex;
     flex-direction: column;
@@ -793,8 +797,9 @@
 
 .menuList {
     overflow-y: scroll;
-    max-height: 90%;
+    max-height: 25rem;
     padding: 5%;
+    margin-top: 0;
 }
 
 .programme, .preference_container {

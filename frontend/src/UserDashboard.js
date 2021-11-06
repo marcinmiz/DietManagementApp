@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import AppBar from "./components/AppBar"
 import UserBottomNavigation from "./components/UserBottomNavigation"
 import {Container} from '@material-ui/core';
@@ -10,25 +10,58 @@ import Menus from "./pages/Menus";
 import Programmes from "./pages/Programmes";
 import ShoppingLists from "./pages/ShoppingLists";
 import Settings from "./pages/Settings";
+import Dashboard from "./pages/Dashboard";
+import FinishedDietaryProgrammeDialog from "./components/FinishedDietaryProgrammeDialog";
 
 export default function UserDashboard(props) {
 
-    let admin = props.admin;
-    let adminMode = props.adminMode;
-    let loaded = props.loaded;
+    const { admin, adminMode, currentDietaryProgramme, dietaryProgrammeStartDate, ...other } = props;
+
     const history = useHistory();
 
     let {path} = useRouteMatch();
 
+    const [state, setState] = React.useState({
+        openFinishedDietaryProgrammeDialog: false
+    });
+
+        useEffect(
+        async () => {
+            const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+            const now = new Date();
+            const startDate = new Date(dietaryProgrammeStartDate);
+            startDate.setHours(0,0,0);
+
+            const diffDays = Math.floor(Math.abs((now - startDate) / oneDay));
+            console.log(diffDays);
+
+            if (currentDietaryProgramme != null && diffDays >= currentDietaryProgramme.dietaryProgrammeDays) {
+                setState({
+                    ...state,
+                    openFinishedDietaryProgrammeDialog: true,
+                });
+            }
+
+        }, [props.adminMode]
+    );
+
+    const handleCloseFinishedDietaryProgrammeDialog = (event) => {
+        setState({
+            ...state,
+            openFinishedDietaryProgrammeDialog: false,
+        });
+    };
+
     return (
         <Container maxWidth="false">
-            <AppBar name={props.name} surname={props.surname} admin={props.admin} adminMode={props.adminMode} avatarImage={props.avatarImage}
+            <AppBar name={props.name} surname={props.surname} admin={props.admin} adminMode={props.adminMode}
+                    avatarImage={props.avatarImage}
                     handleAdminMode={props.handleAdminMode} handleLogout={props.handleLogout}/>
             <main>
                 <div>
                     <Switch>
                         <Route path={`${path}dashboard`}>
-                            <div>Dashboard</div>
+                            <div><Dashboard/></div>
                         </Route>
                         <Route path={`${path}products/:productId?/:mode?`}>
                             <Products userId={props.userId} admin={admin} adminMode={adminMode}
@@ -45,8 +78,8 @@ export default function UserDashboard(props) {
                             <Programmes currentDietaryProgramme={props.currentDietaryProgramme}
                                         handleUseDietaryProgramme={props.handleUseDietaryProgramme}/>
                         </Route>
-                        <Route path={`${path}menus`}>
-                            <Menus currentDietaryProgramme={props.currentDietaryProgramme}
+                        <Route path={`${path}menus/:recipeId?`}>
+                            <Menus userId={props.userId} currentDietaryProgramme={props.currentDietaryProgramme}
                                    currentDietaryProgrammeDay={props.currentDietaryProgrammeDay}/>
                         </Route>
                         <Route path={`${path}shopping`}>
@@ -56,7 +89,8 @@ export default function UserDashboard(props) {
                             />
                         </Route>
                         <Route path={`${path}settings`}>
-                            <Settings userId={props.userId} name={props.name} surname={props.surname} username={props.username}
+                            <Settings userId={props.userId} name={props.name} surname={props.surname}
+                                      username={props.username}
                                       avatarImage={props.avatarImage}
                             />
                         </Route>
@@ -64,6 +98,12 @@ export default function UserDashboard(props) {
                             <Redirect to={"/dashboard"}/>
                         </Route>
                     </Switch>
+
+                    <FinishedDietaryProgrammeDialog
+                        open={state.openFinishedDietaryProgrammeDialog}
+                        onClose={handleCloseFinishedDietaryProgrammeDialog}
+                        currentDietaryProgramme={props.currentDietaryProgramme}
+                />
                 </div>
             </main>
             <UserBottomNavigation history={history}/>

@@ -802,7 +802,11 @@ export default function ViewerModal(props) {
     };
 
     const handleBottomItemRep = (event, item_id) => {
-        history.push('/' + type + 's/' + item_id + '/' + props.mode);
+        let mode = "";
+        if (type !== "menu") {
+            mode = '/' + props.mode;
+        }
+        history.push('/' + type + 's/' + item_id + mode);
     };
 
     const handleCloseExistedProductsPopup = (event) => {
@@ -971,7 +975,8 @@ export default function ViewerModal(props) {
                         {props.mode === 'view' &&
                         (state.selected_item.product_id !== 'new' ?
                                 <div className="product_author" onClick={event => handleAuthor(event)}>
-                                    <Avatar/>
+                                    <Avatar src={state.selected_item.product_author_image}
+                                            alt={state.selected_item.product_author}/>
                                     <div
                                         className="product_author_name">{state.selected_item.product_author}</div>
                                 </div> :
@@ -1034,6 +1039,7 @@ export default function ViewerModal(props) {
             </Grid>;
             break;
         case "recipe":
+        case "menu":
             item = <Grid item key={state.selected_item.recipe_id} id={"recipe" + state.selected_item.recipe_id}
                          className="product_edit recipe_edit">
                 <div className="product_header product_header_buttons">
@@ -1057,7 +1063,7 @@ export default function ViewerModal(props) {
                             </div>
                         </div>}
 
-                    <div className="product_buttons">
+                    {type !== 'menu' && <div className="product_buttons">
                         {state.selected_item.recipe_author_id === props.userId ?
                             <Tooltip title="Delete" aria-label="delete">
                                 <IconButton aria-label="delete" className="product_icon_button"
@@ -1073,7 +1079,7 @@ export default function ViewerModal(props) {
                                 </IconButton>
                             </Tooltip> : null}
                         {/*{state.loaded && handleFavouriteIcon(item_index)}*/}
-                    </div>
+                    </div>}
                 </div>
                 <div className="creation_date">
                     {state.selected_item.recipe_id === "new" ? "" : "created " + state.selected_item.creation_date}
@@ -1099,7 +1105,8 @@ export default function ViewerModal(props) {
                             {props.mode === 'view' &&
                             (state.selected_item.recipe_id !== 'new' ?
                                     <div className="product_author" onClick={event => handleAuthor(event)}>
-                                        <Avatar/>
+                                        <Avatar src={state.selected_item.recipe_author_image}
+                                                alt={state.selected_item.recipe_author}/>
                                         <div
                                             className="product_author_name">{state.selected_item.recipe_author}</div>
                                     </div> :
@@ -1481,9 +1488,9 @@ export default function ViewerModal(props) {
                                     <Chip
                                         className={index === selected_item_index ? "selected_bottom_product_rep" : (Math.abs(selected_item_index - index) === 1 ? "first_middle_bottom_product_rep" : (Math.abs(selected_item_index - index) === 2 ? "second_middle_bottom_product_rep" : "third_middle_bottom_product_rep"))}
                                         size={index === selected_item_index ? "medium" : "small"}
-                                        label={type === 'product' ? item.product_name : (type === 'recipe' ? item.recipe_name : "")}
+                                        label={type === 'product' ? item.product_name : (type === 'recipe' || type === 'menu' ? item.recipe_name : "")}
                                         color="primary"
-                                        onClick={index !== selected_item_index ? event => handleBottomItemRep(event, type === 'product' ? item.product_id : (type === 'recipe' ? item.recipe_id : -1)) : null}
+                                        onClick={index !== selected_item_index ? event => handleBottomItemRep(event, type === 'product' ? item.product_id : (type === 'recipe' || type === 'menu' ? item.recipe_id : -1)) : null}
                                     />
                                 </div>
                             ))}

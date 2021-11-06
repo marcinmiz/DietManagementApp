@@ -46,13 +46,23 @@ export default function ShoppingLists(props) {
         msg: "",
         loaded: false
     });
+
     useEffect(
         async () => {
             if (props.currentDietaryProgramme) {
                 let startWeekDate = new Date(props.dietaryProgrammeStartDate);
                 let endWeekDate = new Date(props.dietaryProgrammeStartDate);
                 startWeekDate.setDate(startWeekDate.getDate() + (7 * (Math.floor(props.currentDietaryProgrammeDay / 7))));
-                endWeekDate.setDate(startWeekDate.getDate() + 6 + (7 * (Math.floor(props.currentDietaryProgrammeDay / 7))));
+
+                let programmeDays = props.currentDietaryProgramme.dietaryProgrammeDays;
+
+                console.log(programmeDays);
+
+                if(programmeDays < 7) {
+                    endWeekDate.setDate(startWeekDate.getDate() + programmeDays - 1);
+                } else {
+                    endWeekDate.setDate(startWeekDate.getDate() + 6 + (7 * (Math.floor(props.currentDietaryProgrammeDay / 7))));
+                }
                 startWeekDate = startWeekDate.toLocaleDateString();
                 endWeekDate = endWeekDate.toLocaleDateString();
 
@@ -156,6 +166,8 @@ export default function ShoppingLists(props) {
                         </Fab>
                     </div> :
                     <div className="menuNotUsedProgramme">No dietary programme is used</div>}
+                {/*{state.shoppingLists.length === 0 && !state.loaded ?*/}
+                    {/*<div className="loading">{"Loading"}</div> : null}*/}
             </div>
         </Container>
     );

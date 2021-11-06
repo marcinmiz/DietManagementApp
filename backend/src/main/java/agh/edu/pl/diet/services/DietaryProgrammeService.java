@@ -14,4 +14,6 @@ public interface DietaryProgrammeService {
 
     ResponseMessage useDietaryProgramme(Long programmeId, String type);
 
+    ResponseMessage finishDietaryProgramme(Long programmeId);
+
 }
