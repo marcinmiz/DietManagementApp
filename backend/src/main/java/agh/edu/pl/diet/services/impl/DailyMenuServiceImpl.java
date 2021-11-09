@@ -562,7 +562,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
                 DailyMenuResponse.Recipe createdRecipe = response.createRecipe(recipe.getRecipeId(), recipe.getRecipeName(), recipe.getCreationDate(), recipe.getRecipeOwner().getUserId(), recipeAuthor, recipe.getRecipeOwner().getAvatarImage(), recipe.getRecipeImage(), calories, proteins, carbohydrates, fats, inCollection, likedInPreference, recipe.getRecipeProducts(), recipe.getRecipeSteps());
 
-                response.addMeal(meal.getMealsName(), meal.getMealHourTime(), createdRecipe);
+                response.addMeal(meal.getMealId(), meal.getMealsName(), meal.getMealHourTime(), createdRecipe, meal.getConsumed());
             }
 
             dietaryProgrammeMenus.add(response);

@@ -905,3 +905,13 @@
 .logoAvatarPointer {
     cursor: pointer;
 }
+
+.nonMarkedConsumeButton {
+    background-color: palegoldenrod !important;
+    /*or skyblue or goldenrod, darkkhaki*/
+    /*opacity: '0.7'*/
+}
+
+.markedConsumeButton {
+    background-color: gold !important;
+}

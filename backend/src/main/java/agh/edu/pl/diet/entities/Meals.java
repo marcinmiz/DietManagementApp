@@ -15,6 +15,7 @@ public class Meals {
     private DailyMenu dailyMenu;
     @ManyToOne
     private Recipes recipe;
+    private Boolean consumed = false;
 
     public Long getMealId() {
         return mealId;
@@ -54,5 +55,13 @@ public class Meals {
 
     public void setRecipe(Recipes recipe) {
         this.recipe = recipe;
+    }
+
+    public Boolean getConsumed() {
+        return consumed;
+    }
+
+    public void setConsumed(Boolean consumed) {
+        this.consumed = consumed;
     }
 }

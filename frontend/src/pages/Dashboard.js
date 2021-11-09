@@ -19,7 +19,7 @@ const useStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '5px',
-        width: '20%',
+        width: '60%',
         minHeight: '10%',
         padding: '2%',
         marginLeft: 'auto',
@@ -49,6 +49,8 @@ export default function Dashboard(props) {
     const [weightTrendCondition, setWeightTrendCondition] = React.useState(false);
     const [weightTrendCondition2, setWeightTrendCondition2] = React.useState(true);
     const [dataPoints4, setDataPoints4] = React.useState([]);
+    const [consumedCalories, setConsumedCalories] = React.useState(0);
+    const [totalCalories, setTotalCalories] = React.useState(0);
 
     const options = {
         theme: "dark2",
@@ -97,6 +99,7 @@ export default function Dashboard(props) {
             name: "Trend line",
             showInLegend: true,
             markerSize: 0,
+            lineThickness: 5,
             xValueFormatString: "DD MM YYYY",
             toolTipContent: "<b>Date: </b>{x}<br/><b>Weight: </b>{y} kg",
             dataPoints: dataPoints3
@@ -189,9 +192,16 @@ export default function Dashboard(props) {
 
                 setDataPoints3(trendList);
 
+                let response3 = await http.get("/api/menus/getCaloriesConsumed");
+
+                let data = response3.data;
+
+                setConsumedCalories(data[0]);
+                setTotalCalories(data[1]);
+
                 setDataPoints4([
-                    {y: 60, label: "Consumed"},
-                    {y: 40, label: "Not consumed"}
+                    {y: data[2], label: "Consumed"},
+                    {y: data[3], label: "Not consumed"}
                 ]);
                 // Calling render makes no difference
                 setInitialized(true);
@@ -214,11 +224,11 @@ export default function Dashboard(props) {
                         <div className={classes.chartsContainer}>
                             <div className={classes.chartsContainerPart}>
                                 <div className={classes.label}>
-                                    <div
-                                        className={classes.currentWeight}>{dataPoints[dataPoints.length - 1] && dataPoints[dataPoints.length - 1].y + " kg"}
+                                    <div className={classes.currentWeight}>
+                                        {dataPoints[dataPoints.length - 1] && dataPoints[dataPoints.length - 1].y + " kg"}
                                     </div>
-                                    {dataPoints.length >= 1 ? <div
-                                            className={weightTrendCondition && weightTrendCondition2 ? classes.greenFont : (!weightTrendCondition && !weightTrendCondition2 ? classes.redFont : "")}>{weightTrend >= 0 ? "+" + weightTrend + " %" : weightTrend + " %"}
+                                    {dataPoints.length >= 1 ? <div className={weightTrendCondition && weightTrendCondition2 ? classes.greenFont : (!weightTrendCondition && !weightTrendCondition2 ? classes.redFont : "")}>
+                                            {weightTrend >= 0 ? "+" + weightTrend + " %" : weightTrend + " %"}
                                         </div> :
                                         null}
                                 </div>
@@ -232,7 +242,7 @@ export default function Dashboard(props) {
                             </div>
                             <div className={classes.chartsContainerPart}>
                                 <div className={classes.label}>
-                                    <div>1548/2220 kcal</div>
+                                    <div className={classes.currentWeight}>{consumedCalories + " kcal of " + totalCalories + " kcal"}</div>
                                 </div>
                                 <div>
                                     <CanvasJSChart options={options2}

@@ -23,14 +23,18 @@ public class DailyMenuResponse {
     }
 
     private class Meal {
+        private Long mealId;
         private String mealName;
         private String mealHourTime;
         private Recipe recipe;
+        private Boolean consumed;
 
-        private Meal(String mealName, String mealHourTime, Recipe recipe) {
+        private Meal(Long mealId, String mealName, String mealHourTime, Recipe recipe, Boolean consumed) {
+            this.mealId = mealId;
             this.mealName = mealName;
             this.mealHourTime = mealHourTime;
             this.recipe = recipe;
+            this.consumed = consumed;
         }
 
         public String getMealName() {
@@ -43,6 +47,14 @@ public class DailyMenuResponse {
 
         public Recipe getRecipe() {
             return recipe;
+        }
+
+        public Long getMealId() {
+            return mealId;
+        }
+
+        public Boolean getConsumed() {
+            return consumed;
         }
     }
 
@@ -162,8 +174,8 @@ public class DailyMenuResponse {
         return meals;
     }
 
-    public void addMeal(String mealName, String mealHourTime, Recipe recipe) {
-        this.meals.add(new Meal(mealName, mealHourTime, recipe));
+    public void addMeal(Long mealId, String mealName, String mealHourTime, Recipe recipe, Boolean consumed) {
+        this.meals.add(new Meal(mealId, mealName, mealHourTime, recipe, consumed));
     }
 
     public Recipe createRecipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {

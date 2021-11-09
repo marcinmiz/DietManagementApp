@@ -6,7 +6,9 @@ import agh.edu.pl.diet.entities.Meals;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
+import agh.edu.pl.diet.services.MealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,9 @@ public class DailyMenuController {
 
     @Autowired
     private DailyMenuService dailyMenuService;
+
+    @Autowired
+    private MealService mealService;
 
 
 //    @GetMapping("/{id}")
@@ -39,8 +44,26 @@ public class DailyMenuController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(menuResponses);
         }
         return ResponseEntity.status(HttpStatus.OK).body(menuResponses);
-
     }
+
+    @GetMapping("/markMealAsConsumed/{mealId}/{mark}")
+    public ResponseEntity<ResponseMessage> markMealAsConsumed(@PathVariable("mealId") Long mealId, @PathVariable("mark") String mark) {
+        ResponseMessage message = mealService.markMealAsConsumed(mealId, mark);
+        if (message.getMessage().endsWith("has been marked as consumed") || message.getMessage().endsWith("has been unmarked as consumed")) {
+            return ResponseEntity.status(HttpStatus.OK).body(message);
+        }
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+    }
+
+    @GetMapping("/getCaloriesConsumed")
+    public ResponseEntity<List<Double>> getCaloriesConsumed() {
+        List<Double> consumed = mealService.getCaloriesConsumed();
+        if (consumed != null) {
+            return ResponseEntity.status(HttpStatus.OK).body(consumed);
+        }
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(consumed);
+    }
+
 
 //    @PostMapping("/add")
 //    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {

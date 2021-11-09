@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react'
-import {Container, makeStyles} from "@material-ui/core";
+import {Container, makeStyles, Tooltip} from "@material-ui/core";
 import http from "../http-common";
 import Timeline from "@material-ui/lab/Timeline";
 import TimelineItem from "@material-ui/lab/TimelineItem";
@@ -16,6 +16,11 @@ import NavigateBeforeRoundedIcon from '@material-ui/icons/NavigateBeforeRounded'
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded';
 import ViewerModal from "../components/ViewerModal";
 import {useHistory, useParams} from "react-router-dom";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from '@material-ui/icons/Delete';
+import CheckIcon from '@material-ui/icons/Check';
+import ClearIcon from '@material-ui/icons/Clear';
 
 const useStyles = makeStyles({
     meal_hour: {
@@ -23,12 +28,15 @@ const useStyles = makeStyles({
         marginBottom: 'auto'
     },
     meal_description: {
+        width: '100%',
+        position: 'relative',
         marginTop: 'auto',
         marginBottom: 'auto',
         marginLeft: '1%',
         textAlign: 'left',
         backgroundColor: '#8a7666',
-        borderRadius: '5px'
+        borderRadius: '5px',
+        padding: '1%'
     },
     timeline: {
         marginTop: 'auto',
@@ -62,6 +70,36 @@ const useStyles = makeStyles({
     centralContainer: {
         width: '87%',
         marginLeft: '0'
+    },
+    past_meal: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5) !important',
+        zIndex : '100',
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: '100%',
+        height: '100%',
+        borderRadius: '5px',
+        // textAlign: 'center'
+    },
+    consumedButtons: {
+        display: 'flex',
+        justifyContent: 'space-evenly',
+        width: '45%',
+        height: '45%',
+        opacity: '0.7',
+        position: 'absolute',
+        top: '27.5%',
+        right: '27.5%'
+    },
+    viewRecipe: {
+        height: '30%',
+        width: '30%',
+        cursor: 'pointer',
+        marginTop: '7%'
+    },
+    center: {
+        textAlign: 'center'
     }
 });
 
@@ -214,8 +252,10 @@ export default function Menus(props) {
 
         for (let i in meals) {
             menu.meals[i] = {};
+            menu.meals[i].mealId = meals[i].mealId;
             menu.meals[i].mealName = meals[i].mealName;
             menu.meals[i].mealTime = meals[i].mealHourTime;
+            menu.meals[i].consumed = meals[i].consumed;
 
             menu.meals[i].recipe = {};
             menu.meals[i].recipe.recipe_id = meals[i].recipe.recipeId;
@@ -313,12 +353,59 @@ export default function Menus(props) {
 
     };
 
+    const handleMarkConsumed = async (event, index, mark) => {
+
+        if (mark !== state.menus[state.currentDietaryProgrammeDay].meals[index].consumed) {
+            let meal = {...state.menus[state.currentDietaryProgrammeDay].meals[index], consumed: mark};
+
+            let meals = [...state.menus[state.currentDietaryProgrammeDay].meals];
+            const oldMealIndex = meals.findIndex(m => m.mealId === meal.mealId);
+            meals.splice(oldMealIndex, 1, meal);
+
+            let menu = {...state.menus[state.currentDietaryProgrammeDay], meals};
+
+            let menus = [...state.menus];
+            const oldMenuIndex = menus.findIndex(m => m.dailyMenuId === menu.dailyMenuId);
+
+            menus.splice(oldMenuIndex, 1, menu);
+
+            try {
+                const stringMark = mark ? "mark" : "unmark";
+
+                let response = await http.get("/api/menus/markMealAsConsumed/" + state.menus[state.currentDietaryProgrammeDay].meals[index].mealId + "/" + stringMark);
+
+                setState({
+                    ...state,
+                    menus: menus,
+                    msg: response.data.message
+                });
+
+                setTimeout(()=>{
+                    setState({
+                        ...state,
+                        menus: menus,
+                        msg: ""
+                    });
+                }, 3000);
+
+            } catch (e) {
+                setState({
+                    ...state,
+                    msg: "Error during marking meal as consumed"
+                });
+                console.error(e)
+            }
+
+        }
+    };
+
     return (
         <Container id="main_container" maxWidth="lg">
             <div className={state.openViewerModal ? "background_blur page_container" : "page_container"}>
                 <div>
                     <h2>Daily Menus</h2>
                 </div>
+                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
                 {props.currentDietaryProgramme ?
                     <div className="dailyMenu">
                         <Fab aria-label="prev">
@@ -343,50 +430,69 @@ export default function Menus(props) {
                                                 </TimelineDot>
                                                 <TimelineConnector/>
                                             </TimelineSeparator>
-                                            <TimelineContent className={classes.meal_description}>
-                                                <Typography variant="h6" component="span">
-                                                    {meal.mealName}
-                                                </Typography>
-                                                <Typography>
-                                                    <div className={classes.recipe_description}>
-                                                        <div className={classes.recipe_row}>
-                                                            {meal.recipe.recipe_image !== '' ?
-                                                                <Avatar className="menuImage"
-                                                                        src={meal.recipe.recipe_image}
-                                                                        onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>
-                                                                : <ReceiptIcon className={classes.photo_placeholder}
-                                                                               onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>}
-                                                            <div className={classes.recipe_name}
-                                                                 onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}>
-                                                                {meal.recipe.recipe_name}
-                                                            </div>
+                                            <TimelineContent>
+                                                <div className={classes.meal_description}>
+                                                    {new Date(meal.mealTime).setHours(new Date(meal.mealTime).getHours() - 2) < new Date() ? <div className={classes.past_meal}>
+                                                        <div className={classes.viewRecipe} onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}></div>
+                                                        {/*<Button className={classes.button} variant="contained" color="primary" type="button">Save</Button>*/}
+                                                        <div className={classes.consumedButtons}>
+                                                            <Tooltip title="Consumed" aria-label="Consumed">
+                                                                <IconButton aria-label="Consumed" className={meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"} onClick={event => handleMarkConsumed(event, index, true)}>
+                                                                    <CheckIcon fontSize="large"/>
+                                                                </IconButton>
+                                                            </Tooltip>
+                                                            <Tooltip title="Not consumed" aria-label="Not consumed">
+                                                                <IconButton aria-label="Not consumed" className={!meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"} onClick={event => handleMarkConsumed(event, index, false)}>
+                                                                    <ClearIcon fontSize="large"/>
+                                                                </IconButton>
+                                                            </Tooltip>
+
                                                         </div>
-                                                        <div className={classes.recipe_row}>
-                                                            {meal.recipe.recipe_calories} kCal
-                                                            <div className={classes.recipe_nutrients}>
+                                                    </div> : null}
+                                                    <Typography variant="h6" component="div" className={classes.center}>
+                                                        {meal.mealName}
+                                                    </Typography>
+                                                    <Typography>
+                                                        <div className={classes.recipe_description}>
+                                                            <div className={classes.recipe_row}>
+                                                                {meal.recipe.recipe_image !== '' ?
+                                                                    <Avatar className="menuImage"
+                                                                            src={meal.recipe.recipe_image}
+                                                                            onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>
+                                                                    : <ReceiptIcon className={classes.photo_placeholder}
+                                                                                   onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}/>}
+                                                                <div className={classes.recipe_name}
+                                                                     onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}>
+                                                                    {meal.recipe.recipe_name}
+                                                                </div>
+                                                            </div>
+                                                            <div className={classes.recipe_row}>
+                                                                {meal.recipe.recipe_calories} kCal
+                                                                <div className={classes.recipe_nutrients}>
+                                                                    <div>
+                                                                        Proteins: {meal.recipe.recipe_proteins} g
+                                                                    </div>
+                                                                    <div className={classes.nutrient}>
+                                                                        Carbohydrates: {meal.recipe.recipe_carbohydrates} g
+                                                                    </div>
+                                                                    <div className={classes.nutrient}>
+                                                                        Fats: {meal.recipe.recipe_fats} g
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className={classes.recipe_row}>
                                                                 <div>
-                                                                    Proteins: {meal.recipe.recipe_proteins} g
+                                                                    belongs to collection:
+                                                                    <span>{meal.recipe.in_collection}</span>
                                                                 </div>
-                                                                <div className={classes.nutrient}>
-                                                                    Carbohydrates: {meal.recipe.recipe_carbohydrates} g
-                                                                </div>
-                                                                <div className={classes.nutrient}>
-                                                                    Fats: {meal.recipe.recipe_fats} g
+                                                                <div className={classes.recipe_name}>
+                                                                    liked in preference:
+                                                                    <span>{meal.recipe.liked_in_preference}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className={classes.recipe_row}>
-                                                            <div>
-                                                                belongs to collection:
-                                                                <span>{meal.recipe.in_collection}</span>
-                                                            </div>
-                                                            <div className={classes.recipe_name}>
-                                                                liked in preference:
-                                                                <span>{meal.recipe.liked_in_preference}</span>
-                                                            </div>
-                                                        </div>
+                                                    </Typography>
                                                     </div>
-                                                </Typography>
                                             </TimelineContent>
                                         </TimelineItem>
                                     ))}
@@ -399,7 +505,7 @@ export default function Menus(props) {
                     </div> :
                     <div className="menuNotUsedProgramme">No dietary programme is used</div>}
                 {/*{state.menus.length === 0 && !state.loaded ?*/}
-                    {/*<div className="loading">{"Loading"}</div> : null}*/}
+                {/*<div className="loading">{"Loading"}</div> : null}*/}
                 {recipeId && state.recipe_index !== 'new' && state.menuRecipes.length > 0 && <ViewerModal
                     open={state.openViewerModal}
                     onClose={handleCloseViewerModal}

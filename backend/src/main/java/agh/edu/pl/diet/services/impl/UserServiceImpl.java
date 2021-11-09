@@ -354,7 +354,7 @@ public class UserServiceImpl implements UserService {
             trendThreshold = 5;
             Instant lastProgrammeDayInstant = Instant.parse(measurer.getDietaryProgrammeStartDate());
             Calendar lastProgrammeDay = GregorianCalendar.from(ZonedDateTime.ofInstant(lastProgrammeDayInstant, ZoneId.systemDefault()));
-            lastProgrammeDay.add(Calendar.DAY_OF_MONTH, measurer.getCurrentDietaryProgramme().getDietaryProgrammeDays() + 1);
+            lastProgrammeDay.add(Calendar.DAY_OF_MONTH, measurer.getCurrentDietaryProgramme().getDietaryProgrammeDays());
 
             DietaryPreferences preference = preferencesRepo.findByRelatedDietaryProgramme(measurer.getCurrentDietaryProgramme());
 
