@@ -29,8 +29,6 @@ public class User {
     @ManyToOne
     private Role role;
     private String creationDate;
-    @Transient
-    private List<Pair<String, Float>> weights = new ArrayList<>();
     @OneToOne
     private DietaryProgramme currentDietaryProgramme = null;
     private String dietaryProgrammeStartDate = null;
@@ -111,18 +109,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public List<Pair<String, Float>> getWeights() {
-        return weights;
-    }
-
-    public void setWeights(List<Pair<String, Float>> weights) {
-        this.weights = weights;
-    }
-
-    public void addNewWeight(Pair<String, Float> weight) {
-        this.weights.add(weight);
     }
 
     public DietaryProgramme getCurrentDietaryProgramme() {

@@ -15,31 +15,38 @@ import FinishedDietaryProgrammeDialog from "./components/FinishedDietaryProgramm
 
 export default function UserDashboard(props) {
 
-    const { admin, adminMode, currentDietaryProgramme, dietaryProgrammeStartDate, ...other } = props;
+    const {admin, adminMode, currentDietaryProgramme, dietaryProgrammeStartDate, ...other} = props;
 
     const history = useHistory();
 
     let {path} = useRouteMatch();
 
     const [state, setState] = React.useState({
-        openFinishedDietaryProgrammeDialog: false
+        openFinishedDietaryProgrammeDialog: false,
+        initialized: false,
+        daysDifference: -1
     });
 
-        useEffect(
+    useEffect(
         async () => {
             const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
             const now = new Date();
             const startDate = new Date(dietaryProgrammeStartDate);
-            startDate.setHours(0,0,0);
+            startDate.setHours(0, 0, 0);
 
-            const diffDays = Math.floor(Math.abs((now - startDate) / oneDay));
-            console.log(diffDays);
+            const timeDifference = now - startDate;
+            if (timeDifference >= 0) {
 
-            if (currentDietaryProgramme != null && diffDays >= currentDietaryProgramme.dietaryProgrammeDays) {
-                setState({
-                    ...state,
-                    openFinishedDietaryProgrammeDialog: true,
-                });
+                let daysDiff = Math.floor(Math.abs(timeDifference / oneDay));
+
+                if (currentDietaryProgramme != null && daysDiff >= currentDietaryProgramme.dietaryProgrammeDays) {
+                    setState({
+                        ...state,
+                        openFinishedDietaryProgrammeDialog: true,
+                        daysDifference: daysDiff,
+                        initialized: true
+                    });
+                }
             }
 
         }, [props.adminMode]
@@ -49,6 +56,7 @@ export default function UserDashboard(props) {
         setState({
             ...state,
             openFinishedDietaryProgrammeDialog: false,
+            daysDifference: -1
         });
     };
 
@@ -61,7 +69,8 @@ export default function UserDashboard(props) {
                 <div>
                     <Switch>
                         <Route path={`${path}dashboard`}>
-                            <div><Dashboard/></div>
+                            <div><Dashboard currentDietaryProgramme={props.currentDietaryProgramme}
+                                            dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}/></div>
                         </Route>
                         <Route path={`${path}products/:productId?/:mode?`}>
                             <Products userId={props.userId} admin={admin} adminMode={adminMode}
@@ -90,7 +99,8 @@ export default function UserDashboard(props) {
                         </Route>
                         <Route path={`${path}settings`}>
                             <Settings userId={props.userId} name={props.name} surname={props.surname}
-                                      username={props.username}
+                                      username={props.username} currentDietaryProgramme={props.currentDietaryProgramme}
+                                      dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}
                                       avatarImage={props.avatarImage}
                             />
                         </Route>
@@ -99,11 +109,12 @@ export default function UserDashboard(props) {
                         </Route>
                     </Switch>
 
-                    <FinishedDietaryProgrammeDialog
+                    {state.initialized && <FinishedDietaryProgrammeDialog
                         open={state.openFinishedDietaryProgrammeDialog}
                         onClose={handleCloseFinishedDietaryProgrammeDialog}
                         currentDietaryProgramme={props.currentDietaryProgramme}
-                />
+                        daysDifference={state.daysDifference}
+                    />}
                 </div>
             </main>
             <UserBottomNavigation history={history}/>

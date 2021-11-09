@@ -1,6 +1,7 @@
 package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.entities.Weight;
 import agh.edu.pl.diet.payloads.request.*;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.services.UserService;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -91,5 +94,32 @@ public class UserController {
     public ResponseEntity<ResponseMessage> resetEmail(@RequestBody ForgotPasswordRequest request, BindingResult bindingResult) {
         ResponseMessage message = userService.changeEmail(request, bindingResult);
         return ResponseEntity.ok(message);
+    }
+
+    @GetMapping("/addWeight/{weight}")
+    public ResponseEntity<ResponseMessage> addWeight(@PathVariable Double weight) {
+        ResponseMessage message = userService.addWeight(weight);
+        if (message.getMessage().equals("Weight " + weight + " has been added")) {
+            return ResponseEntity.ok(message);
+        }
+        return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+    }
+
+    @GetMapping("/getLoggedUserWeights")
+    public ResponseEntity<List<List<Weight>>> getLoggedUserWeights() {
+        List<List<Weight>> weights = userService.getLoggedUserWeights();
+        if (weights == null) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+        return ResponseEntity.ok(weights);
+    }
+
+    @GetMapping("/getWeightTrend")
+    public ResponseEntity<Double> getWeightTrend() {
+        Double weightTrend = userService.getWeightTrend();
+        if (weightTrend == null) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+        return ResponseEntity.ok(weightTrend);
     }
 }

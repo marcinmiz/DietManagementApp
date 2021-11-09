@@ -1,8 +1,16 @@
 import React, {useEffect} from 'react';
 import "../Authentication.css";
 import http from "../http-common";
+import {makeStyles} from "@material-ui/core";
+
+const useStyles = makeStyles({
+    passwordForm: {
+        minHeight: 'min-content !important',
+    }
+});
 
 export default function ChangePassword(props) {
+    const classes = useStyles();
 
     const [state, setState] = React.useState({
         password: "",
@@ -94,7 +102,7 @@ export default function ChangePassword(props) {
         <div>
             {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
-            <form className="form">
+            <form className={classes.passwordForm + " form"}>
                 <div className="setting_header">Change Password</div>
                 <label htmlFor="password">Enter your new password</label>
                 <input

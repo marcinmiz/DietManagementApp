@@ -1,6 +1,7 @@
 package agh.edu.pl.diet.services;
 
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.entities.Weight;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
 import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
 import agh.edu.pl.diet.payloads.request.ChangePasswordRequest;
@@ -11,6 +12,7 @@ import org.springframework.validation.BindingResult;
 
 import javax.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 
 public interface UserService {
@@ -39,4 +41,11 @@ public interface UserService {
 
     ResponseMessage changeEmail(ForgotPasswordRequest request, BindingResult bindingResult);
 
+    ResponseMessage addWeight(Double weight);
+
+    List<List<Weight>> getLoggedUserWeights();
+
+    List<String> countMovingAverage(List<Weight> weightList);
+
+    Double getWeightTrend();
 }

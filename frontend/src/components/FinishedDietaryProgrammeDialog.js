@@ -7,13 +7,13 @@ import Dialog from '@material-ui/core/Dialog';
 import http from "../http-common";
 
 export default function FinishedDietaryProgrammeDialog(props) {
-    const {onClose, open, currentDietaryProgramme, ...other} = props;
+    const {onClose, open, currentDietaryProgramme, daysDifference, ...other} = props;
     const [msg, setMsg] = React.useState("Loading");
 
     useEffect(
         async () => {
             try {
-                if (currentDietaryProgramme != null) {
+                if (currentDietaryProgramme != null && daysDifference > 0) {
                     const res = await http.put("/api/programmes/finishDietaryProgramme/" + currentDietaryProgramme.dietaryProgrammeId);
                     const data = res.data;
                     setMsg(data.message);
@@ -25,7 +25,7 @@ export default function FinishedDietaryProgrammeDialog(props) {
                     setMsg("Error while finishing Dietary programme named " + currentDietaryProgramme.dietaryProgrammeName);
                 }
             }
-        }, [props.adminMode]
+        }, [props.adminMode, daysDifference]
     );
 
     return (

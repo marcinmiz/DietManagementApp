@@ -1,8 +1,16 @@
 import React, {useEffect} from 'react';
 import "../Authentication.css";
 import http from "../http-common";
+import {makeStyles} from "@material-ui/core";
 
-export default function ResetPassword(props) {
+const useStyles = makeStyles({
+    emailForm: {
+        minHeight: 'min-content !important',
+    }
+});
+
+export default function ChangeEmail(props) {
+    const classes = useStyles();
 
     const [state, setState] = React.useState({
         email: "",
@@ -83,7 +91,7 @@ export default function ResetPassword(props) {
         <div>
             {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
 
-            <form className="form">
+            <form className={classes.emailForm + " form"}>
                 <div className="setting_header">Change E-mail</div>
                 <label htmlFor="email">Enter your new e-mail</label>
                 <input

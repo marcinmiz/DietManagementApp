@@ -1,6 +1,8 @@
 package agh.edu.pl.diet.services.impl;
 
+import agh.edu.pl.diet.entities.DietaryPreferences;
 import agh.edu.pl.diet.entities.User;
+import agh.edu.pl.diet.entities.Weight;
 import agh.edu.pl.diet.exceptions.UserNotFoundException;
 import agh.edu.pl.diet.payloads.request.ForgotPasswordRequest;
 import agh.edu.pl.diet.payloads.request.ChangePasswordRequest;
@@ -10,8 +12,10 @@ import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.payloads.validators.EmailValidator;
 import agh.edu.pl.diet.payloads.validators.PasswordValidator;
 import agh.edu.pl.diet.payloads.validators.UserValidator;
+import agh.edu.pl.diet.repos.DietaryPreferencesRepo;
 import agh.edu.pl.diet.repos.RoleRepo;
 import agh.edu.pl.diet.repos.UserRepo;
+import agh.edu.pl.diet.repos.WeightRepo;
 import agh.edu.pl.diet.services.ImageService;
 import agh.edu.pl.diet.services.SecurityService;
 import agh.edu.pl.diet.services.UserService;
@@ -35,10 +39,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -57,6 +61,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepo roleRepo;
+
+    @Autowired
+    private WeightRepo weightRepo;
+
+    @Autowired
+    private DietaryPreferencesRepo preferencesRepo;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -287,5 +297,121 @@ public class UserServiceImpl implements UserService {
             userRepo.save(user);
             return new ResponseMessage("You have successfully changed your e-mail");
         }
+    }
+
+    @Override
+    public ResponseMessage addWeight(Double weight) {
+
+        User user = findByUsername(getLoggedUser().getUsername());
+
+        if (user == null) {
+            return new ResponseMessage("Logged user has not been found");
+        }
+
+        Weight newWeight = new Weight(weight, user);
+
+        weightRepo.save(newWeight);
+
+        return new ResponseMessage("Weight " + weight + " has been added");
+    }
+
+    @Override
+    public List<String> countMovingAverage(List<Weight> weightList) {
+        Double movingAverageValue;
+        List<String> movingAverage = new ArrayList<>();
+        List<Weight> weights;
+        Integer minimumWeightsSkipMode = 5;
+        if (weightList.size() < 5) {
+            return null;
+        }
+        if (weightList.size() > minimumWeightsSkipMode)
+            weights = weightList.stream().skip(weightList.size() - minimumWeightsSkipMode).limit(5).collect(Collectors.toList());
+        else
+            weights = weightList.stream().limit(5).collect(Collectors.toList());
+
+        movingAverageValue = weights.stream().mapToDouble(Weight::getWeightValue).sum() / weights.size();
+        movingAverage.add(movingAverageValue.toString());
+        movingAverage.add(weights.get(weights.size()-1).getMeasureDate());
+        return movingAverage;
+    }
+
+    @Override
+    public List<List<Weight>> getLoggedUserWeights() {
+
+        User measurer = findByUsername(getLoggedUser().getUsername());
+
+        if (measurer == null) {
+            return null;
+        }
+        List<List<Weight>> weightList = new ArrayList<>();
+        weightList.add(new ArrayList<>(weightRepo.findByMeasurer(measurer)));
+
+        weightList.get(0).sort(Comparator.comparing(w -> Instant.parse(w.getMeasureDate())));
+
+        Integer trendThreshold = 4, iterationLimit = weightList.get(0).size();
+
+        if (measurer.getCurrentDietaryProgramme() != null) {
+            trendThreshold = 5;
+            Instant lastProgrammeDayInstant = Instant.parse(measurer.getDietaryProgrammeStartDate());
+            Calendar lastProgrammeDay = GregorianCalendar.from(ZonedDateTime.ofInstant(lastProgrammeDayInstant, ZoneId.systemDefault()));
+            lastProgrammeDay.add(Calendar.DAY_OF_MONTH, measurer.getCurrentDietaryProgramme().getDietaryProgrammeDays() + 1);
+
+            DietaryPreferences preference = preferencesRepo.findByRelatedDietaryProgramme(measurer.getCurrentDietaryProgramme());
+
+            if (preference == null) {
+                return null;
+            }
+
+            Weight weight = new Weight(preference.getTargetWeight(), measurer);
+            weight.setMeasureDate(lastProgrammeDay.toInstant().toString());
+            weightList.get(0).add(weight);
+        }
+
+        weightList.add(new ArrayList<>());
+
+        if (weightList.get(0).size()-1 >= trendThreshold) {
+            for (int i = 4; i < iterationLimit; i++) {
+                List<String> movingAverage = countMovingAverage(weightList.get(0).subList(0, i + 1));
+                Weight weight = new Weight(Double.parseDouble(movingAverage.get(0)), measurer);
+                weight.setMeasureDate(movingAverage.get(1));
+                weightList.get(1).add(weight);
+            }
+        }
+
+        return weightList;
+    }
+
+    @Override
+    public Double getWeightTrend() {
+        User measurer = findByUsername(getLoggedUser().getUsername());
+
+        if (measurer == null) {
+            return null;
+        }
+        List<Weight> weightList = weightRepo.findByMeasurer(measurer);
+
+        weightList.sort(Comparator.comparing(w -> Instant.parse(w.getMeasureDate())));
+
+//        int index = weightList.size() - 5;
+
+        if (weightList.isEmpty()) {
+            return 0.0;
+        }
+
+        List<String> trend = countMovingAverage(weightList);
+
+        if (trend == null) {
+            return 0.0;
+        }
+
+        Double movingAverageValue = Double.parseDouble(trend.get(0));
+
+        Double lastMeasurementValue = weightList.get(weightList.size() - 1).getWeightValue();
+
+        Double weightTrend = ((lastMeasurementValue - movingAverageValue) / movingAverageValue) * 100;
+
+        Long tempWeightTrend = Math.round(weightTrend * 100);
+
+        return Double.valueOf(tempWeightTrend) / 100;
     }
 }

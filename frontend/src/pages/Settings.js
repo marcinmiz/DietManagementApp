@@ -1,9 +1,10 @@
 import React from 'react'
-import {Container, makeStyles} from "@material-ui/core";
+import {Container, Divider, makeStyles} from "@material-ui/core";
 import ChangePassword from "../components/ChangePassword";
 import UploadImages from "../components/UploadImages";
 import Button from "@material-ui/core/Button";
-import ResetEmail from "../components/ChangeEmail";
+import ChangeEmail from "../components/ChangeEmail";
+import WeightManager from "../components/WeightManager";
 
 const useStyles = makeStyles({
     product: {
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
     settingsContainer: {
         display: 'flex',
         justifyContent: 'space-around',
-        alignItems: 'center',
+        // alignItems: 'center',
         width: '100%',
         // height: '90% !important',
         // overflowY: 'scroll'
@@ -44,9 +45,12 @@ const useStyles = makeStyles({
     avatarId: {
         width: '20%',
     },
+    settingsBody: {
+        width: '60%',
+    },
     emailPasswordContainer: {
+        // height: '30%',
         display: 'flex',
-        width: '50%',
         // alignItems: 'center',
         justifyContent: 'space-between',
         // marginLeft: 'auto',
@@ -70,6 +74,7 @@ export default function Settings(props) {
 
     const [state, setState] = React.useState({
         submitted: false,
+        weight: 45.0,
         msg: "",
         loaded: false
     });
@@ -96,12 +101,20 @@ export default function Settings(props) {
                             <Button className={classes.saveButton} variant="contained" color="primary" type="button"
                                     onClick={() => handleSave()}>Save</Button>
                         </div>
-                        <div className={classes.emailPasswordContainer}>
-                            <div className={classes.emailPassword}>
-                                <ChangePassword resetType="settings"/>
-                            </div>
-                            <div className={classes.emailPassword}>
-                                <ResetEmail/>
+                        <div>
+                        <Divider variant="fullWidth" orientation="vertical"/>
+                        </div>
+                        <div className={classes.settingsBody}>
+                            <div className={classes.emailPasswordContainer}>
+                                <div className={classes.emailPassword}>
+                                    <ChangePassword resetType="settings"/>
+                                </div>
+                                <div className={classes.emailPassword}>
+                                    <ChangeEmail/>
+                                </div>
+                                <div>
+                                    <WeightManager currentDietaryProgramme={props.currentDietaryProgramme}/>
+                                </div>
                             </div>
                         </div>
                     </div>

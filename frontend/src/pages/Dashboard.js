@@ -1,37 +1,32 @@
 import React, {useEffect} from 'react';
 import {Container, makeStyles} from "@material-ui/core";
-import CanvasJS from "../canvasjs.min";
 import CanvasJSReact from '../canvasjs.react';
+import http from "../http-common";
 
-var CanvasJSChart = CanvasJSReact.CanvasJSChart;
+let CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const useStyles = makeStyles({
     chartsContainer: {
         display: 'flex',
-        // alignItems: 'center',
         justifyContent: 'space-around',
-        // marginLeft: 'auto',
-        // marginRight: 'auto',
-        // marginTop: '2%',
-        // marginBottom: '2%'
     },
     chartsContainerPart: {
         width: '48%',
-        // boxShadow: 'inset 0px 0px 40px 40px #DBA632'
     },
     label: {
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        // backgroundColor: '#8a7666',
         borderRadius: '5px',
         width: '20%',
         minHeight: '10%',
         padding: '2%',
         marginLeft: 'auto',
         marginRight: 'auto',
-        marginBottom: '1%',
-        // boxShadow: 'inset 0px 0px 4px 4px dimgrey'
+    },
+    currentWeight: {
+        fontSize: 'xx-large'
     },
     greenFont: {
         color: 'darkgreen'
@@ -43,11 +38,17 @@ const useStyles = makeStyles({
 
 export default function Dashboard(props) {
     const classes = useStyles();
+    let lastWeight;
 
     const [initialized, setInitialized] = React.useState(false);
 
     const [dataPoints, setDataPoints] = React.useState([]);
     const [dataPoints2, setDataPoints2] = React.useState([]);
+    const [dataPoints3, setDataPoints3] = React.useState([]);
+    const [weightTrend, setWeightTrend] = React.useState(false);
+    const [weightTrendCondition, setWeightTrendCondition] = React.useState(false);
+    const [weightTrendCondition2, setWeightTrendCondition2] = React.useState(true);
+    const [dataPoints4, setDataPoints4] = React.useState([]);
 
     const options = {
         theme: "dark2",
@@ -56,18 +57,17 @@ export default function Dashboard(props) {
         exportEnabled: true,
         zoomEnabled: true,
         title: {
-            text: "Ice Cream Sales vs Temperature"
+            text: "Weight diagram"
         },
         axisX: {
-            title: "Temperature (in °C)",
-            suffix: "°C",
             crosshair: {
                 enabled: true,
                 snapToDataPoint: true
             }
         },
         axisY: {
-            title: "Sales",
+            title: "Weight",
+            suffix: "kg",
             includeZero: false,
             crosshair: {
                 enabled: true,
@@ -76,10 +76,30 @@ export default function Dashboard(props) {
         },
         data: [{
             type: "scatter",
+            name: "Real weight",
+            showInLegend: true,
             markerSize: 10,
             markerColor: "blue",
-            toolTipContent: "<b>Temperature: </b>{x}°C<br/><b>Sales: </b>{y}",
+            xValueFormatString: "DD MM YYYY",
+            toolTipContent: "<b>Date: </b>{x}<br/><b>Weight: </b>{y} kg",
             dataPoints: dataPoints
+        }, {
+            type: "scatter",
+            name: "Target weight",
+            showInLegend: true,
+            markerSize: 10,
+            markerColor: "green",
+            xValueFormatString: "DD MM YYYY",
+            toolTipContent: "<b>Date: </b>{x}<br/><b>Weight: </b>{y} kg",
+            dataPoints: dataPoints2
+        }, {
+            type: "line",
+            name: "Trend line",
+            showInLegend: true,
+            markerSize: 0,
+            xValueFormatString: "DD MM YYYY",
+            toolTipContent: "<b>Date: </b>{x}<br/><b>Weight: </b>{y} kg",
+            dataPoints: dataPoints3
         }]
     };
 
@@ -89,53 +109,99 @@ export default function Dashboard(props) {
         theme: "dark2", // "light1", "dark1", "dark2"
         backgroundColor: "transparent",
         title: {
-            text: "Trip Expenses"
+            text: "Calories consumed"
         },
         data: [{
             type: "pie",
             indexLabel: "{label}: {y}%",
             startAngle: -90,
-            dataPoints: dataPoints2
+            dataPoints: dataPoints4
         }]
     };
 
     useEffect(() => {
         if (!initialized) {
-            setTimeout(() => {
-                setDataPoints([
-                    {x: 14.2, y: 215},
-                    {x: 12.9, y: 175},
-                    {x: 16.4, y: 325},
-                    {x: 26.9, y: 635},
-                    {x: 32.5, y: 464},
-                    {x: 22.1, y: 522},
-                    {x: 19.4, y: 412},
-                    {x: 25.1, y: 614},
-                    {x: 34.9, y: 374},
-                    {x: 28.7, y: 625},
-                    {x: 23.4, y: 544},
-                    {x: 31.4, y: 502},
-                    {x: 40.8, y: 262},
-                    {x: 37.4, y: 312},
-                    {x: 42.3, y: 202},
-                    {x: 39.1, y: 302},
-                    {x: 17.2, y: 408}
-                ]);
+            setTimeout(async () => {
+                let response = await http.get("/api/users/getLoggedUserWeights");
 
-                setDataPoints2([
-                    {y: 20, label: "Airfare"},
-                    {y: 24, label: "Food & Drinks"},
-                    {y: 10, label: "Accomodation"},
-                    {y: 14, label: "Transportation"},
-                    {y: 22, label: "Activities"},
-                    {y: 10, label: "Misc"}
+                let weightsList = [];
+
+                for (let x = 0; x < response.data[0].length; x++) {
+                    weightsList[x] = createWeight(response.data[0], x);
+                }
+
+                let response2 = await http.get("/api/users/getWeightTrend");
+
+                setWeightTrend(response2.data);
+                let trend = response2.data;
+
+                if (props.currentDietaryProgramme != null) {
+
+                    let date = new Date(weightsList[weightsList.length - 1].x);
+                    let targetWeight = weightsList[weightsList.length - 1].y;
+                    setDataPoints2([
+                        {x: date, y: targetWeight}
+                    ]);
+
+                    weightsList.splice(weightsList.length - 1, 1);
+
+                    // let mapping = weightsList.map(weight => {
+                    //     const diff = Math.abs(new Date(props.dietaryProgrammeStartDate) - weight.x);
+                    //     return {weight: weight, diff: diff};
+                    // });
+                    //
+                    // let min = Math.min.apply(null, mapping.map(weight => weight.diff));
+                    //
+                    // let nearestProgrammeWeight = mapping.find(m => m.diff === min);
+
+                    lastWeight = weightsList[weightsList.length - 1].y;
+
+                    if (lastWeight > targetWeight) {
+                        setWeightTrendCondition(trend < 0.0);
+                        setWeightTrendCondition2(trend < 0.0);
+                    } else if (lastWeight === targetWeight) {
+                        setWeightTrendCondition(trend === 0.0);
+                        setWeightTrendCondition2(trend === 0.0);
+                    } else {
+                        setWeightTrendCondition(trend > 0.0);
+                        setWeightTrendCondition2(trend > 0.0);
+                    }
+
+                }
+                console.log(weightTrendCondition);
+                console.log(weightTrendCondition2);
+
+                setDataPoints(weightsList
+                    //     [
+                    //     {x: new Date("10 20 2021"), y: 100},
+                    //     {x: new Date("10 21 2021"), y: 98},
+                    //     {x: new Date("10 23 2021"), y: 95},
+                    //     {x: new Date("10 26 2021"), y: 98},
+                    //     {x: new Date("10 29 2021"), y: 93},
+                    //     {x: new Date("11 01 2021"), y: 86}
+                    // ]
+                );
+                let trendList = [];
+
+                for (let x = 0; x < response.data[1].length; x++) {
+                    trendList[x] = createWeight(response.data[1], x);
+                }
+
+                setDataPoints3(trendList);
+
+                setDataPoints4([
+                    {y: 60, label: "Consumed"},
+                    {y: 40, label: "Not consumed"}
                 ]);
-                // setTitle("Update animates if first render deferred");
-                //Calling render makes no difference
+                // Calling render makes no difference
                 setInitialized(true);
             }, 1);
         }
     }, [initialized]);
+
+    const createWeight = (data, x) => {
+        return {x: new Date(data[x].measureDate), y: data[x].weightValue};
+    };
 
     return (
         <Container id="main_container" maxWidth="lg">
@@ -148,11 +214,20 @@ export default function Dashboard(props) {
                         <div className={classes.chartsContainer}>
                             <div className={classes.chartsContainerPart}>
                                 <div className={classes.label}>
-                                    <div>80 kg</div>
-                                    <div className={classes.greenFont}>-2%</div>
+                                    <div
+                                        className={classes.currentWeight}>{dataPoints[dataPoints.length - 1] && dataPoints[dataPoints.length - 1].y + " kg"}
+                                    </div>
+                                    {dataPoints.length >= 1 ? <div
+                                            className={weightTrendCondition && weightTrendCondition2 ? classes.greenFont : (!weightTrendCondition && !weightTrendCondition2 ? classes.redFont : "")}>{weightTrend >= 0 ? "+" + weightTrend + " %" : weightTrend + " %"}
+                                        </div> :
+                                        null}
                                 </div>
                                 <div>
-                                    <CanvasJSChart options={options}/>
+                                    {dataPoints.length >= 1 ?
+                                        <CanvasJSChart options={options}/>
+                                        :
+                                        "There are no weights to display. Add new weight in settings"
+                                    }
                                 </div>
                             </div>
                             <div className={classes.chartsContainerPart}>
@@ -160,7 +235,9 @@ export default function Dashboard(props) {
                                     <div>1548/2220 kcal</div>
                                 </div>
                                 <div>
-                                    <CanvasJSChart options={options2}/>
+                                    <CanvasJSChart options={options2}
+                                        // onRef={ref => this.chart = ref}
+                                    />
                                 </div>
                             </div>
                         </div>)}
