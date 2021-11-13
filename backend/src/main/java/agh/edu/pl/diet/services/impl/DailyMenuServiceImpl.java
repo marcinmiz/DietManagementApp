@@ -4,6 +4,7 @@ import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
+import agh.edu.pl.diet.payloads.response.RecipeResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
 import agh.edu.pl.diet.repos.DietaryPreferencesRepo;
@@ -12,10 +13,12 @@ import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.MealService;
 import agh.edu.pl.diet.services.RecipeService;
+import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +32,9 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private MealService mealService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private MealRepo mealRepo;
@@ -149,7 +155,19 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 //    }
 
     @Override
-    public ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes) {
+    public ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes, DietaryPreferences preference) {
+
+        User loggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+
+        if (loggedUser == null) {
+            return new ResponseMessage("Logged user has not been found");
+        }
+
+        if (preference == null) {
+            return new ResponseMessage("Dietary programme has to be related to dietary preference");
+        }
+
+        String failExplanation = "";
 
         System.out.println(recipe.getRecipeName() + " verification");
 
@@ -164,24 +182,54 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
             String nutrientName = nutrientNames[i];
 
-            if (recipe.getRecipeNutrients(nutrientName) < dailyNutrientsScopes.get(nutrientName).get(0) || recipe.getRecipeNutrients(nutrientName) > dailyNutrientsScopes.get(nutrientName).get(1)) {
-                System.out.println(nutrientName + ": actual: " + recipe.getRecipeNutrients(nutrientName) + ", lower: " + dailyNutrientsScopes.get(nutrientName).get(0) + ", upper: " + dailyNutrientsScopes.get(nutrientName).get(1));
-                return new ResponseMessage("Recipe has inappropriate amount of " + nutrientName);
+            Double nutrientAmount = recipe.getRecipeNutrients(nutrientName);
+            Double lowerBound = dailyNutrientsScopes.get(nutrientName).get(0);
+            Double upperBound = dailyNutrientsScopes.get(nutrientName).get(1);
+
+            Long tempLowerBound = Math.round(lowerBound * 100);
+
+            lowerBound = Double.valueOf(tempLowerBound) / 100;
+
+            Long tempUpperBound = Math.round(upperBound * 100);
+
+            upperBound = Double.valueOf(tempUpperBound) / 100;
+
+            Long tempNutrientAmount = Math.round(nutrientAmount * 100);
+
+            nutrientAmount = Double.valueOf(tempNutrientAmount) / 100;
+
+            if (nutrientAmount < lowerBound) {
+                System.out.println(nutrientName + ": actual: " + nutrientAmount + ", lower: " + lowerBound);
+                return new ResponseMessage(nutrientName + " " + nutrientAmount + " are less than " + lowerBound);
+            } else if (nutrientAmount > upperBound) {
+                System.out.println(nutrientName + ": actual: " + nutrientAmount + ", upper: " + upperBound);
+                return new ResponseMessage(nutrientName + " " + nutrientAmount + " are more than " + upperBound);
             }
 
         }
 
-        RecipeGetRequest request = new RecipeGetRequest();
-        request.setRecipesGroup("personal");
-        request.setPhrase("");
-        List<Recipes> collectionRecipes = recipeService.getRecipes(request);
+//        RecipeGetRequest request = new RecipeGetRequest();
+//        request.setRecipesGroup("personal");
+//        request.setPhrase("");
+//        List<Recipes> collectionRecipes = recipeService.getRecipes(request);
 
-        if (collectionRecipes.stream().anyMatch(collectionRecipe -> collectionRecipe.getRecipeId().equals(recipe.getRecipeId())))
+        long recipeId = recipe.getRecipeId();
+        ResponseMessage message = recipeService.checkIfInCollection(recipeId);
+
+        if (message.getMessage().equals("Recipe with id " + recipeId + " has not been found")) {
+            return message;
+        }
+
+        if (message.getMessage().equals("Recipe " + recipe.getRecipeName() + " with id " + recipeId + " is in collection"))
             ultimateForce *= 0.7;
         else
             ultimateForce *= 0.3;
 
         System.out.println("ultimateForce after collection check: " + ultimateForce);
+
+        if (ultimateForce < 0.15) {
+            failExplanation = recipe.getRecipeName() + " not in user's recipe collection";
+        }
 
         Map<String, Integer> ingredientIncidence = new LinkedHashMap<>();
 
@@ -217,6 +265,10 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             case "Fats":
             case "Sweets":
             case "Nuts":
+                Double dietImprovement = loggedUser.getDietImprovement();
+                if (dietImprovement != null) {
+                    ultimateForce *= dietImprovement;
+                }
                 ultimateForce *= 0.15;
                 break;
             default:
@@ -225,7 +277,14 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         System.out.println("ultimateForce after pyramid check: " + ultimateForce);
 
-        List<RecipeCustomerSatisfaction> recipeRatings = recipe.getRecipeCustomerSatisfactions().stream().filter(satisfaction -> satisfaction.getRecipeRating() != null).collect(Collectors.toList());
+        if (ultimateForce >= 0.15) {
+            failExplanation = "";
+        } else  {
+            failExplanation = recipe.getRecipeName() + " contains most " + majorCategoryProductName + " category products";
+        }
+
+        List<RecipeCustomerSatisfaction> recipeSatisfactions = recipe.getRecipeCustomerSatisfactions();
+        List<RecipeCustomerSatisfaction> recipeRatings = recipeSatisfactions.stream().filter(satisfaction -> satisfaction.getRecipeRating() != null).collect(Collectors.toList());
 
         if (!recipeRatings.isEmpty()) {
             OptionalDouble average = recipeRatings.stream().mapToDouble(RecipeCustomerSatisfaction::getRecipeRating).average();
@@ -236,15 +295,82 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
                 if (averageRating < 3.0) {
                     ultimateForce *= 0.0;
+                    failExplanation = recipe.getRecipeName() + "'s average rating is less than 3.0";
                 }
 
             }
         }
 
-        System.out.println("ultimateForce after ratings check (end): " + ultimateForce);
+        System.out.println("ultimateForce after ratings check: " + ultimateForce);
+
+        List<RecipeCustomerSatisfaction> recipeFavourites = recipeSatisfactions.stream().filter(satisfaction -> satisfaction.getRecipeFavourite() != null).collect(Collectors.toList());
+
+        if (!recipeFavourites.isEmpty()) {
+            for (RecipeCustomerSatisfaction satisfaction : recipeFavourites) {
+                if (satisfaction.getCustomerSatisfactionOwner().getUserId().equals(loggedUser.getUserId()) && satisfaction.getRecipeFavourite()) {
+                    ultimateForce *= 3.0;
+                }
+            }
+        }
+
+        System.out.println("ultimateForce after favourite check: " + ultimateForce);
+
+        if (ultimateForce >= 0.15) {
+            failExplanation = "";
+        }
+
+//        DietaryPreferences preference = preferenceRepo.findByRelatedDietaryProgramme(dietaryProgramme);
+
+        String recipePreferred = "neutral";
+        Set<DietaryPreferencesRecipe> preferredRecipes = preference.getRecipes();
+
+        for (DietaryPreferencesRecipe preferredRecipe : preferredRecipes) {
+            if (preferredRecipe.getRecipe().getRecipeId().equals(recipe.getRecipeId())) {
+                if (preferredRecipe.isRecipePreferred()) {
+                    recipePreferred = "liked";
+                    ultimateForce *= 3.0;
+                } else {
+                    recipePreferred = "disliked";
+                    ultimateForce *= 0.0;
+                    failExplanation = recipe.getRecipeName() + " is disliked";
+                }
+            }
+
+        }
+
+        System.out.println("ultimateForce after preferred recipes check: " + ultimateForce);
+
+        if (ultimateForce >= 0.15) {
+            failExplanation = "";
+        }
+
+        Set<DietaryPreferencesProduct> preferredProducts = preference.getProducts();
+
+        List<Product> ingredients = recipeProducts.stream().map(RecipeProduct::getProduct).collect(Collectors.toList());
+
+        for (DietaryPreferencesProduct preferredProduct : preferredProducts) {
+
+            System.out.println(recipePreferred);
+            if (ingredients.contains(preferredProduct.getProduct())) {
+                if (preferredProduct.isProductPreferred()) {
+                    ultimateForce *= 2.0;
+                } else if (!recipePreferred.equals("liked")) {
+                    ultimateForce *= 0.0;
+                    failExplanation = "Product " + preferredProduct.getProduct().getProductName() + " is disliked";
+                }
+            }
+
+        }
+
+        System.out.println("ultimateForce after preferred products check(end): " + ultimateForce);
+
+        if (ultimateForce >= 0.15) {
+            failExplanation = "";
+        }
 
         if (ultimateForce < 0.15) {
-            return new ResponseMessage("Recipe is inappropriate in regard to dietary preference");
+            String explanation = failExplanation.equals("") ? "" : " (" + failExplanation + ")";
+            return new ResponseMessage("Recipe is inappropriate in regard to dietary preference" + explanation);
         }
 
         return new ResponseMessage("Recipe is appropriate in regard to dietary preference");
@@ -385,13 +511,16 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                 Double finalUpperCaloriesLimit = upperCaloriesLimit;
 
                 potentialRecipes = recipes.stream().filter(recipe -> recipe.getRecipeCalories() >= finalLowerCaloriesLimit && recipe.getRecipeCalories() <= finalUpperCaloriesLimit).collect(Collectors.toList());
+
+                Collections.shuffle(potentialRecipes); //shuffle potentialRecipes to get random order
+
                 System.out.println("id");
                 potentialRecipes.stream().map(Recipes::getRecipeId).forEach(System.out::println);
             }
 
             for (Recipes verifiedRecipe : potentialRecipes) {
 
-                if (verifyRecipe(verifiedRecipe, dailyNutrientsScopes).getMessage().equals("Recipe is appropriate in regard to dietary preference") && !chosenRecipes.contains(verifiedRecipe)) {
+                if (verifyRecipe(verifiedRecipe, dailyNutrientsScopes, preferenceRepo.findByRelatedDietaryProgramme(dietaryProgramme)).getMessage().equals("Recipe is appropriate in regard to dietary preference") && !chosenRecipes.contains(verifiedRecipe)) {
                     System.out.println(verifiedRecipe.getRecipeName());
                     chosenRecipes.add(verifiedRecipe);
 
@@ -472,9 +601,9 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             if (!mealService.addNewMeal(mealName, recipe, dailyMenu).getMessage().equals("Meal has been added")) {
 
                 List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(dietaryProgramme);
-                for (DailyMenu menu: menus) {
+                for (DailyMenu menu : menus) {
                     List<Meals> meals = mealRepo.findByDailyMenu(menu);
-                    for (Meals meal: meals) {
+                    for (Meals meal : meals) {
                         mealRepo.delete(meal);
                     }
                     dailyMenuRepo.delete(menu);

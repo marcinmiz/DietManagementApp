@@ -4,9 +4,11 @@ import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
+import agh.edu.pl.diet.repos.DietaryPreferencesRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.MealService;
 import agh.edu.pl.diet.services.RecipeService;
+import agh.edu.pl.diet.services.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +32,13 @@ class DailyMenuServiceImplTest {
 
     private List<Category> categories = List.of(new Category("Fruit"), new Category("Vegetables"), new Category("Cereal"), new Category("Dairy"), new Category("Meat"), new Category("Fish"), new Category("Fats"), new Category("Sweets"), new Category("Nuts"));
     @Mock
+    private UserService userService;
+    @Mock
     private RecipeService recipeService;
     @Mock
     private DailyMenuRepo dailyMenuRepo;
+    @Mock
+    private DietaryPreferencesRepo preferencesRepo;
     @Mock
     private MealService mealService;
     @InjectMocks
@@ -128,11 +134,11 @@ class DailyMenuServiceImplTest {
         allRecipes = new ArrayList<>();
 
         Double[][] nutrientsAmounts = new Double[3][3];
-        Double[] nutrient4 = {12.0, 30.4, 5.5};
+        Double[] nutrient4 = {12.0, 10.4, 5.0};
         nutrientsAmounts[0] = nutrient4;
-        Double[] nutrient5 = {11.6, 24.0, 10.7};
+        Double[] nutrient5 = {11.6, 10.0, 2.0};
         nutrientsAmounts[1] = nutrient5;
-        Double[] nutrient6 = {6.1, 24.8, 8.55};
+        Double[] nutrient6 = {10.8, 2.8, 4.5};
         nutrientsAmounts[2] = nutrient6;
         Double[] calories = {216.0, 123.0, 262.0};
         Double[] amounts = {4.0, 100.0, 0.1};
@@ -253,7 +259,7 @@ class DailyMenuServiceImplTest {
         nutrient6 = new Double[]{18.1, 25.8, 8.55};
         nutrientsAmounts[2] = nutrient6;
         calories = new Double[]{23.0, 144.5, 251.0};
-        amounts = new Double[]{100.0, 20.0, 100.0};
+        amounts = new Double[]{109.0, 20.0, 100.0};
         units = new String[]{"tbsp", "dag", "ml"};
         averageWeights = new Double[]{null, null, null};
 
@@ -419,6 +425,8 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient2;
         Double[] nutrient3 = {10.0, 4.0, 3.0};
         nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
         Integer[] categoryIndexes = {1, 2, 5};
         Float[] ratings = {4.7F, 4.2F};
 
@@ -434,6 +442,8 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < recipeProducts.size(); i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
         }
         for (int i = 0; i < satisfactions.size(); i++) {
             satisfactions.get(i).setRecipeRating(ratings[i]);
@@ -445,9 +455,26 @@ class DailyMenuServiceImplTest {
         recipe.setRecipeProducts(recipeProducts);
         recipe.setRecipeCustomerSatisfactions(satisfactions);
 
-        doReturn(collection).when(recipeService).getRecipes(any(RecipeGetRequest.class));
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
 
-        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes);
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        preference.setProducts(new HashSet<>());
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
 
         assertEquals(expected, actual.getMessage());
     }
@@ -463,6 +490,8 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient2;
         Double[] nutrient3 = {10.0, 4.0, 3.85};
         nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
         Integer[] categoryIndexes = {1, 2, 5};
         Float[] ratings = {4.7F, 4.2F};
 
@@ -478,6 +507,8 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < recipeProducts.size(); i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
         }
         for (int i = 0; i < satisfactions.size(); i++) {
             satisfactions.get(i).setRecipeRating(ratings[i]);
@@ -489,14 +520,23 @@ class DailyMenuServiceImplTest {
         recipe.setRecipeProducts(recipeProducts);
         recipe.setRecipeCustomerSatisfactions(satisfactions);
 
-        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes);
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
 
         assertEquals(expected, actual.getMessage());
     }
 
     @Test
     void shouldRecipeBeInappropriateDueToProductCategories() {
-        String expected = "Recipe is inappropriate in regard to dietary preference";
+        String expected = "Recipe is inappropriate in regard to dietary preference (Recipe spaghetti contains most products, which belong to category Fish)";
 
         Double[][] nutrientsAmounts = new Double[3][3];
         Double[] nutrient1 = {12.0, 14.4, 5.5};
@@ -505,6 +545,8 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient2;
         Double[] nutrient3 = {10.0, 4.0, 3.0};
         nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
         Integer[] categoryIndexes = {1, 5, 5};
         Float[] ratings = {4.7F, 4.2F};
 
@@ -520,27 +562,45 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < recipeProducts.size(); i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
         }
         for (int i = 0; i < satisfactions.size(); i++) {
             satisfactions.get(i).setRecipeRating(ratings[i]);
         }
 
         Recipes recipe = new Recipes();
-        recipe.setRecipeId(704L);
+        recipe.setRecipeId(650L);
         recipe.setRecipeName("spaghetti");
         recipe.setRecipeProducts(recipeProducts);
         recipe.setRecipeCustomerSatisfactions(satisfactions);
 
-        doReturn(collection).when(recipeService).getRecipes(any(RecipeGetRequest.class));
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
 
-        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes);
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is not in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        preference.setProducts(new HashSet<>());
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
 
         assertEquals(expected, actual.getMessage());
     }
 
     @Test
     void shouldRecipeBeInappropriateDueToLowRatings() {
-        String expected = "Recipe is inappropriate in regard to dietary preference";
+        String expected = "Recipe is inappropriate in regard to dietary preference (Recipe ratings spaghetti are less than 3.0)";
 
         Double[][] nutrientsAmounts = new Double[3][3];
         Double[] nutrient1 = {12.0, 14.4, 5.5};
@@ -549,6 +609,8 @@ class DailyMenuServiceImplTest {
         nutrientsAmounts[1] = nutrient2;
         Double[] nutrient3 = {10.0, 4.0, 3.0};
         nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
         Integer[] categoryIndexes = {1, 2, 5};
         Float[] ratings = {2.7F, 3.2F};
 
@@ -564,6 +626,8 @@ class DailyMenuServiceImplTest {
 
         for (int i = 0; i < recipeProducts.size(); i++) {
             recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
         }
         for (int i = 0; i < satisfactions.size(); i++) {
             satisfactions.get(i).setRecipeRating(ratings[i]);
@@ -575,9 +639,386 @@ class DailyMenuServiceImplTest {
         recipe.setRecipeProducts(recipeProducts);
         recipe.setRecipeCustomerSatisfactions(satisfactions);
 
-        doReturn(collection).when(recipeService).getRecipes(any(RecipeGetRequest.class));
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
 
-        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes);
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        preference.setProducts(new HashSet<>());
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldRecipeBeInappropriateDueToDietImprovement() {
+        String expected = "Recipe is inappropriate in regard to dietary preference (Recipe spaghetti contains most products, which belong to category Sweets)";
+
+        Double[][] nutrientsAmounts = new Double[3][3];
+        Double[] nutrient1 = {12.0, 14.4, 5.5};
+        nutrientsAmounts[0] = nutrient1;
+        Double[] nutrient2 = {11.6, 4.0, 2.7};
+        nutrientsAmounts[1] = nutrient2;
+        Double[] nutrient3 = {10.0, 4.0, 3.0};
+        nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
+        Integer[] categoryIndexes = {7, 6, 7};
+        Float[] ratings = {4.7F, 4.2F};
+
+        for (int i = 0; i < products.size(); i++) {
+
+            products.get(i).setCategory(categories.get(categoryIndexes[i]));
+
+            for (int j = 0; j < 3; j++) {
+                productNutrients.get(i).get(j).setNutrientAmount(nutrientsAmounts[i][j]);
+            }
+            products.get(i).setNutrients(productNutrients.get(i));
+        }
+
+        for (int i = 0; i < recipeProducts.size(); i++) {
+            recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
+        }
+        for (int i = 0; i < satisfactions.size(); i++) {
+            satisfactions.get(i).setRecipeRating(ratings[i]);
+        }
+
+        Recipes recipe = new Recipes();
+        recipe.setRecipeId(704L);
+        recipe.setRecipeName("spaghetti");
+        recipe.setRecipeProducts(recipeProducts);
+        recipe.setRecipeCustomerSatisfactions(satisfactions);
+
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(0.2);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        preference.setProducts(new HashSet<>());
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldRecipeBeAppropriateDueToFavouriteRecipe() {
+        String expected = "Recipe is appropriate in regard to dietary preference";
+
+        Double[][] nutrientsAmounts = new Double[3][3];
+        Double[] nutrient1 = {12.0, 14.4, 5.5};
+        nutrientsAmounts[0] = nutrient1;
+        Double[] nutrient2 = {11.6, 4.0, 2.7};
+        nutrientsAmounts[1] = nutrient2;
+        Double[] nutrient3 = {10.0, 4.0, 3.0};
+        nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
+        Integer[] categoryIndexes = {6, 6, 5};
+
+        for (int i = 0; i < products.size(); i++) {
+
+            products.get(i).setCategory(categories.get(categoryIndexes[i]));
+
+            for (int j = 0; j < 3; j++) {
+                productNutrients.get(i).get(j).setNutrientAmount(nutrientsAmounts[i][j]);
+            }
+            products.get(i).setNutrients(productNutrients.get(i));
+        }
+
+        for (int i = 0; i < recipeProducts.size(); i++) {
+            recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
+        }
+        for (int i = 0; i < satisfactions.size(); i++) {
+            satisfactions.get(i).setRecipeFavourite(true);
+        }
+
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
+
+        User differentUser = new User();
+        differentUser.setUserId(3L);
+        differentUser.setName("John");
+        differentUser.setUsername("johnny");
+        differentUser.setDietImprovement(1.0);
+
+        satisfactions.get(0).setCustomerSatisfactionOwner(differentUser);
+        satisfactions.get(1).setCustomerSatisfactionOwner(loggedUser);
+
+        Recipes recipe = new Recipes();
+        recipe.setRecipeId(704L);
+        recipe.setRecipeName("spaghetti");
+        recipe.setRecipeProducts(recipeProducts);
+        recipe.setRecipeCustomerSatisfactions(satisfactions);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        preference.setProducts(new HashSet<>());
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldRecipeBeInappropriateDueToNotLikedProduct() {
+        String expected = "Recipe is inappropriate in regard to dietary preference (Product null is disliked)";
+
+        Double[][] nutrientsAmounts = new Double[3][3];
+        Double[] nutrient1 = {12.0, 14.4, 5.5};
+        nutrientsAmounts[0] = nutrient1;
+        Double[] nutrient2 = {11.6, 4.0, 2.7};
+        nutrientsAmounts[1] = nutrient2;
+        Double[] nutrient3 = {10.0, 4.0, 3.0};
+        nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
+        Integer[] categoryIndexes = {1, 2, 5};
+        Float[] ratings = {4.7F, 4.2F};
+
+        for (int i = 0; i < products.size(); i++) {
+
+            products.get(i).setCategory(categories.get(categoryIndexes[i]));
+
+            for (int j = 0; j < 3; j++) {
+                productNutrients.get(i).get(j).setNutrientAmount(nutrientsAmounts[i][j]);
+            }
+            products.get(i).setNutrients(productNutrients.get(i));
+        }
+
+        for (int i = 0; i < recipeProducts.size(); i++) {
+            recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
+        }
+        for (int i = 0; i < satisfactions.size(); i++) {
+            satisfactions.get(i).setRecipeRating(ratings[i]);
+        }
+
+        Recipes recipe = new Recipes();
+        recipe.setRecipeId(704L);
+        recipe.setRecipeName("spaghetti");
+        recipe.setRecipeProducts(recipeProducts);
+        recipe.setRecipeCustomerSatisfactions(satisfactions);
+
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+        preference.setRecipes(new HashSet<>());
+        Set<DietaryPreferencesProduct> preferredProducts = new HashSet<>();
+        DietaryPreferencesProduct preferencesProduct = new DietaryPreferencesProduct();
+        preferencesProduct.setProduct(products.get(1));
+        preferencesProduct.setProductPreferred(false);
+        preferredProducts.add(preferencesProduct);
+        preference.setProducts(preferredProducts);
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldRecipeBeAppropriateDueToNotLikedProductAndLikedRecipe() {
+        String expected = "Recipe is appropriate in regard to dietary preference";
+
+        Double[][] nutrientsAmounts = new Double[3][3];
+        Double[] nutrient1 = {12.0, 14.4, 5.5};
+        nutrientsAmounts[0] = nutrient1;
+        Double[] nutrient2 = {11.6, 4.0, 2.7};
+        nutrientsAmounts[1] = nutrient2;
+        Double[] nutrient3 = {10.0, 4.0, 3.0};
+        nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
+        Integer[] categoryIndexes = {1, 2, 5};
+        Float[] ratings = {4.7F, 4.2F};
+
+        for (int i = 0; i < products.size(); i++) {
+
+            products.get(i).setCategory(categories.get(categoryIndexes[i]));
+
+            for (int j = 0; j < 3; j++) {
+                productNutrients.get(i).get(j).setNutrientAmount(nutrientsAmounts[i][j]);
+            }
+            products.get(i).setNutrients(productNutrients.get(i));
+        }
+
+        for (int i = 0; i < recipeProducts.size(); i++) {
+            recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
+        }
+        for (int i = 0; i < satisfactions.size(); i++) {
+            satisfactions.get(i).setRecipeRating(ratings[i]);
+        }
+
+        Recipes recipe = new Recipes();
+        recipe.setRecipeId(704L);
+        recipe.setRecipeName("spaghetti");
+        recipe.setRecipeProducts(recipeProducts);
+        recipe.setRecipeCustomerSatisfactions(satisfactions);
+
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+
+        Set<DietaryPreferencesRecipe> preferredRecipes = new HashSet<>();
+        DietaryPreferencesRecipe preferencesRecipe = new DietaryPreferencesRecipe();
+        preferencesRecipe.setRecipe(recipe);
+        preferencesRecipe.setRecipePreferred(true);
+        preferredRecipes.add(preferencesRecipe);
+        preference.setRecipes(preferredRecipes);
+
+        Set<DietaryPreferencesProduct> preferredProducts = new HashSet<>();
+        DietaryPreferencesProduct preferencesProduct = new DietaryPreferencesProduct();
+        preferencesProduct.setProduct(products.get(1));
+        preferencesProduct.setProductPreferred(false);
+        preferredProducts.add(preferencesProduct);
+        preference.setProducts(preferredProducts);
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
+
+        assertEquals(expected, actual.getMessage());
+    }
+
+    @Test
+    void shouldRecipeBeInappropriateDueToLikedProductAndNotLikedRecipe() {
+        String expected = "Recipe is inappropriate in regard to dietary preference (Recipe spaghetti is disliked)";
+
+        Double[][] nutrientsAmounts = new Double[3][3];
+        Double[] nutrient1 = {12.0, 14.4, 5.5};
+        nutrientsAmounts[0] = nutrient1;
+        Double[] nutrient2 = {11.6, 4.0, 2.7};
+        nutrientsAmounts[1] = nutrient2;
+        Double[] nutrient3 = {10.0, 4.0, 3.0};
+        nutrientsAmounts[2] = nutrient3;
+        Double[] productAmounts = {100.0, 100.0, 100.0};
+        String[] productUnits = {"g", "g", "g"};
+        Integer[] categoryIndexes = {1, 2, 5};
+        Float[] ratings = {4.7F, 4.2F};
+
+        for (int i = 0; i < products.size(); i++) {
+
+            products.get(i).setCategory(categories.get(categoryIndexes[i]));
+
+            for (int j = 0; j < 3; j++) {
+                productNutrients.get(i).get(j).setNutrientAmount(nutrientsAmounts[i][j]);
+            }
+            products.get(i).setNutrients(productNutrients.get(i));
+        }
+
+        for (int i = 0; i < recipeProducts.size(); i++) {
+            recipeProducts.get(i).setProduct(products.get(i));
+            recipeProducts.get(i).setProductAmount(productAmounts[i]);
+            recipeProducts.get(i).setProductUnit(productUnits[i]);
+        }
+        for (int i = 0; i < satisfactions.size(); i++) {
+            satisfactions.get(i).setRecipeRating(ratings[i]);
+        }
+
+        Recipes recipe = new Recipes();
+        recipe.setRecipeId(704L);
+        recipe.setRecipeName("spaghetti");
+        recipe.setRecipeProducts(recipeProducts);
+        recipe.setRecipeCustomerSatisfactions(satisfactions);
+
+        User loggedUser = new User();
+        loggedUser.setUserId(1L);
+        loggedUser.setName("John");
+        loggedUser.setUsername("johnny");
+        loggedUser.setDietImprovement(1.0);
+
+        doReturn(loggedUser).when(userService).getLoggedUser();
+        doReturn(loggedUser).when(userService).findByUsername(anyString());
+
+        ResponseMessage message = new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection");
+
+        doReturn(message).when(recipeService).checkIfInCollection(anyLong());
+
+        DietaryPreferences preference = new DietaryPreferences();
+
+        Set<DietaryPreferencesRecipe> preferredRecipes = new HashSet<>();
+        DietaryPreferencesRecipe preferencesRecipe = new DietaryPreferencesRecipe();
+        preferencesRecipe.setRecipe(recipe);
+        preferencesRecipe.setRecipePreferred(false);
+        preferredRecipes.add(preferencesRecipe);
+        preference.setRecipes(preferredRecipes);
+
+        Set<DietaryPreferencesProduct> preferredProducts = new HashSet<>();
+        DietaryPreferencesProduct preferencesProduct = new DietaryPreferencesProduct();
+        preferencesProduct.setProduct(products.get(1));
+        preferencesProduct.setProductPreferred(true);
+        preferredProducts.add(preferencesProduct);
+        preference.setProducts(preferredProducts);
+
+        doReturn(preference).when(preferencesRepo).findByRelatedDietaryProgramme(any(DietaryProgramme.class));
+
+        ResponseMessage actual = dailyMenuService.verifyRecipe(recipe, dailyNutrientsScopes, new DietaryPreferences());
 
         assertEquals(expected, actual.getMessage());
     }
@@ -617,7 +1058,7 @@ class DailyMenuServiceImplTest {
 
         doReturn(dailyMenu).when(dailyMenuRepo).save(any(DailyMenu.class));
 
-        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
+        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap(), any(DietaryPreferences.class));
 
         ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
@@ -644,6 +1085,8 @@ class DailyMenuServiceImplTest {
 
         //remove pizza from allRecipes to create lack of dish for lunch
         allRecipes.remove(4);
+        //remove risotto from allRecipes to create lack of dish for lunch
+        allRecipes.remove(1);
 
         for (Recipes qrecipe : allRecipes) {
 
@@ -653,7 +1096,7 @@ class DailyMenuServiceImplTest {
 
         doReturn(allRecipes).when(recipeService).getRecipes(any(RecipeGetRequest.class));
 
-        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
+        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap(), any(DietaryPreferences.class));
 
         ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
@@ -686,9 +1129,9 @@ class DailyMenuServiceImplTest {
 
         doReturn(allRecipes).when(recipeService).getRecipes(any(RecipeGetRequest.class));
 
-        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
+        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap(), any(DietaryPreferences.class));
 
-        doReturn(new ResponseMessage("Recipe has inappropriate amount of Protein")).when(spyDailyMenuService).verifyRecipe(eq(allRecipes.get(2)), anyMap());
+        doReturn(new ResponseMessage("Recipe has inappropriate amount of Protein")).when(spyDailyMenuService).verifyRecipe(eq(allRecipes.get(2)), anyMap(), any(DietaryPreferences.class));
 
         ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 
@@ -728,7 +1171,7 @@ class DailyMenuServiceImplTest {
 
         doReturn(new ResponseMessage("Recipe is required")).when(mealService).addNewMeal(anyString(), any(Recipes.class), any(DailyMenu.class));
 
-        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap());
+        doReturn(new ResponseMessage("Recipe is appropriate in regard to dietary preference")).when(spyDailyMenuService).verifyRecipe(any(Recipes.class), anyMap(), any(DietaryPreferences.class));
 
         ResponseMessage actual = spyDailyMenuService.addNewDailyMenu(dietaryProgramme, totalDailyCalories, mealsQuantity, totalDailyNutrients, currentDay, lastDay);
 

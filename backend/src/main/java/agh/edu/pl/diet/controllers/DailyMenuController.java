@@ -3,12 +3,15 @@ package agh.edu.pl.diet.controllers;
 import agh.edu.pl.diet.entities.DailyMenu;
 import agh.edu.pl.diet.entities.DietaryProgramme;
 import agh.edu.pl.diet.entities.Meals;
+import agh.edu.pl.diet.entities.Recipes;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
+import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.MealRepo;
 import agh.edu.pl.diet.services.DailyMenuService;
 import agh.edu.pl.diet.services.MealService;
+import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,9 @@ public class DailyMenuController {
 
     @Autowired
     private MealService mealService;
+
+    @Autowired
+    private RecipeService recipeService;
 
 
 //    @GetMapping("/{id}")
@@ -63,7 +69,6 @@ public class DailyMenuController {
         }
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(consumed);
     }
-
 
 //    @PostMapping("/add")
 //    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {

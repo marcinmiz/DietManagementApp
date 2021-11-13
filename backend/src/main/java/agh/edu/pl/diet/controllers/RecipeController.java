@@ -2,7 +2,9 @@ package agh.edu.pl.diet.controllers;
 
 import agh.edu.pl.diet.entities.Recipes;
 import agh.edu.pl.diet.payloads.request.*;
+import agh.edu.pl.diet.payloads.response.RecipeResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.payloads.response.SuitabilityRecipeResponse;
 import agh.edu.pl.diet.services.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +22,22 @@ public class RecipeController {
     private RecipeService recipeService;
 
     @GetMapping
-    public Set<Recipes> getAllRecipes() {
+    public List<Recipes> getAllRecipes() {
         return recipeService.getAllRecipes();
     }
 
     @PostMapping
     public ResponseEntity<List<Recipes>> getRecipes(@RequestBody RecipeGetRequest recipeGetRequest) {
         List<Recipes> recipesList = recipeService.getRecipes(recipeGetRequest);
+        if (recipesList == null) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(recipesList);
+    }
+
+    @PostMapping("/getRecipesSuitabilities")
+    public ResponseEntity<List<RecipeResponse>> getRecipesSuitabilities(@RequestBody RecipeGetRequest recipeGetRequest) {
+        List<RecipeResponse> recipesList = recipeService.getRecipesSuitabilities(recipeGetRequest);
         if (recipesList == null) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
         }
@@ -125,6 +136,15 @@ public class RecipeController {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
         }
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
+
+    @GetMapping("/checkRecipeSuitability/{id}")
+    public ResponseEntity<List<List<SuitabilityRecipeResponse>>> checkRecipeSuitability(@PathVariable("id") Long recipeId) {
+        List<List<SuitabilityRecipeResponse>> response = recipeService.checkRecipeSuitability(recipeId);
+        if (response == null) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

@@ -33,6 +33,9 @@ const useStyles = makeStyles({
     },
     redFont: {
         color: 'darkred'
+    },
+    center: {
+        marginTop: '25%'
     }
 });
 
@@ -49,8 +52,8 @@ export default function Dashboard(props) {
     const [weightTrendCondition, setWeightTrendCondition] = React.useState(false);
     const [weightTrendCondition2, setWeightTrendCondition2] = React.useState(true);
     const [dataPoints4, setDataPoints4] = React.useState([]);
-    const [consumedCalories, setConsumedCalories] = React.useState(0);
-    const [totalCalories, setTotalCalories] = React.useState(0);
+    const [consumedCalories, setConsumedCalories] = React.useState(-1);
+    const [totalCalories, setTotalCalories] = React.useState(-1);
 
     const options = {
         theme: "dark2",
@@ -196,13 +199,16 @@ export default function Dashboard(props) {
 
                 let data = response3.data;
 
-                setConsumedCalories(data[0]);
-                setTotalCalories(data[1]);
+                if (props.currentDietaryProgramme != null) {
 
-                setDataPoints4([
-                    {y: data[2], label: "Consumed"},
-                    {y: data[3], label: "Not consumed"}
-                ]);
+                    setConsumedCalories(data[0]);
+                    setTotalCalories(data[1]);
+
+                    setDataPoints4([
+                        {y: data[2], label: "Consumed"},
+                        {y: data[3], label: "Not consumed"}
+                    ]);
+                }
                 // Calling render makes no difference
                 setInitialized(true);
             }, 1);
@@ -236,18 +242,26 @@ export default function Dashboard(props) {
                                     {dataPoints.length >= 1 ?
                                         <CanvasJSChart options={options}/>
                                         :
-                                        "There are no weights to display. Add new weight in settings"
+                                        <div className={classes.center}>
+                                            There are no weights to display. Add new weight in settings
+                                        </div>
                                     }
                                 </div>
                             </div>
                             <div className={classes.chartsContainerPart}>
                                 <div className={classes.label}>
-                                    <div className={classes.currentWeight}>{consumedCalories + " kcal of " + totalCalories + " kcal"}</div>
+                                    {consumedCalories > 0 && totalCalories > 0 ? <div className={classes.currentWeight}>{consumedCalories + " kcal of " + totalCalories + " kcal"}</div> : null}
                                 </div>
                                 <div>
+                                    {dataPoints4.length >= 1 ?
                                     <CanvasJSChart options={options2}
                                         // onRef={ref => this.chart = ref}
                                     />
+                                        :
+                                        <div className={classes.center}>
+                                            No dietary programme is used, which is necessary to display today consumed calories chart
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>)}

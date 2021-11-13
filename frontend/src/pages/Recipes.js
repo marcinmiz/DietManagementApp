@@ -65,6 +65,8 @@ export default function Recipes(props) {
         confirmation_recipe_id: null,
         confirmation_recipe_name: null,
         open_preference_suitability_popup: false,
+        suitabilityRecipeId: null,
+        suitabilityRecipeName: null,
         open_viewer_modal: false,
     });
 
@@ -104,13 +106,15 @@ export default function Recipes(props) {
 
             recipes_parameters.phrase = state.search;
 
-            http.post("/api/recipes", recipes_parameters)
+            http.post("/api/recipes/getRecipesSuitabilities", recipes_parameters)
                 .then(async resp => {
                     let table = [];
 
                     for (let x in resp.data) {
                         table[x] = await createRecipe(resp.data, x);
                     }
+
+                    console.log(table);
 
                     let recipe_index = 'new';
 
@@ -165,51 +169,53 @@ export default function Recipes(props) {
 
     const createRecipe = async (data, x) => {
         let recipe = {};
-        recipe.recipe_id = data[x].recipeId;
-        recipe.recipe_name = data[x].recipeName;
-        recipe.recipe_author = data[x].recipeOwner.name + " " + data[x].recipeOwner.surname;
-        recipe.recipe_author_id = data[x].recipeOwner.userId;
-        recipe.recipe_author_image = data[x].recipeOwner.avatarImage;
+        recipe.positiveSuitabilities = data[x].positiveSuitabilities;
+        recipe.negativeSuitabilities = data[x].negativeSuitabilities;
+        recipe.recipe_id = data[x].recipe.recipeId;
+        recipe.recipe_name = data[x].recipe.recipeName;
+        recipe.recipe_author = data[x].recipe.recipeOwner.name + " " + data[x].recipe.recipeOwner.surname;
+        recipe.recipe_author_id = data[x].recipe.recipeOwner.userId;
+        recipe.recipe_author_image = data[x].recipe.recipeOwner.avatarImage;
 
-        let ingredients_quantity = data[x].recipeProducts.length;
+        let ingredients_quantity = data[x].recipe.recipeProducts.length;
         recipe.recipe_ingredients = [];
 
         for (let i = 0; i < ingredients_quantity; i++) {
             recipe.recipe_ingredients[i] = {};
-            recipe.recipe_ingredients[i].ingredient_name = data[x].recipeProducts[i].product.productName;
-            recipe.recipe_ingredients[i].ingredient_amount = Number(data[x].recipeProducts[i].productAmount);
-            recipe.recipe_ingredients[i].ingredient_unit = data[x].recipeProducts[i].productUnit;
+            recipe.recipe_ingredients[i].ingredient_name = data[x].recipe.recipeProducts[i].product.productName;
+            recipe.recipe_ingredients[i].ingredient_amount = Number(data[x].recipe.recipeProducts[i].productAmount);
+            recipe.recipe_ingredients[i].ingredient_unit = data[x].recipe.recipeProducts[i].productUnit;
         }
 
-        let steps_quantity = data[x].recipeSteps.length;
+        let steps_quantity = data[x].recipe.recipeSteps.length;
         recipe.recipe_steps = [];
 
         for (let i = 0; i < steps_quantity; i++) {
             recipe.recipe_steps[i] = {};
             recipe.recipe_steps[i].step_number = i + 1;
-            recipe.recipe_steps[i].step_name = data[x].recipeSteps[i].recipeStepDescription;
+            recipe.recipe_steps[i].step_name = data[x].recipe.recipeSteps[i].recipeStepDescription;
         }
 
-        let customer_satisfactions_quantity = data[x].recipeCustomerSatisfactions.length;
+        let customer_satisfactions_quantity = data[x].recipe.recipeCustomerSatisfactions.length;
         recipe.recipe_customer_satisfactions = [];
 
         for (let i = 0; i < customer_satisfactions_quantity; i++) {
             recipe.recipe_customer_satisfactions[i] = {};
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_author = data[x].recipeCustomerSatisfactions[i].customerSatisfactionOwner.name + " " + data[x].recipeCustomerSatisfactions[i].customerSatisfactionOwner.surname;
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_rating = Number(data[x].recipeCustomerSatisfactions[i].recipeRating);
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_favourite = data[x].recipeCustomerSatisfactions[i].recipeFavourite;
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_author = data[x].recipe.recipeCustomerSatisfactions[i].customerSatisfactionOwner.name + " " + data[x].recipe.recipeCustomerSatisfactions[i].customerSatisfactionOwner.surname;
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_rating = Number(data[x].recipe.recipeCustomerSatisfactions[i].recipeRating);
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_favourite = data[x].recipe.recipeCustomerSatisfactions[i].recipeFavourite;
         }
 
-        recipe.recipe_shared = data[x].recipeShared;
-        recipe.recipe_image = data[x].recipeImage;
+        recipe.recipe_shared = data[x].recipe.recipeShared;
+        recipe.recipe_image = data[x].recipe.recipeImage;
 
-        let creationDate = new Date(data[x].creationDate);
+        let creationDate = new Date(data[x].recipe.creationDate);
         recipe.creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
-        recipe.approval_status = data[x].approvalStatus;
+        recipe.approval_status = data[x].recipe.approvalStatus;
         if (recipe.assessmentDate !== null) {
-            let assessmentDate = new Date(data[x].assessmentDate);
+            let assessmentDate = new Date(data[x].recipe.assessmentDate);
             recipe.assessment_date = assessmentDate.toLocaleDateString() + " " + assessmentDate.toLocaleTimeString();
-            recipe.reject_explanation = data[x].rejectExplanation;
+            recipe.reject_explanation = data[x].recipe.rejectExplanation;
         }
         const response = await http.get("/api/recipes/checkIfInCollection/" + recipe.recipe_id);
 
@@ -491,24 +497,22 @@ export default function Recipes(props) {
     const handleChangePersonalRating = async (event, index) => {
         console.log("change " + index);
     };
-    const handleOpenPreferenceSuitabilityPopup = (event) => {
+    const handleOpenPreferenceSuitabilityPopup = (event, suitabilityRecipeId, suitabilityRecipeName) => {
         event.cancelBubble = true;
         if (event.stopPropagation) event.stopPropagation();
-        console.log(event);
         setState({
             ...state,
             open_preference_suitability_popup: true,
+            suitabilityRecipeId: suitabilityRecipeId,
+            suitabilityRecipeName: suitabilityRecipeName
         });
-        console.log(state.open_preference_suitability_popup);
     };
 
     const handleClosePreferenceSuitabilityPopup = (event) => {
-        console.log(event);
         setState({
             ...state,
-            open_preference_suitability_popup: false,
+            open_preference_suitability_popup: false
         });
-        console.log(state.open_preference_suitability_popup);
 
     };
 
@@ -574,7 +578,6 @@ export default function Recipes(props) {
     };
 
     let tab = null;
-
     if (props.admin === true && props.adminMode === true) {
         tab = <div className="unconfirmed_recipes_list">
             {state.recipes.map((recipe, index) => (
@@ -691,12 +694,12 @@ export default function Recipes(props) {
                         {state.recipes.map((recipe, index) => (
                             <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe">
                                 <div className="recipe_header">
-                                    <div className="check_icons" onClick={handleOpenPreferenceSuitabilityPopup}>
+                                    <div className="check_icons" onClick={event => handleOpenPreferenceSuitabilityPopup(event, recipe.recipe_id, recipe.recipe_name)}>
                                         <div className="check_passed">
-                                            3 <CheckIcon fontSize="small"/>
+                                            {recipe.positiveSuitabilities} <CheckIcon fontSize="small"/>
                                         </div>
                                         <div className="check_failed">
-                                            2 <ClearIcon fontSize="small"/>
+                                            {recipe.negativeSuitabilities} <ClearIcon fontSize="small"/>
                                         </div>
                                     </div>
                                     <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
@@ -777,10 +780,12 @@ export default function Recipes(props) {
                         ))}
                     </Grid>
 
-                    <SuitableRecipeModal
+                    {state.loaded && state.suitabilityRecipeId && <SuitableRecipeModal
                         open={state.open_preference_suitability_popup}
                         onClose={handleClosePreferenceSuitabilityPopup}
-                    />
+                        recipeId={state.suitabilityRecipeId}
+                        recipeName={state.suitabilityRecipeName}
+                    />}
                 </div>;
                 break;
             case 2:

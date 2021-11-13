@@ -5,18 +5,25 @@ import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
+import agh.edu.pl.diet.payloads.response.RecipeResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.payloads.response.SuitabilityRecipeResponse;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public interface RecipeService {
 
-    Set<Recipes> getAllRecipes();
+    List<Recipes> getAllRecipes();
 
     Recipes getRecipe(Long recipe_id);
 
     List<Recipes> getRecipes(RecipeGetRequest recipeGetRequest);
+
+    List<RecipeResponse> getRecipesSuitabilities(RecipeGetRequest recipeGetRequest);
 
     ResponseMessage addNewRecipe(RecipeRequest recipesRequest);
 
@@ -38,4 +45,5 @@ public interface RecipeService {
 
     ResponseMessage checkIfInCollection(Long recipeId);
 
+    List<List<SuitabilityRecipeResponse>> checkRecipeSuitability(Long recipeId);
 }

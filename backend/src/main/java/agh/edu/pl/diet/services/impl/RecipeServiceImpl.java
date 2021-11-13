@@ -5,11 +5,11 @@ import agh.edu.pl.diet.payloads.request.ItemAssessRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.request.RecipeRequest;
 import agh.edu.pl.diet.payloads.request.RecipeSearchRequest;
+import agh.edu.pl.diet.payloads.response.RecipeResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
+import agh.edu.pl.diet.payloads.response.SuitabilityRecipeResponse;
 import agh.edu.pl.diet.repos.*;
-import agh.edu.pl.diet.services.ImageService;
-import agh.edu.pl.diet.services.RecipeService;
-import agh.edu.pl.diet.services.UserService;
+import agh.edu.pl.diet.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +39,10 @@ public class RecipeServiceImpl implements RecipeService {
     private UserService userService;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private DietaryPreferencesService preferencesService;
+    @Autowired
+    private DailyMenuService menuService;
     private Product ingredient = null;
 
     private ResponseMessage verify(String type, Object item) {
@@ -161,19 +165,21 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public Set<Recipes> getAllRecipes() {
+    public List<Recipes> getAllRecipes() {
         String item_type = "recipe";
         String recipe_owner_type = "avatar";
-        Set<Recipes> set = new HashSet<>();
-        recipeRepo.findAll().forEach(set::add);
+        List<Recipes> list = new ArrayList<>();
+        recipeRepo.findAll().forEach(list::add);
 
-        for (Recipes recipe : set) {
+        for (Recipes recipe : list) {
             String url = imageService.getImageURL(item_type, recipe.getRecipeId());
             recipe.setRecipeImage(url);
             String avatarUrl = imageService.getImageURL(recipe_owner_type, recipe.getRecipeOwner().getUserId());
             recipe.getRecipeOwner().setAvatarImage(avatarUrl);
+
         }
-        return set;
+
+        return list;
     }
 
     @Override
@@ -238,6 +244,41 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         return recipesList;
+    }
+
+    @Override
+    public List<RecipeResponse> getRecipesSuitabilities(RecipeGetRequest recipeGetRequest) {
+        List<Recipes> list = getRecipes(recipeGetRequest);
+        List<RecipeResponse> recipesWithSuitability = new ArrayList<>();
+
+        Integer positiveSuitabilities = 0, negativeSuitabilities = 0, suitabilitiesCounter = 0;
+
+        for (Recipes recipe : list) {
+
+            List<List<SuitabilityRecipeResponse>> suitability = checkRecipeSuitability(recipe.getRecipeId());
+            for (List<SuitabilityRecipeResponse> recipeResponses: suitability) {
+                for (SuitabilityRecipeResponse response: recipeResponses) {
+                    if (response.getSuitable()) {
+                        suitabilitiesCounter++;
+                    }
+                }
+
+                if (suitabilitiesCounter > 0) {
+                    positiveSuitabilities++;
+                } else {
+                    negativeSuitabilities++;
+                }
+
+                suitabilitiesCounter = 0;
+            }
+
+            recipesWithSuitability.add(new RecipeResponse(recipe, positiveSuitabilities, negativeSuitabilities));
+
+            positiveSuitabilities = 0;
+            negativeSuitabilities = 0;
+        }
+
+        return recipesWithSuitability;
     }
 
     @Override
@@ -727,6 +768,153 @@ public class RecipeServiceImpl implements RecipeService {
 
         return new ResponseMessage("Recipe " + recipe.getRecipeName() + " with id " + recipeId + " is not in collection");
 
+    }
+
+    @Override
+    public List<List<SuitabilityRecipeResponse>> checkRecipeSuitability(Long recipeId) {
+        Recipes recipe = recipeRepo.findByRecipeId(recipeId);
+
+        if (recipe == null) {
+            return null;
+        }
+
+        List<List<SuitabilityRecipeResponse>> list = new ArrayList<>();
+
+        Map<String, List<Double>> nutrientsScopes = new LinkedHashMap<>();
+        nutrientsScopes.put("breakfast", List.of(0.25, 0.3));
+        nutrientsScopes.put("lunch", List.of(0.05, 0.1));
+        nutrientsScopes.put("dinner", List.of(0.35, 0.4));
+        nutrientsScopes.put("tea", List.of(0.05, 0.1));
+        nutrientsScopes.put("supper1", List.of(0.15, 0.2));
+        nutrientsScopes.put("supper2", List.of(0.25, 0.3));
+
+        List<DietaryPreferences> preferences = preferencesService.getUserDietaryPreferences();
+
+        if (preferences == null) {
+            return null;
+        }
+
+        Map<String, List<Double>> dailyNutrientsScopes;
+
+        String[] keySet = nutrientsScopes.keySet().toArray(new String[0]);
+
+        for (int j = 0; j < preferences.size(); j++) {
+            DietaryPreferences preference = preferences.get(j);
+            list.add(new ArrayList<>());
+
+            Set<DietaryPreferencesNutrient> nutrients = preference.getNutrients();
+            Map<String, Double> totalDailyNutrients = new LinkedHashMap<>();
+
+            for (DietaryPreferencesNutrient dietaryPreferencesNutrient : nutrients) {
+                totalDailyNutrients.put(dietaryPreferencesNutrient.getNutrient().getNutrientName(), dietaryPreferencesNutrient.getNutrientAmount());
+            }
+
+            for (int i = 0; i < keySet.length; i++) {
+                String mealName = keySet[i];
+                SuitabilityRecipeResponse suitableRecipe;
+                List<Double> scope = nutrientsScopes.get(mealName);
+
+                Double recipeCalories = recipe.getRecipeCalories();
+                Double totalDailyCalories = preference.getTotalDailyCalories();
+
+                Double lowerBound = scope.get(0) * totalDailyCalories;
+                Double upperBound = scope.get(1) * totalDailyCalories;
+
+                Long tempLowerBound = Math.round(lowerBound * 100);
+
+                lowerBound = Double.valueOf(tempLowerBound) / 100;
+
+                Long tempUpperBound = Math.round(upperBound * 100);
+
+                upperBound = Double.valueOf(tempUpperBound) / 100;
+
+                Long tempRecipeCalories = Math.round(recipeCalories * 100);
+
+                recipeCalories = Double.valueOf(tempRecipeCalories) / 100;
+
+                System.out.println(recipeCalories);
+
+                if (recipeCalories < lowerBound) {
+                    System.out.println("lowerBound " + lowerBound);
+                    suitableRecipe = new SuitabilityRecipeResponse(false, "Calories " + recipeCalories + " are less than " + lowerBound);
+
+                    if (i == 0)
+                        suitableRecipe.setPreferenceCalories(preference.getTotalDailyCalories());
+
+                    list.get(j).add(suitableRecipe);
+                    continue;
+                } else if (recipeCalories > upperBound) {
+                    System.out.println("upperBound " + upperBound);
+                    suitableRecipe = new SuitabilityRecipeResponse(false, "Calories " + recipeCalories + " are more than " + upperBound);
+
+                    if (i == 0)
+                        suitableRecipe.setPreferenceCalories(preference.getTotalDailyCalories());
+
+                    list.get(j).add(suitableRecipe);
+                    continue;
+                }
+
+                Double lowerProteinsLimit, upperProteinsLimit, lowerCarbohydratesLimit, upperCarbohydratesLimit, lowerFatsLimit, upperFatsLimit;
+
+                lowerProteinsLimit = scope.get(0) * totalDailyNutrients.get("Protein");
+                upperProteinsLimit = scope.get(1) * totalDailyNutrients.get("Protein");
+
+                lowerCarbohydratesLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Carbohydrate");
+                upperCarbohydratesLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Carbohydrate");
+
+                lowerFatsLimit = (nutrientsScopes.get(mealName).get(0)) * totalDailyNutrients.get("Fat");
+                upperFatsLimit = (nutrientsScopes.get(mealName).get(1)) * totalDailyNutrients.get("Fat");
+
+                dailyNutrientsScopes = new LinkedHashMap<>();
+                dailyNutrientsScopes.put("Protein", List.of(lowerProteinsLimit, upperProteinsLimit));
+                dailyNutrientsScopes.put("Carbohydrate", List.of(lowerCarbohydratesLimit, upperCarbohydratesLimit));
+                dailyNutrientsScopes.put("Fat", List.of(lowerFatsLimit, upperFatsLimit));
+
+                ResponseMessage verifyRecipeMessage = menuService.verifyRecipe(recipe, dailyNutrientsScopes, preference);
+
+                String message = verifyRecipeMessage.getMessage();
+
+                if (message.equals("Recipe is appropriate in regard to dietary preference")) {
+                    suitableRecipe = new SuitabilityRecipeResponse(true, "");
+                } else {
+                    suitableRecipe = new SuitabilityRecipeResponse(false, message);
+                }
+
+                if (i == 0)
+                    suitableRecipe.setPreferenceCalories(preference.getTotalDailyCalories());
+
+                list.get(j).add(suitableRecipe);
+
+//                switch (verifyRecipeMessage.getMessage()) {
+//                    case "Recipe is appropriate in regard to dietary preference":
+//                        suitableRecipe = new SuitabilityRecipeResponse(true, "");
+//                        list.get(i).add(suitableRecipe);
+//                        break;
+//                    case "Recipe has inappropriate amount of Protein":
+//                        suitableRecipe = new SuitabilityRecipeResponse(false, "Recipe has inappropriate amount of Protein");
+//                        list.get(i).add(suitableRecipe);
+//                        break;
+//                    case "Recipe has inappropriate amount of Carbohydrate":
+//                        suitableRecipe = new SuitabilityRecipeResponse(false, "Recipe has inappropriate amount of Carbohydrate");
+//                        list.get(i).add(suitableRecipe);
+//                        break;
+//                    case "Recipe has inappropriate amount of Fat":
+//                        suitableRecipe = new SuitabilityRecipeResponse(false, "Recipe has inappropriate amount of Fat");
+//                        list.get(i).add(suitableRecipe);
+//                        break;
+//                    default:
+//                        String message = verifyRecipeMessage.getMessage();
+//                        if (message.equals("Recipe is inappropriate in regard to dietary preference (Recipe " + recipe.getRecipeName() + " does not belong to user's recipe collection)")) {
+//                            suitableRecipe = new SuitabilityRecipeResponse(false, message);
+//                            list.get(i).add(suitableRecipe);
+//                        } else if (message.startsWith("Recipe " + recipe.getRecipeName() + " contains most products, which belong to category"))
+//                        break;
+//                }
+            }
+
+        }
+
+        return list;
     }
 
 }

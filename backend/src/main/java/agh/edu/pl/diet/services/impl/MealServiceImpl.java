@@ -95,8 +95,12 @@ public class MealServiceImpl implements MealService {
         Double consumedCalories = 0.0, totalCalories = 0.0, part = 0.0;
 
         User loggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
-        if (loggedUser == null || loggedUser.getCurrentDietaryProgramme() == null) {
+        if (loggedUser == null) {
             return null;
+        }
+
+        if (loggedUser.getCurrentDietaryProgramme() == null) {
+            return new ArrayList<>();
         }
 
         List<DailyMenu> menus = menuRepo.findByDietaryProgramme(loggedUser.getCurrentDietaryProgramme());
