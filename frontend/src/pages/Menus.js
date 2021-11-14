@@ -201,6 +201,8 @@ export default function Menus(props) {
                         menus[x] = createMenu(response.data, x);
                     }
 
+                    console.log(currentDietaryProgrammeDay);
+
                     for (let i in menus[currentDietaryProgrammeDay].meals) {
                         menuRecipes[i] = menus[currentDietaryProgrammeDay].meals[i].recipe;
                     }

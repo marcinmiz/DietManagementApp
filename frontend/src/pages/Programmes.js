@@ -12,6 +12,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Chip from "@material-ui/core/Chip";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField/TextField";
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -417,6 +418,13 @@ export default function Programmes(props) {
                                         />
                                     </div>
                                     <div className="product_buttons programme_header_part">
+                                        <Tooltip title="Edit" aria-label="edit">
+                                            <IconButton aria-label="edit" className="product_icon_button"
+                                                        // onClick={event => handleEdit(event, programme.dietaryProgrammeId)}
+                                            >
+                                                <EditIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Tooltip>
                                         <Tooltip title="Delete" aria-label="delete">
                                             <IconButton aria-label="delete" className="product_icon_button"
                                                         onClick={event => handleRemove(event, programme.dietaryProgrammeId)}

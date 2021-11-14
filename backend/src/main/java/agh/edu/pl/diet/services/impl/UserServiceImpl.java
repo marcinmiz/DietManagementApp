@@ -206,6 +206,20 @@ public class UserServiceImpl implements UserService {
             }
         } else {
 
+            if (resetType.equalsIgnoreCase("settings")) {
+                try {
+                    String currentPassword = request.getCurrentPassword();
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getUsername(), currentPassword);
+                    Authentication authentication = authenticationManager.authenticate(authenticationToken);
+                    if (!authentication.isAuthenticated()) {
+                        System.out.println("Current password is wrong");
+                        throw new Exception("Current password is wrong");
+                    }
+                } catch (Exception error) {
+                    return new ResponseMessage(error.getMessage());
+                }
+            }
+
             passwordValidator.validate(request, bindingResult);
 
             if (bindingResult.hasErrors()) {
@@ -286,6 +300,18 @@ public class UserServiceImpl implements UserService {
             return new ResponseMessage("Logged user has not been found");
         } else {
 
+            try {
+                String currentPassword = request.getCurrentPassword();
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user.getUsername(), currentPassword);
+                Authentication authentication = authenticationManager.authenticate(authenticationToken);
+                if (!authentication.isAuthenticated()) {
+                    System.out.println("Current password is wrong");
+                    throw new Exception("Current password is wrong");
+                }
+            } catch (Exception error) {
+                return new ResponseMessage(error.getMessage());
+            }
+
             emailValidator.validate(request, bindingResult);
 
             if (bindingResult.hasErrors()) {
@@ -331,7 +357,7 @@ public class UserServiceImpl implements UserService {
 
         movingAverageValue = weights.stream().mapToDouble(Weight::getWeightValue).sum() / weights.size();
         movingAverage.add(movingAverageValue.toString());
-        movingAverage.add(weights.get(weights.size()-1).getMeasureDate());
+        movingAverage.add(weights.get(weights.size() - 1).getMeasureDate());
         return movingAverage;
     }
 
@@ -369,7 +395,7 @@ public class UserServiceImpl implements UserService {
 
         weightList.add(new ArrayList<>());
 
-        if (weightList.get(0).size()-1 >= trendThreshold) {
+        if (weightList.get(0).size() - 1 >= trendThreshold) {
             for (int i = 4; i < iterationLimit; i++) {
                 List<String> movingAverage = countMovingAverage(weightList.get(0).subList(0, i + 1));
                 Weight weight = new Weight(Double.parseDouble(movingAverage.get(0)), measurer);

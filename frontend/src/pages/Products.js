@@ -53,6 +53,16 @@ const useStyles = makeStyles((theme) => ({
     },
     photo_placeholder: {
         fontSize: 200
+    },
+    searchContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '30%',
+        justifyContent: 'space-evenly'
+    },
+    searchButton: {
+        marginLeft: '5%'
     }
 }));
 
@@ -67,7 +77,7 @@ export default function Products(props) {
     let products_parameters = {};
 
     const [state, setState] = React.useState({
-        search: '',
+        searchPhrase: '',
         category: '',
         products_group: 0,//0: all, 1: unconfirmed, 2: new
         products: [],
@@ -112,89 +122,8 @@ export default function Products(props) {
 
     useEffect(
         async () => {
-
-            setState({
-                ...state,
-                loaded: false
-            });
-
-            let categoriesTable = [];
-
-            http.get("/api/categories")
-                .then(resp => {
-                    for (let x in resp.data) {
-                        categoriesTable[x] = {};
-                        categoriesTable[x].category_id = resp.data[x].categoryId;
-                        categoriesTable[x].category_name = resp.data[x].categoryName;
-                    }
-                })
-                .catch(error => console.log(error));
-
-            products_parameters.phrase = state.search;
-            products_parameters.category = state.category;
-
-            if (products_parameters.productsGroup === "accepted") {
-                products_parameters.productsGroup = "all";
-            }
-
-            http.post("/api/products", products_parameters)
-                .then(async resp => {
-                    let table = [];
-
-                    for (let x in resp.data) {
-                        table[x] = createProduct(resp.data, x);
-                    }
-
-                    let product_index = 'new';
-
-                    if (productId !== 'new' && (mode === 'view' || mode === 'edit')) {
-
-                        for (let i = 0; i < table.length; i++) {
-                            if (table[i]) {
-                                if (table[i].product_id === Number(productId)) {
-                                    product_index = i;
-                                }
-                            }
-                        }
-                        //
-                        // let resp = await http.get("/api/products/checkProductApprovalStatus/" + productId);
-                        // let approvalStatus = resp.data.message;
-                        //
-                        // if (product_index === 'new') {
-                        //     switch (approvalStatus) {
-                        //         case 'accepted':
-                        //             document.getElementById('first').click();
-                        //             break;
-                        //         case 'pending':
-                        //             document.getElementById('second').click();
-                        //             break;
-                        //         case 'rejected':
-                        //             if (props.adminMode) {
-                        //                 document.getElementById('third').click();
-                        //             } else {
-                        //                 document.getElementById('second').click();
-                        //             }
-                        //             break;
-                        //     }
-                        // }
-                    }
-
-                    if ((!Number.isInteger(Number(productId)) && productId !== 'new') || (mode !== 'view' && mode !== 'edit')) {
-                        history.push('/products');
-                    }
-
-                    setState({
-                        ...state,
-                        products: table,
-                        categories: categoriesTable,
-                        loaded: true,
-                        product_index: product_index,
-                        open_viewer_modal: productId && mode && state.msg === "" ? true : false
-                    });
-                })
-                .catch(error => console.log(error))
-
-        }, [state.products_group, state.msg, state.search, state.category, props.adminMode, productId, mode]
+            handleSearch();
+        }, [state.products_group, state.msg, props.adminMode, productId, mode]
     );
 
     const createProduct = (data, x) => {
@@ -373,6 +302,93 @@ export default function Products(props) {
         }
 
         history.push('/products/' + state.products[new_index].product_id + '/' + mode);
+
+    };
+
+    const handleSearch = () => {
+
+        setState({
+            ...state,
+            loaded: false,
+            products: []
+        });
+
+        let categoriesTable = [];
+
+        http.get("/api/categories")
+            .then(resp => {
+                for (let x in resp.data) {
+                    categoriesTable[x] = {};
+                    categoriesTable[x].category_id = resp.data[x].categoryId;
+                    categoriesTable[x].category_name = resp.data[x].categoryName;
+                }
+            })
+            .catch(error => console.log(error));
+
+        products_parameters.phrase = state.searchPhrase;
+        products_parameters.category = state.category;
+
+        if (products_parameters.productsGroup === "accepted") {
+            products_parameters.productsGroup = "all";
+        }
+
+        http.post("/api/products", products_parameters)
+            .then(async resp => {
+                let table = [];
+
+                for (let x in resp.data) {
+                    table[x] = createProduct(resp.data, x);
+                }
+
+                let product_index = 'new';
+
+                if (productId !== 'new' && (mode === 'view' || mode === 'edit')) {
+
+                    for (let i = 0; i < table.length; i++) {
+                        if (table[i]) {
+                            if (table[i].product_id === Number(productId)) {
+                                product_index = i;
+                            }
+                        }
+                    }
+                    //
+                    // let resp = await http.get("/api/products/checkProductApprovalStatus/" + productId);
+                    // let approvalStatus = resp.data.message;
+                    //
+                    // if (product_index === 'new') {
+                    //     switch (approvalStatus) {
+                    //         case 'accepted':
+                    //             document.getElementById('first').click();
+                    //             break;
+                    //         case 'pending':
+                    //             document.getElementById('second').click();
+                    //             break;
+                    //         case 'rejected':
+                    //             if (props.adminMode) {
+                    //                 document.getElementById('third').click();
+                    //             } else {
+                    //                 document.getElementById('second').click();
+                    //             }
+                    //             break;
+                    //     }
+                    // }
+                }
+
+                if ((!Number.isInteger(Number(productId)) && productId !== 'new') || (mode !== 'view' && mode !== 'edit')) {
+                    history.push('/products');
+                }
+
+                setState({
+                    ...state,
+                    products: table,
+                    categories: categoriesTable,
+                    loaded: true,
+                    product_index: product_index,
+                    open_viewer_modal: productId && mode && state.msg === "" ? true : false
+                });
+            })
+            .catch(error => console.log(error))
+
 
     };
 
@@ -668,18 +684,18 @@ export default function Products(props) {
                             <Tab id="third" className="product_group_tab" label="New"/>
                         </Tabs>
                     }
-                    <div>
+                    <div className={classes.searchContainer}>
                         <FormControl variant="filled">
-                            <InputLabel htmlFor="search" className="search_input">Search</InputLabel>
+                            <InputLabel htmlFor="searchPhrase" className="search_input">Type product name</InputLabel>
                             <FilledInput
-                                id="search"
-                                name="search"
+                                id="searchPhrase"
+                                name="searchPhrase"
                                 className="search_input"
-                                placeholder="Type product name"
-                                value={state.search}
+                                value={state.searchPhrase}
                                 onChange={handleChange}
                             />
                         </FormControl>
+
                         <FormControl variant="filled" className={classes.formControl}>
                             <InputLabel id="category_select_label" className="category_select">Category</InputLabel>
                             <Select
@@ -696,6 +712,9 @@ export default function Products(props) {
                                 ))}
                             </Select>
                         </FormControl>
+
+                        <Button className={classes.searchButton} variant="contained" color="primary" type="button"
+                                onClick={() => handleSearch()}>Search</Button>
                     </div>
                     <Fab className="add_button" aria-label="add" onClick={handleAddNewProduct}>
                         <AddIcon/>

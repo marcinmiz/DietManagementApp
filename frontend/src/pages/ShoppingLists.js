@@ -142,7 +142,7 @@ export default function ShoppingLists(props) {
                                 <div>
                                     <h3>{state.startWeekDate != null && state.endWeekDate != null && state.startWeekDate + " - " + state.endWeekDate}</h3>
                                 </div>
-                                <div className="menuList">
+                                <div className="shoppingList">
                                     {state.shoppingLists[state.currentWeekShoppingList] && state.shoppingLists[state.currentWeekShoppingList].map((product, index) => (
                                         <div key={index} className={classes.product}>
                                             <div className={classes.productName}>

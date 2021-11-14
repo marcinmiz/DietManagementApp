@@ -802,6 +802,13 @@
     margin-top: 0;
 }
 
+.shoppingList {
+    overflow-y: scroll;
+    max-height: 20rem;
+    padding: 5%;
+    margin-top: 0;
+}
+
 .programme, .preference_container {
     background-color: #484848;
     border-radius: 5px;

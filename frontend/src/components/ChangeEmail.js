@@ -13,6 +13,7 @@ export default function ChangeEmail(props) {
     const classes = useStyles();
 
     const [state, setState] = React.useState({
+        currentPassword: "",
         email: "",
         msg: "",
     });
@@ -61,9 +62,11 @@ export default function ChangeEmail(props) {
         try {
             let result, credentials;
             console.log(state.email);
+            console.log(state.currentPassword);
 
             if (validateEmail() !== "error") {
                 credentials = {
+                    "currentPassword": state.currentPassword,
                     "email": state.email
                 };
 
@@ -72,7 +75,7 @@ export default function ChangeEmail(props) {
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                 setState({
                     ...state,
-                    msg: result.data.message
+                    msg: result.data.message === "Bad credentials" ? "Wrong current password" : result.data.message
                 });
                 // }
             }
@@ -93,6 +96,18 @@ export default function ChangeEmail(props) {
 
             <form className={classes.emailForm + " form"}>
                 <div className="setting_header">Change E-mail</div>
+
+                <label htmlFor="password" className={classes.currentPassword}>Enter your current password</label>
+                <input
+                    className={classes.currentPassword + " input_field"}
+                    id="currentPassword2"
+                    type="password"
+                    name="currentPassword"
+                    value={state.currentPassword}
+                    autoComplete="off"
+                    onChange={event => handleChange(event)}
+                    required/>
+
                 <label htmlFor="email">Enter your new e-mail</label>
                 <input
                     className="input_field"

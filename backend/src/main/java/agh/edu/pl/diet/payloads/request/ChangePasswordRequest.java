@@ -8,6 +8,8 @@ public class ChangePasswordRequest {
     @NotBlank
     private String token;
     @NotBlank
+    private String currentPassword;
+    @NotBlank
     private String password;
     @NotBlank
     private String passwordConfirmation;
@@ -26,6 +28,14 @@ public class ChangePasswordRequest {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getCurrentPassword() {
+        return currentPassword;
+    }
+
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
     }
 
     public String getPassword() {

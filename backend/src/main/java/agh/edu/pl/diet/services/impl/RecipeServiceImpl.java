@@ -239,6 +239,12 @@ public class RecipeServiceImpl implements RecipeService {
             case "rejected":
                 recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("rejected")).collect(Collectors.toList());
                 break;
+            case "favourite":
+                recipesList = recipesList.stream().filter(recipe -> {
+                    List<Recipes> favouriteRecipes = recipe.getRecipeCustomerSatisfactions().stream().filter(satisfaction -> satisfaction.getRecipeFavourite() && satisfaction.getCustomerSatisfactionOwner().getUserId().equals(currentLoggedUser.getUserId())).map(RecipeCustomerSatisfaction::getRecipe).collect(Collectors.toList());
+                    return recipe.getApprovalStatus().equals("accepted") && favouriteRecipes.contains(recipe);
+                }).collect(Collectors.toList());
+                break;
             default:
                 recipesList = null;
         }

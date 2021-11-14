@@ -23,7 +23,6 @@ import ClearIcon from '@material-ui/icons/Clear';
 import {useHistory, useParams} from "react-router-dom";
 import ViewerModal from "../components/ViewerModal";
 import ArrowDownwardRoundedIcon from '@material-ui/icons/ArrowDownwardRounded';
-import CloudDownloadRoundedIcon from '@material-ui/icons/CloudDownloadRounded';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 
@@ -34,6 +33,14 @@ const useStyles = makeStyles({
     },
     photo_placeholder: {
         fontSize: 200
+    },
+    searchContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    searchButton: {
+        marginLeft: '2%'
     }
 });
 
@@ -51,7 +58,7 @@ export default function Recipes(props) {
     // console.log("mode " + mode);
 
     const [state, setState] = React.useState({
-        search: '',
+        searchPhrase: '',
         recipes_group: 0,//0: personal, 1: shared, 2: unconfirmed
         recipes: [
             // {"recipe_id": 1, "recipe_name": "Salmon with green beans and bacon", "recipe_author": "John Smith", "recipe_favourite": false, "recipe_shared": false, "recipe_image": "http://localhost:8097/api/images/get/recipe/recipe1.jpg", "creation_date": "7.08.2021 21:11:14", "assessment_date": "9.08.2021 21:11:14", "rejectExplanation": "", "approval_status": "accepted", "recipeCustomerSatisfactions": [{"rating_author": "John Smith", "rating_value": 0.2}, {"rating_author": "Derek Johnson", "rating_value": 3.5}, {"rating_author": "Kate Bell", "rating_value": 2.0}, {"rating_author": "Jessica Wells", "rating_value": 5.0}], "ingredients": [{"ingredient_name": "salmon fillet", "ingredient_quantity": 4, "ingredient_unit": "pcs"}, {"ingredient_name": "green beans", "ingredient_quantity": 450, "ingredient_unit": "g"}, {"ingredient_name": "butter", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "smoked bacon", "ingredient_quantity": 2, "ingredient_unit": "slices"}, {"ingredient_name": "breadcrumbs", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "olive oil", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}, {"ingredient_name": "water", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}], "steps": [{"step_number": 1, "step_name": "Cut each salmon fillet into 4 pieces and place them in ovenproof dish lined with parchment. Pour it some olive oil. Leave it for several minutes, then roast at 160 Celsius degrees for 15 minutes."}, {"step_number": 2, "step_name": "Cube smoked bacon and fry it up on the frying pan."}, {"step_number": 3, "step_name": "Blanch green beans, then strain it and add to smoked bacon. Stop frying after 1 minute."}, {"step_number": 4, "step_name": "Add butter to green beans and fry it for a few minutes."}, {"step_number": 5, "step_name": "Before you finish frying sprinkle its content with breadcrumbs. Serve with roasted salmon. You might append boiled rice."}]}
@@ -92,6 +99,9 @@ export default function Recipes(props) {
                 recipes_parameters.recipesGroup = "unconfirmed";
             }
             break;
+        case 3:
+                recipes_parameters.recipesGroup = "favourite";
+            break;
         default:
             recipes_parameters.recipesGroup = "";
             console.error("Wrong recipes group");
@@ -99,123 +109,66 @@ export default function Recipes(props) {
 
     useEffect(
         async () => {
-            setState({
-                ...state,
-                loaded: false
-            });
-
-            recipes_parameters.phrase = state.search;
-
-            http.post("/api/recipes/getRecipesSuitabilities", recipes_parameters)
-                .then(async resp => {
-                    let table = [];
-
-                    for (let x in resp.data) {
-                        table[x] = await createRecipe(resp.data, x);
-                    }
-
-                    console.log(table);
-
-                    let recipe_index = 'new';
-
-                    if (recipeId !== 'new' && (mode === 'view' || mode === 'edit')) {
-
-                        for (let i = 0; i < table.length; i++) {
-                            if (table[i]) {
-                                if (table[i].recipe_id === Number(recipeId)) {
-                                    recipe_index = i;
-                                }
-                            }
-                        }
-
-                        // let resp = await http.get("/api/recipes/checkRecipeApprovalStatus/" + recipeId);
-                        // let approvalStatus = resp.data.message;
-                        //
-                        // if (recipe_index === 'new') {
-                        //     switch (approvalStatus) {
-                        //         case 'accepted':
-                        //             document.getElementById('first').click();
-                        //             break;
-                        //         case 'pending':
-                        //             document.getElementById('second').click();
-                        //             break;
-                        //         case 'rejected':
-                        //             if (props.adminMode) {
-                        //                 document.getElementById('third').click();
-                        //             } else {
-                        //                 document.getElementById('second').click();
-                        //             }
-                        //             break;
-                        //     }
-                        // }
-                    }
-
-                    if ((!Number.isInteger(Number(recipeId)) && recipeId !== 'new') || (mode !== 'view' && mode !== 'edit')) {
-                        history.push('/recipes');
-                    }
-
-                    setState({
-                        ...state,
-                        recipes: table,
-                        loaded: true,
-                        recipe_index: recipe_index,
-                        open_viewer_modal: recipeId && mode && state.msg === "" ? true : false
-                    });
-                })
-                .catch(error => console.log(error))
-
-        }, [state.recipes_group, state.search, state.msg, props.adminMode, recipeId, mode]
+            handleSearch();
+        }, [state.recipes_group, state.msg, props.adminMode, recipeId, mode]
     );
 
-    const createRecipe = async (data, x) => {
+    const createRecipe = async (data, x, recipesGroup) => {
         let recipe = {};
-        recipe.positiveSuitabilities = data[x].positiveSuitabilities;
-        recipe.negativeSuitabilities = data[x].negativeSuitabilities;
-        recipe.recipe_id = data[x].recipe.recipeId;
-        recipe.recipe_name = data[x].recipe.recipeName;
-        recipe.recipe_author = data[x].recipe.recipeOwner.name + " " + data[x].recipe.recipeOwner.surname;
-        recipe.recipe_author_id = data[x].recipe.recipeOwner.userId;
-        recipe.recipe_author_image = data[x].recipe.recipeOwner.avatarImage;
+        let info;
+        if (recipesGroup === "personal" || recipesGroup === "shared" || recipesGroup === "favourite") {
+            recipe.positiveSuitabilities = data[x].positiveSuitabilities;
+            recipe.negativeSuitabilities = data[x].negativeSuitabilities;
+            info = data[x].recipe;
+        } else {
+            info = data[x];
+        }
+        recipe.recipe_id = info.recipeId;
+        recipe.recipe_name = info.recipeName;
+        recipe.recipe_author = info.recipeOwner.name + " " + info.recipeOwner.surname;
+        recipe.recipe_author_id = info.recipeOwner.userId;
+        recipe.recipe_author_image = info.recipeOwner.avatarImage;
 
-        let ingredients_quantity = data[x].recipe.recipeProducts.length;
+        let ingredients_quantity = info.recipeProducts.length;
         recipe.recipe_ingredients = [];
 
         for (let i = 0; i < ingredients_quantity; i++) {
             recipe.recipe_ingredients[i] = {};
-            recipe.recipe_ingredients[i].ingredient_name = data[x].recipe.recipeProducts[i].product.productName;
-            recipe.recipe_ingredients[i].ingredient_amount = Number(data[x].recipe.recipeProducts[i].productAmount);
-            recipe.recipe_ingredients[i].ingredient_unit = data[x].recipe.recipeProducts[i].productUnit;
+            recipe.recipe_ingredients[i].ingredient_name = info.recipeProducts[i].product.productName;
+            recipe.recipe_ingredients[i].ingredient_amount = Number(info.recipeProducts[i].productAmount);
+            recipe.recipe_ingredients[i].ingredient_unit = info.recipeProducts[i].productUnit;
         }
 
-        let steps_quantity = data[x].recipe.recipeSteps.length;
+        let steps_quantity = info.recipeSteps.length;
         recipe.recipe_steps = [];
 
         for (let i = 0; i < steps_quantity; i++) {
             recipe.recipe_steps[i] = {};
             recipe.recipe_steps[i].step_number = i + 1;
-            recipe.recipe_steps[i].step_name = data[x].recipe.recipeSteps[i].recipeStepDescription;
+            recipe.recipe_steps[i].step_name = info.recipeSteps[i].recipeStepDescription;
         }
 
-        let customer_satisfactions_quantity = data[x].recipe.recipeCustomerSatisfactions.length;
+        let customer_satisfactions_quantity = info.recipeCustomerSatisfactions.length;
         recipe.recipe_customer_satisfactions = [];
 
         for (let i = 0; i < customer_satisfactions_quantity; i++) {
             recipe.recipe_customer_satisfactions[i] = {};
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_author = data[x].recipe.recipeCustomerSatisfactions[i].customerSatisfactionOwner.name + " " + data[x].recipe.recipeCustomerSatisfactions[i].customerSatisfactionOwner.surname;
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_rating = Number(data[x].recipe.recipeCustomerSatisfactions[i].recipeRating);
-            recipe.recipe_customer_satisfactions[i].customer_satisfaction_favourite = data[x].recipe.recipeCustomerSatisfactions[i].recipeFavourite;
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_author = info.recipeCustomerSatisfactions[i].customerSatisfactionOwner.name + " " + info.recipeCustomerSatisfactions[i].customerSatisfactionOwner.surname;
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_rating = Number(info.recipeCustomerSatisfactions[i].recipeRating);
+            recipe.recipe_customer_satisfactions[i].customer_satisfaction_favourite = info.recipeCustomerSatisfactions[i].recipeFavourite;
         }
 
-        recipe.recipe_shared = data[x].recipe.recipeShared;
-        recipe.recipe_image = data[x].recipe.recipeImage;
+        recipe.recipe_shared = info.recipeShared;
+        recipe.recipe_image = info.recipeImage;
 
-        let creationDate = new Date(data[x].recipe.creationDate);
+        let creationDate = new Date(info.creationDate);
         recipe.creation_date = creationDate.toLocaleDateString() + " " + creationDate.toLocaleTimeString();
-        recipe.approval_status = data[x].recipe.approvalStatus;
-        if (recipe.assessmentDate !== null) {
-            let assessmentDate = new Date(data[x].recipe.assessmentDate);
+        recipe.approval_status = info.approvalStatus;
+
+        if (info.assessmentDate !== null) {
+            let assessmentDate = new Date(info.assessmentDate);
             recipe.assessment_date = assessmentDate.toLocaleDateString() + " " + assessmentDate.toLocaleTimeString();
-            recipe.reject_explanation = data[x].recipe.rejectExplanation;
+            recipe.reject_explanation = info.rejectExplanation;
         }
         const response = await http.get("/api/recipes/checkIfInCollection/" + recipe.recipe_id);
 
@@ -472,7 +425,7 @@ export default function Recipes(props) {
 
         let response = await http.put("/api/recipes/rate/" + recipeId + "/" + newValue);
 
-        if(response.data.message.startsWith("Recipe with id")) {
+        if (response.data.message.startsWith("Recipe with id")) {
             setState({
                 ...state,
                 "msg": "Recipe " + state.recipes[index].recipe_name + " has been rated"
@@ -577,6 +530,80 @@ export default function Recipes(props) {
 
     };
 
+    const handleSearch = async () => {
+        setState({
+            ...state,
+            recipes: [],
+            loaded: false
+        });
+
+        recipes_parameters.phrase = state.searchPhrase;
+        let response;
+
+        try {
+            if (recipes_parameters.recipesGroup === "personal" || recipes_parameters.recipesGroup === "shared" || recipes_parameters.recipesGroup === "favourite") {
+                response = await http.post("/api/recipes/getRecipesSuitabilities", recipes_parameters)
+            } else {
+                response = await http.post("/api/recipes", recipes_parameters)
+            }
+            let table = [];
+
+            for (let x in response.data) {
+                table[x] = await createRecipe(response.data, x, recipes_parameters.recipesGroup);
+            }
+
+            let recipe_index = 'new';
+
+            if (recipeId !== 'new' && (mode === 'view' || mode === 'edit')) {
+
+                for (let i = 0; i < table.length; i++) {
+                    if (table[i]) {
+                        if (table[i].recipe_id === Number(recipeId)) {
+                            recipe_index = i;
+                        }
+                    }
+                }
+
+                // let resp = await http.get("/api/recipes/checkRecipeApprovalStatus/" + recipeId);
+                // let approvalStatus = resp.data.message;
+                //
+                // if (recipe_index === 'new') {
+                //     switch (approvalStatus) {
+                //         case 'accepted':
+                //             document.getElementById('first').click();
+                //             break;
+                //         case 'pending':
+                //             document.getElementById('second').click();
+                //             break;
+                //         case 'rejected':
+                //             if (props.adminMode) {
+                //                 document.getElementById('third').click();
+                //             } else {
+                //                 document.getElementById('second').click();
+                //             }
+                //             break;
+                //     }
+                // }
+            }
+
+            if ((!Number.isInteger(Number(recipeId)) && recipeId !== 'new') || (mode !== 'view' && mode !== 'edit')) {
+                history.push('/recipes');
+            }
+
+            setState({
+                ...state,
+                recipes: table,
+                loaded: true,
+                recipe_index: recipe_index,
+                open_viewer_modal: recipeId && mode && state.msg === "" ? true : false
+            });
+
+        } catch (error) {
+            console.log(error);
+        }
+
+    };
+
     let tab = null;
     if (props.admin === true && props.adminMode === true) {
         tab = <div className="unconfirmed_recipes_list">
@@ -589,18 +616,20 @@ export default function Recipes(props) {
                                     {recipe.recipe_name}
                                 </div>
                                 <div className="recipe_buttons">
-                                    {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Remove" aria-label="remove">
-                                        <IconButton aria-label="remove" className="recipe_icon_button"
-                                                    onClick={event => handleRemove(event, index)}>
-                                            <DeleteIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip> : null}
-                                    {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
-                                        <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                    onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                            <EditIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Tooltip> : null}
+                                    {state.recipes[index].recipe_author_id === props.userId ?
+                                        <Tooltip title="Remove" aria-label="remove">
+                                            <IconButton aria-label="remove" className="recipe_icon_button"
+                                                        onClick={event => handleRemove(event, index)}>
+                                                <DeleteIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Tooltip> : null}
+                                    {state.recipes[index].recipe_author_id === props.userId ?
+                                        <Tooltip title="Edit" aria-label="edit">
+                                            <IconButton type="button" aria-label="edit" className="recipe_icon_button"
+                                                        onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                                <EditIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Tooltip> : null}
                                 </div>
                             </div>
                             <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
@@ -608,8 +637,11 @@ export default function Recipes(props) {
                             </div>
 
                             <div className="recipe_content">
-                                <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                    {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                <div className="recipe_image_container"
+                                     onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                    {recipe.recipe_image !== "" ?
+                                        <img src={recipe.recipe_image} alt={recipe.recipe_name}
+                                             className="recipe_image"/> :
                                         <ReceiptIcon className={classes.photo_placeholder}/>}
                                 </div>
                                 <div className="recipe_description">
@@ -632,7 +664,8 @@ export default function Recipes(props) {
                         <div className="recipe_status">
                             <div className="unconfirmed_header">Status</div>
                             <Divider variant="fullWidth"/>
-                            <div className={recipe.approval_status === "accepted"?"accepted_recipe unconfirmed_body":(recipe.approval_status === "pending"?"pending_recipe unconfirmed_body":"rejected_recipe unconfirmed_body")}>
+                            <div
+                                className={recipe.approval_status === "accepted" ? "accepted_recipe unconfirmed_body" : (recipe.approval_status === "pending" ? "pending_recipe unconfirmed_body" : "rejected_recipe unconfirmed_body")}>
                                 {recipe.approval_status.toUpperCase()}
                             </div>
                         </div>
@@ -640,10 +673,12 @@ export default function Recipes(props) {
                             ?
                             <div className="assessment_details">
                                 <div>
-                                    <Button name="accept" variant="contained" className="accept_button" onClick={(event) => handleAssess(event, recipe.recipe_id, recipe.recipe_name)}>Accept</Button>
+                                    <Button name="accept" variant="contained" className="accept_button"
+                                            onClick={(event) => handleAssess(event, recipe.recipe_id, recipe.recipe_name)}>Accept</Button>
                                 </div>
                                 <div>
-                                    <Button name="reject" variant="contained" className="reject_button" onClick={event => handleAssess(event, recipe.recipe_id, recipe.recipe_name)}>Reject</Button>
+                                    <Button name="reject" variant="contained" className="reject_button"
+                                            onClick={event => handleAssess(event, recipe.recipe_id, recipe.recipe_name)}>Reject</Button>
                                 </div>
 
                             </div>
@@ -678,10 +713,10 @@ export default function Recipes(props) {
                 type="recipe"
                 open={state.open_confirmation_modal && state.msg === ''}
                 onClose={handleCloseConfirmationPopup}
-                complement = {state.complement}
-                itemId = {state.confirmation_recipe_id}
-                itemName = {state.confirmation_recipe_name}
-                handleOperationMessage = {handleOperationMessage}
+                complement={state.complement}
+                itemId={state.confirmation_recipe_id}
+                itemName={state.confirmation_recipe_name}
+                handleOperationMessage={handleOperationMessage}
             />
         </div>;
 
@@ -689,12 +724,14 @@ export default function Recipes(props) {
         switch (state.recipes_group) {
             case 0:
             case 1:
+            case 3:
                 tab = <div className="recipes_list">
                     <Grid container>
                         {state.recipes.map((recipe, index) => (
                             <Grid item key={index} id={"recipe" + recipe.recipe_id} className="recipe">
                                 <div className="recipe_header">
-                                    <div className="check_icons" onClick={event => handleOpenPreferenceSuitabilityPopup(event, recipe.recipe_id, recipe.recipe_name)}>
+                                    <div className="check_icons"
+                                         onClick={event => handleOpenPreferenceSuitabilityPopup(event, recipe.recipe_id, recipe.recipe_name)}>
                                         <div className="check_passed">
                                             {recipe.positiveSuitabilities} <CheckIcon fontSize="small"/>
                                         </div>
@@ -702,31 +739,41 @@ export default function Recipes(props) {
                                             {recipe.negativeSuitabilities} <ClearIcon fontSize="small"/>
                                         </div>
                                     </div>
-                                    <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                    <div className="recipe_name"
+                                         onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                         {recipe.recipe_name}
-                                        <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                        <div className="creation_date"
+                                             onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                             {"created " + recipe.creation_date}
                                         </div>
                                     </div>
                                     <div className="recipe_buttons">
                                         {handleFavouriteIcon(index)}
-                                        {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Remove" aria-label="remove">
-                                            <IconButton aria-label="remove" className="recipe_icon_button"
-                                                        onClick={event => handleRemove(event, index)}>
-                                                <DeleteIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip> : null}
-                                        {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
-                                            <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                        onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                                <EditIcon fontSize="small"/>
-                                            </IconButton>
-                                        </Tooltip> : null}
-                                        {state.recipes[index].recipe_author_id !== props.userId ? <Tooltip title={recipe.in_collection ? "Remove from collection" : "Add to collection"} aria-label={recipe.in_collection ? "Remove from collection" : "Add to collection"}>
-                                            <IconButton type="button" aria-label={recipe.in_collection ? "Remove from collection" : "Add to collection"} className="recipe_icon_button"
+                                        {state.recipes[index].recipe_author_id === props.userId ?
+                                            <Tooltip title="Remove" aria-label="remove">
+                                                <IconButton aria-label="remove" className="recipe_icon_button"
+                                                            onClick={event => handleRemove(event, index)}>
+                                                    <DeleteIcon fontSize="small"/>
+                                                </IconButton>
+                                            </Tooltip> : null}
+                                        {state.recipes[index].recipe_author_id === props.userId ?
+                                            <Tooltip title="Edit" aria-label="edit">
+                                                <IconButton type="button" aria-label="edit"
+                                                            className="recipe_icon_button"
+                                                            onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                                    <EditIcon fontSize="small"/>
+                                                </IconButton>
+                                            </Tooltip> : null}
+                                        {state.recipes[index].recipe_author_id !== props.userId ? <Tooltip
+                                            title={recipe.in_collection ? "Remove from collection" : "Add to collection"}
+                                            aria-label={recipe.in_collection ? "Remove from collection" : "Add to collection"}>
+                                            <IconButton type="button"
+                                                        aria-label={recipe.in_collection ? "Remove from collection" : "Add to collection"}
+                                                        className="recipe_icon_button"
                                                         onClick={(event) => handleAddToCollection(event, recipe.recipe_id)}
                                             >
-                                                {recipe.in_collection ? <CloseRoundedIcon fontSize="small"/> : <ArrowDownwardRoundedIcon fontSize="small"/>}
+                                                {recipe.in_collection ? <CloseRoundedIcon fontSize="small"/> :
+                                                    <ArrowDownwardRoundedIcon fontSize="small"/>}
                                             </IconButton>
                                         </Tooltip> : null}
 
@@ -734,8 +781,11 @@ export default function Recipes(props) {
                                 </div>
 
                                 <div className="recipe_content">
-                                    <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                        {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                    <div className="recipe_image_container"
+                                         onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                        {recipe.recipe_image !== "" ?
+                                            <img src={recipe.recipe_image} alt={recipe.recipe_name}
+                                                 className="recipe_image"/> :
                                             <ReceiptIcon className={classes.photo_placeholder}/>}
                                     </div>
                                     <div className="recipe_description">
@@ -757,19 +807,34 @@ export default function Recipes(props) {
                                                 <div className="recipe_ratings">
                                                     General: {handleGeneralRating(index)} ({state.recipes[index].recipe_customer_satisfactions ? state.recipes[index].recipe_customer_satisfactions.length : 0} {state.recipes[index].recipe_customer_satisfactions ? (state.recipes[index].recipe_customer_satisfactions.length === 1 ? "rating" : "ratings") : "ratings"})
                                                 </div>
-                                                <Rating name="read-only" value={handleGeneralRating(index)} precision={0.1} readOnly/>
+                                                <Rating name="read-only" value={handleGeneralRating(index)}
+                                                        precision={0.1} readOnly/>
                                                 <div className="recipe_ratings_header">
                                                     Personal rating
                                                 </div>
-                                                <Tooltip title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : handlePersonalRating(index)} aria-label="rate" placement="top">
-                                                    <Rating name={`rating${index}`} value={handlePersonalRating(index)} precision={0.1} onChange={(event, value) => handlePersonalRatingEdit(event,index, value)} onChangeActive={(event, newHover) => {
-                                                        // console.log(index);
-                                                        // console.log(recipe);
-                                                        setState({...state, "hover_rating": newHover})
-                                                    }}/>
+                                                <Tooltip
+                                                    title={"Value: " + state.hover_rating !== -1 ? state.hover_rating : handlePersonalRating(index)}
+                                                    aria-label="rate" placement="top">
+                                                    <Rating name={`rating${index}`} value={handlePersonalRating(index)}
+                                                            precision={0.1}
+                                                            onChange={(event, value) => handlePersonalRatingEdit(event, index, value)}
+                                                            onChangeActive={(event, newHover) => {
+                                                                // console.log(index);
+                                                                // console.log(recipe);
+                                                                setState({...state, "hover_rating": newHover})
+                                                            }}/>
                                                 </Tooltip>
                                             </div>
-                                            {state.recipes[index].recipe_shared ? <Tooltip title={state.recipes[index].recipe_author_id === props.userId ? "Cancel sharing" : "Only recipe owner can share recipe"} aria-label="Cancel sharing recipe"><Button variant="contained" className="shared_button" size="medium" onClick={event => handleShare(event, index)} disabled={state.recipes[index].recipe_author_id !== props.userId}>Shared</Button></Tooltip> : <Tooltip title="Share recipe" aria-label="Share"><Button variant="contained" color="primary" size="medium" onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}
+                                            {state.recipes[index].recipe_shared ? <Tooltip
+                                                    title={state.recipes[index].recipe_author_id === props.userId ? "Cancel sharing" : "Only recipe owner can share recipe"}
+                                                    aria-label="Cancel sharing recipe"><Button variant="contained"
+                                                                                               className="shared_button"
+                                                                                               size="medium"
+                                                                                               onClick={event => handleShare(event, index)}
+                                                                                               disabled={state.recipes[index].recipe_author_id !== props.userId}>Shared</Button></Tooltip> :
+                                                <Tooltip title="Share recipe" aria-label="Share"><Button
+                                                    variant="contained" color="primary" size="medium"
+                                                    onClick={event => handleShare(event, index)}>Share</Button></Tooltip>}
 
                                         </div>
                                     </div>
@@ -795,31 +860,39 @@ export default function Recipes(props) {
                             <div id={"recipe" + recipe.recipe_id} className="unconfirmed_recipe">
                                 <div className="recipe">
                                     <div className="recipe_header">
-                                        <div className="recipe_name" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                        <div className="recipe_name"
+                                             onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                             {recipe.recipe_name}
                                         </div>
                                         <div className="recipe_buttons">
-                                            {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Remove" aria-label="remove">
-                                                <IconButton aria-label="remove" className="recipe_icon_button"
-                                                            onClick={event => handleRemove(event, index)}>
-                                                    <DeleteIcon fontSize="small"/>
-                                                </IconButton>
-                                            </Tooltip> : null}
-                                            {state.recipes[index].recipe_author_id === props.userId ? <Tooltip title="Edit" aria-label="edit">
-                                                <IconButton type="button" aria-label="edit" className="recipe_icon_button"
-                                                            onClick={(event) => handleEdit(event, recipe.recipe_id)}>
-                                                    <EditIcon fontSize="small"/>
-                                                </IconButton>
-                                            </Tooltip> : null}
+                                            {state.recipes[index].recipe_author_id === props.userId ?
+                                                <Tooltip title="Remove" aria-label="remove">
+                                                    <IconButton aria-label="remove" className="recipe_icon_button"
+                                                                onClick={event => handleRemove(event, index)}>
+                                                        <DeleteIcon fontSize="small"/>
+                                                    </IconButton>
+                                                </Tooltip> : null}
+                                            {state.recipes[index].recipe_author_id === props.userId ?
+                                                <Tooltip title="Edit" aria-label="edit">
+                                                    <IconButton type="button" aria-label="edit"
+                                                                className="recipe_icon_button"
+                                                                onClick={(event) => handleEdit(event, recipe.recipe_id)}>
+                                                        <EditIcon fontSize="small"/>
+                                                    </IconButton>
+                                                </Tooltip> : null}
                                         </div>
                                     </div>
-                                    <div className="creation_date" onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                    <div className="creation_date"
+                                         onClick={event => handleRecipe(event, recipe.recipe_id)}>
                                         {"created " + recipe.creation_date}
                                     </div>
 
                                     <div className="recipe_content">
-                                        <div className="recipe_image_container" onClick={event => handleRecipe(event, recipe.recipe_id)}>
-                                            {recipe.recipe_image !== "" ? <img src={recipe.recipe_image} alt={recipe.recipe_name} className="recipe_image"/> :
+                                        <div className="recipe_image_container"
+                                             onClick={event => handleRecipe(event, recipe.recipe_id)}>
+                                            {recipe.recipe_image !== "" ?
+                                                <img src={recipe.recipe_image} alt={recipe.recipe_name}
+                                                     className="recipe_image"/> :
                                                 <ReceiptIcon className={classes.photo_placeholder}/>}
                                         </div>
                                         <div className="recipe_description">
@@ -843,7 +916,8 @@ export default function Recipes(props) {
                                 <div className="recipe_status">
                                     <div className="unconfirmed_header">Status</div>
                                     <Divider variant="fullWidth"/>
-                                    <div className={recipe.approval_status === "pending"?"pending_recipe unconfirmed_body":"rejected_recipe unconfirmed_body"}>
+                                    <div
+                                        className={recipe.approval_status === "pending" ? "pending_recipe unconfirmed_body" : "rejected_recipe unconfirmed_body"}>
                                         {recipe.approval_status.toUpperCase()}
                                     </div>
                                 </div>
@@ -879,7 +953,8 @@ export default function Recipes(props) {
 
     return (
         <Container id="main_container" maxWidth="lg">
-            <div className={(state.open_viewer_modal || state.open_confirmation_modal) && state.msg === '' ? "background_blur page_container" : "page_container"}>
+            <div
+                className={(state.open_viewer_modal || state.open_confirmation_modal) && state.msg === '' ? "background_blur page_container" : "page_container"}>
                 <h2>Recipes</h2>
                 <div className="toolbar_container">
 
@@ -908,35 +983,22 @@ export default function Recipes(props) {
                             <Tab className="recipe_group_tab" label="Personal"/>
                             <Tab className="recipe_group_tab" label="Shared"/>
                             <Tab className="recipe_group_tab" label="Unconfirmed"/>
+                            <Tab className="recipe_group_tab" label="Favourite"/>
                         </Tabs>
                     }
-                    <div>
+                    <div className={classes.searchContainer}>
                         <FormControl variant="filled">
-                            <InputLabel htmlFor="search" className="search_input">Search</InputLabel>
+                            <InputLabel htmlFor="searchPhrase" className="search_input">Type recipe name</InputLabel>
                             <FilledInput
-                                id="search"
-                                name="search"
+                                id="searchPhrase"
+                                name="searchPhrase"
                                 className="search_input"
-                                placeholder="Type product name"
-                                value={state.search}
+                                value={state.searchPhrase}
                                 onChange={handleChange}
                             />
                         </FormControl>
-                        {/*<FormControl variant="filled" className={classes.formControl}>*/}
-                        {/*<InputLabel id="category_select_label" className="category_select">Category</InputLabel>*/}
-                        {/*<Select*/}
-                        {/*labelId="category_select_label"*/}
-                        {/*id="category_select"*/}
-                        {/*className="category_select"*/}
-                        {/*name="category"*/}
-                        {/*value={state.category}*/}
-                        {/*onChange={handleChange}*/}
-                        {/*>*/}
-                        {/*{state.categories.map((category, index) => (*/}
-                        {/*<MenuItem key={index} value={category.category_name}>{category.category_name}</MenuItem>*/}
-                        {/*))}*/}
-                        {/*</Select>*/}
-                        {/*</FormControl>*/}
+                        <Button className={classes.searchButton} variant="contained" color="primary" type="button"
+                                onClick={() => handleSearch()}>Search</Button>
                     </div>
                     <Fab className="add_button" aria-label="add" onClick={handleAddNewProduct}>
                         <AddIcon/>

@@ -6,6 +6,9 @@ import {makeStyles} from "@material-ui/core";
 const useStyles = makeStyles({
     passwordForm: {
         minHeight: 'min-content !important',
+    },
+    currentPassword: {
+        width: '87%'
     }
 });
 
@@ -13,6 +16,7 @@ export default function ChangePassword(props) {
     const classes = useStyles();
 
     const [state, setState] = React.useState({
+        currentPassword: "",
         password: "",
         passwordConfirmation: "",
         msg: "",
@@ -67,6 +71,7 @@ export default function ChangePassword(props) {
     const handleSubmit = async (event) => {
         try {
             let result, credentials;
+            console.log(state.currentPassword);
             console.log(state.password);
             console.log(props.resetType);
 
@@ -74,6 +79,7 @@ export default function ChangePassword(props) {
                 credentials = {
                     "resetType": props.resetType,
                     "token": props.token,
+                    "currentPassword": state.currentPassword,
                     "password": state.password,
                     "passwordConfirmation": state.passwordConfirmation
                 };
@@ -83,7 +89,7 @@ export default function ChangePassword(props) {
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                 setState({
                     ...state,
-                    msg: result.data.message
+                    msg: result.data.message === "Bad credentials" ? "Wrong current password" : result.data.message
                 });
                 // }
             }
@@ -104,6 +110,19 @@ export default function ChangePassword(props) {
 
             <form className={classes.passwordForm + " form"}>
                 <div className="setting_header">Change Password</div>
+                {props.resetType === "settings" ? <div>
+                    <label htmlFor="password" className={classes.currentPassword}>Enter your current password</label>
+                    <input
+                        className={classes.currentPassword + " input_field"}
+                        id="currentPassword"
+                        type="password"
+                        name="currentPassword"
+                        value={state.currentPassword}
+                        autoComplete="off"
+                        onChange={event => handleChange(event)}
+                        required/>
+                </div> : null}
+
                 <label htmlFor="password">Enter your new password</label>
                 <input
                     className="input_field"
