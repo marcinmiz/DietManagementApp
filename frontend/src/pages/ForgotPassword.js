@@ -2,6 +2,9 @@ import React, {useEffect} from 'react';
 import "../Authentication.css";
 import {useHistory} from "react-router-dom";
 import http from "../http-common";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
 
 export default function ForgotPassword(props) {
     const history = useHistory();
@@ -10,6 +13,36 @@ export default function ForgotPassword(props) {
         email: "",
         msg: "",
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     useEffect(
         () => {
@@ -40,12 +73,16 @@ export default function ForgotPassword(props) {
             });
             // }
 
+            handleOpen();
+
         } catch (err) {
 
             setState({
                 ...state,
                 "msg": "bad email"
             });
+            handleOpen();
+
             console.error(err);
         }
 
@@ -58,7 +95,15 @@ export default function ForgotPassword(props) {
                     DIETIX
                 </div>
 
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={open}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
 
                 <form className="form">
                     <div className="setting_header">Forgot Password</div>

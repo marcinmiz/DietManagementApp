@@ -21,7 +21,9 @@ export default function UserBottomNavigation(props) {
         () => {
             switch (page) {
                 case "dashboard":
-                    document.getElementById("dashboard").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("dashboard").click();
+                    }
                     break;
                 case "products":
                     document.getElementById("products").click();
@@ -30,22 +32,34 @@ export default function UserBottomNavigation(props) {
                     document.getElementById("recipes").click();
                     break;
                 case "preferences":
-                    document.getElementById("preferences").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("preferences").click();
+                    }
                     break;
                 case "programmes":
-                    document.getElementById("programmes").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("programmes").click();
+                    }
                     break;
                 case "menus":
-                    document.getElementById("menus").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("menus").click();
+                    }
                     break;
                 case "shopping":
-                    document.getElementById("shopping").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("shopping").click();
+                    }
                     break;
                 case "settings":
                     document.getElementById("settings").click();
                     break;
                 default:
-                    document.getElementById("dashboard").click();
+                    if (props.adminMode === false) {
+                        document.getElementById("dashboard").click();
+                    } else {
+                        document.getElementById("products").click();
+                    }
             }
         },[]
     );
@@ -64,13 +78,13 @@ export default function UserBottomNavigation(props) {
     return (
         <div>
             <BottomNavigation value={value} onChange={handleChange} className="user_bottom_navigation">
-                <BottomNavigationAction id="dashboard" label="Dashboard" value="dashboard" icon={<NearMeIcon/>}/>
+                {props.adminMode === false ? <BottomNavigationAction id="dashboard" label="Dashboard" value="dashboard" icon={<NearMeIcon/>}/> : null}
                 <BottomNavigationAction id="products" label="Products" value="products" icon={<SpaIcon/>}/>
                 <BottomNavigationAction id="recipes" label="Recipes" value="recipes" icon={<ReceiptIcon/>}/>
-                <BottomNavigationAction id="preferences" label="Dietary preferences" value="preferences" icon={<FingerprintIcon/>}/>
-                <BottomNavigationAction id="programmes" label="Dietary programmes" value="programmes" icon={<TrackChangesIcon/>}/>
-                <BottomNavigationAction id="menus" label="Daily menus" value="menus" icon={<RestaurantIcon/>}/>
-                <BottomNavigationAction id="shopping" label="Shopping lists" value="shopping" icon={<LocalMallIcon/>}/>
+                {props.adminMode === false ? <BottomNavigationAction id="preferences" label="Dietary preferences" value="preferences" icon={<FingerprintIcon/>}/> : null}
+                {props.adminMode === false ? <BottomNavigationAction id="programmes" label="Dietary programmes" value="programmes" icon={<TrackChangesIcon/>}/> : null}
+                {props.adminMode === false ? <BottomNavigationAction id="menus" label="Daily menus" value="menus" icon={<RestaurantIcon/>}/> : null}
+                {props.adminMode === false ? <BottomNavigationAction id="shopping" label="Shopping lists" value="shopping" icon={<LocalMallIcon/>}/> : null}
                 <BottomNavigationAction id="settings" label="Settings" value="settings" icon={<SettingsIcon/>}/>
             </BottomNavigation>
         </div>

@@ -11,6 +11,8 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import DietaryPreferenceEdit from "../components/DietaryPreferenceEdit";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -27,6 +29,36 @@ export default function Preferences(props) {
         editPreferenceId: null,
         loaded: false
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     useEffect(
         async () => {
@@ -137,13 +169,14 @@ export default function Preferences(props) {
             ...state,
             msg: newMsg
         });
+
+        handleOpen();
     };
 
     const handleRemove = (event, preferenceId) => {
         http.delete("/api/preferences/remove/" + preferenceId)
             .then(resp => {
                 handleSetMsg(resp.data.message);
-                setTimeout(() => handleSetMsg(""), 3000);
             })
             .catch(error => console.log(error));
     };
@@ -152,7 +185,15 @@ export default function Preferences(props) {
         <Container id="main_container" maxWidth="lg">
             <div className="page_container">
                 <h2>Dietary Preferences</h2>
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={open}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
                 <div className="toolbar_container">
                     <Accordion className="add_button add_preference">
                         <AccordionSummary
@@ -169,110 +210,6 @@ export default function Preferences(props) {
                 </div>
                 {state.preferences.length === 0 ?
                     <div className="loading">{!state.loaded ? "Loading" : "No dietary preferences found"}</div> : null}
-                {/*<div className="dietary_preferences_list">*/}
-
-                {/*{state.preferences.map((preference, index) => (*/}
-                {/*<div key={index}>*/}
-                {/*<Divider variant="fullWidth"/>*/}
-                {/*{state.editPreferenceId === preference.preferenceId ?*/}
-                {/*<DietaryPreferenceEdit mode='edit' item={preference} handleEdit={handleEdit}*/}
-                {/*handleSetMsg={handleSetMsg}/>*/}
-                {/*:*/}
-                {/*<div id={"preference" + preference.preferenceId}*/}
-                {/*className="dietary_preference">*/}
-                {/*<div className="preference_basic_info">*/}
-                {/*<div>*/}
-                {/*{index + 1}. Dietary Preference*/}
-                {/*</div>*/}
-                {/*<div className="creation_date">*/}
-                {/*{"created " + preference.creationDate}*/}
-                {/*</div>*/}
-                {/*<div className="dietary_preference_diet_type">*/}
-                {/*Diet*/}
-                {/*type: {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}*/}
-                {/*</div>*/}
-                {/*</div>*/}
-                {/*<div className="preference_details">*/}
-                {/*<div className="dietary_preference_total_daily_calories">*/}
-                {/*Total daily calories: {preference.totalDailyCalories} kCal*/}
-                {/*</div>*/}
-                {/*<div className="dietary_preference_calories_per_meal">*/}
-                {/*Calories per meal: {preference.caloriesPerMeal} kCal*/}
-                {/*</div>*/}
-                {/*<div className="dietary_preference_meals_quantity">*/}
-                {/*Meals quantity: {preference.mealsQuantity}*/}
-                {/*</div>*/}
-                {/*<div className="dietary_preference_target_weight">*/}
-                {/*Target weight: {preference.targetWeight} kg*/}
-                {/*</div>*/}
-                {/*</div>*/}
-                {/*<div className="preference_nutrients">*/}
-                {/*<div className="preference_nutrients_header">Nutrients</div>*/}
-                {/*{preference.preferenceNutrients.length === 0 ? "No nutrients" :*/}
-                {/*preference.preferenceNutrients.map((nutrient, index) => (*/}
-                {/*<div key={index} className="preference_nutrient">*/}
-                {/*<div>*/}
-                {/*{nutrient.nutrientName}*/}
-                {/*</div>*/}
-                {/*<div>*/}
-                {/*{nutrient.nutrientRelation}*/}
-                {/*{nutrient.nutrientAmount} g*/}
-                {/*</div>*/}
-                {/*</div>*/}
-                {/*))}*/}
-                {/*</div>*/}
-                {/*<div className="preference_products">*/}
-                {/*<div className="preference_products_header">Products</div>*/}
-                {/*{preference.preferenceProducts.length === 0 ? "No preferred products" :*/}
-                {/*preference.preferenceProducts.map((product, index) => (*/}
-                {/*<div key={index} className="preference_product">*/}
-                {/*<div>*/}
-                {/*{product.productName}*/}
-                {/*</div>*/}
-                {/*<div>*/}
-                {/*{product.productPreferred ?*/}
-                {/*<ThumbUpRoundedIcon className="upThumb"/> :*/}
-                {/*<ThumbDownRoundedIcon className="downThumb"/>}*/}
-                {/*</div>*/}
-                {/*</div>*/}
-                {/*))}*/}
-                {/*</div>*/}
-                {/*<div className="preference_recipes">*/}
-                {/*<div className="preference_recipes_header">Recipes</div>*/}
-                {/*{preference.preferenceRecipes.length === 0 ? "No preferred recipes" :*/}
-                {/*preference.preferenceRecipes.map((recipe, index) => (*/}
-                {/*<div key={index} className="preference_recipe">*/}
-                {/*<div>*/}
-                {/*{recipe.recipeName}*/}
-                {/*</div>*/}
-                {/*<div>*/}
-                {/*{recipe.recipePreferred ?*/}
-                {/*<ThumbUpRoundedIcon className="upThumb"/> :*/}
-                {/*<ThumbDownRoundedIcon className="downThumb"/>}*/}
-                {/*</div>*/}
-                {/*</div>*/}
-                {/*))}*/}
-                {/*</div>*/}
-                {/*<div className="product_buttons">*/}
-                {/*<Tooltip title="Delete" aria-label="delete">*/}
-                {/*<IconButton aria-label="delete" className="product_icon_button"*/}
-                {/*onClick={event => handleRemove(event, preference.preferenceId)}*/}
-                {/*>*/}
-                {/*<DeleteIcon fontSize="small"/>*/}
-                {/*</IconButton>*/}
-                {/*</Tooltip>*/}
-                {/*<Tooltip title="Edit" aria-label="edit">*/}
-                {/*<IconButton type="button" aria-label="edit" className="product_icon_button"*/}
-                {/*onClick={(event) => handleEdit(event, preference.preferenceId)}*/}
-                {/*>*/}
-                {/*<EditIcon fontSize="small"/>*/}
-                {/*</IconButton>*/}
-                {/*</Tooltip>*/}
-                {/*</div>*/}
-                {/*</div>}*/}
-                {/*</div>*/}
-                {/*))}*/}
-                {/*</div>*/}
                 <div className="dietary_preferences_list">
                     {state.preferences.map((preference, index) => (
                         <div key={index} className="preference_container">

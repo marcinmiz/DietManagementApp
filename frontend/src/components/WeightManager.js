@@ -2,6 +2,9 @@ import React, {useEffect} from 'react';
 import "../Authentication.css";
 import http from "../http-common";
 import {Divider, makeStyles} from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 const useStyles = makeStyles({
     weight_field: {
@@ -50,6 +53,36 @@ export default function ResetPassword(props) {
         weights: [],
         msg: "",
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     useEffect(
         async () => {
@@ -101,12 +134,16 @@ export default function ResetPassword(props) {
                 msg: result.data.message
             });
 
+            handleOpen();
+
         } catch (err) {
 
             setState({
                 ...state,
                 "msg": "user is not logged"
             });
+            handleOpen();
+
             console.error(err);
         }
 
@@ -114,7 +151,15 @@ export default function ResetPassword(props) {
 
     return (
         <div>
-            {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+            {state.msg !== "" ? <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                open={open}
+                autoHideDuration={5000}
+                onClose={handleClose}
+                message={state.msg}
+                action={action}
+            /> : null}
+            {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
 
             <form>
                 <div className="setting_header">Weights</div>

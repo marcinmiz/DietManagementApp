@@ -72,10 +72,14 @@ public class DietaryProgrammeController {
 //    public ResponseMessage updateDailyMenu(@PathVariable("id") Long dailyMenuId, @RequestBody DailyMenuRequest dailyMenuRequest) {
 //        return dailyMenuService.updateDailyMenu(dailyMenuId, dailyMenuRequest);
 //    }
-//
-//    @DeleteMapping("/remove/{id}")
-//    public ResponseMessage removeDailyMenu(@PathVariable("id") Long dailyMenuId) {
-//        return dailyMenuService.removeDailyMenu(dailyMenuId);
-//    }
+
+    @DeleteMapping("/remove/{id}")
+    public ResponseEntity<ResponseMessage> removeDietaryProgramme(@PathVariable("id") Long dietaryProgrammeId) {
+        ResponseMessage responseMessage = dietaryProgrammeService.removeDietaryProgramme(dietaryProgrammeId);
+        if (!responseMessage.getMessage().endsWith(" has been removed")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
 
 }

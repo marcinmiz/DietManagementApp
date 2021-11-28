@@ -2,6 +2,9 @@ import React, {useEffect} from 'react';
 import "../Authentication.css";
 import http from "../http-common";
 import {makeStyles} from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 const useStyles = makeStyles({
     passwordForm: {
@@ -21,6 +24,36 @@ export default function ChangePassword(props) {
         passwordConfirmation: "",
         msg: "",
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     useEffect(
         () => {
@@ -86,19 +119,27 @@ export default function ChangePassword(props) {
 
                 result = await http.post("/api/users/changePassword", credentials);
 
+                console.log(result.data.message);
+
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                 setState({
                     ...state,
                     msg: result.data.message === "Bad credentials" ? "Wrong current password" : result.data.message
                 });
+
+                handleOpen();
                 // }
+            } else {
+                handleOpen();
             }
         } catch (err) {
 
-            setState({
-                ...state,
-                "msg": "invalid token"
-            });
+            // setState({
+            //     ...state,
+            //     "msg": "invalid token"
+            // });
+            handleOpen();
+
             console.error(err);
         }
 
@@ -106,7 +147,15 @@ export default function ChangePassword(props) {
 
     return (
         <div>
-            {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+            {state.msg !== "" ? <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                open={open}
+                autoHideDuration={5000}
+                onClose={handleClose}
+                message={state.msg}
+                action={action}
+            /> : null}
+            {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
 
             <form className={classes.passwordForm + " form"}>
                 <div className="setting_header">Change Password</div>

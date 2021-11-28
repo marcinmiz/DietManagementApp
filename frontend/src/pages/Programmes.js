@@ -13,6 +13,8 @@ import Chip from "@material-ui/core/Chip";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField/TextField";
 import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -36,6 +38,36 @@ export default function Programmes(props) {
         msg: "",
         loaded: false
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     useEffect(
         async () => {
@@ -169,6 +201,7 @@ export default function Programmes(props) {
             chosenPreferenceId: preferenceId
         });
     };
+
     // const handleEdit = (event, preferenceId) => {
     //     if (!state.editPreferenceId) {
     //         setState({
@@ -188,15 +221,19 @@ export default function Programmes(props) {
             ...state,
             msg: newMsg
         });
+
+        handleOpen();
     };
 
-    const handleRemove = (event, preferenceId) => {
-        http.delete("/api/preferences/remove/" + preferenceId)
+    const handleRemove = (event, programmeId) => {
+        http.delete("/api/programmes/remove/" + programmeId)
             .then(resp => {
                 handleSetMsg(resp.data.message);
-                setTimeout(() => handleSetMsg(""), 3000);
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                handleSetMsg("Programme with id " + programmeId + " has not been removed");
+                console.log(error);
+            });
     };
 
     const handleUsingDietaryProgramme = (event, index) => {
@@ -211,10 +248,7 @@ export default function Programmes(props) {
         http.put("/api/programmes/" + object + "/" + state.programmes[index].dietaryProgrammeId)
             .then(resp => {
 
-                // setState({
-                //     ...state,
-                //     msg: resp.data.message,
-                // });
+                handleSetMsg(resp.data.message);
 
                 if (object === "start") {
                     props.handleUseDietaryProgramme(state.programmes[index]);
@@ -251,10 +285,8 @@ export default function Programmes(props) {
         try {
             let response = await http.post("/api/programmes/add", programme);
             handleSetMsg(response.data.message);
-            setTimeout(() => handleSetMsg(""), 3000);
         } catch (e) {
             handleSetMsg("Dietary Programme could not be added");
-            setTimeout(() => handleSetMsg(""), 3000);
         }
         // } else if (mode === "edit") {
         //     http.put("/api/preferences/update/" + item_id, preference)
@@ -273,7 +305,15 @@ export default function Programmes(props) {
         <Container id="main_container" maxWidth="lg">
             <div className="page_container">
                 <h2>Dietary Programmes</h2>
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={open}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
                 <div className="toolbar_container">
                     <Accordion className="add_button add_preference">
                         <AccordionSummary

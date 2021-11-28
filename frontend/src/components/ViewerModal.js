@@ -131,6 +131,7 @@ export default function ViewerModal(props) {
         recipe_add_step_name: "",
         hover_rating: -1
     });
+    console.log("asa");
 
     useEffect(
         async () => {
@@ -171,6 +172,7 @@ export default function ViewerModal(props) {
                 selected_item: item_index !== 'new' ? items[item_index] : state.selected_item,
                 loaded: true
             });
+            console.log(state.selected_item);
         }, [item_index]);
 
     const handleChangeItemId = (event) => {
@@ -355,29 +357,30 @@ export default function ViewerModal(props) {
     const handleRemove = () => {
         if (type === "product") {
             http.delete("/api/products/remove/" + state.selected_item.product_id)
-                .then(resp => {
+                .then(async resp => {
                     if (resp.data.message !== "Product " + state.selected_item.product_name + " has been removed successfully") {
                         setState({
                             ...state,
                             "msg": resp.data.message
                         });
                     } else {
-                        props.handleOperationMessage("Product " + state.selected_item.product_name + " has been removed");
-                        onClose();
+                        console.log("closing");
+                        props.handleOperationMessage("Product " + state.selected_item.product_name + " has been removed", false);
+                        setTimeout(() => handleClose(),1000);
                     }
                 })
                 .catch(error => console.log(error));
         } else {
             http.delete("/api/recipes/remove/" + state.selected_item.recipe_id)
-                .then(resp => {
+                .then(async resp => {
                     if (resp.data.message !== "Recipe " + state.selected_item.recipe_name + " has been removed successfully") {
                         setState({
                             ...state,
                             "msg": resp.data.message
                         });
                     } else {
-                        props.handleOperationMessage("Recipe " + state.selected_item.recipe_name + " has been removed");
-                        onClose();
+                        props.handleOperationMessage("Recipe " + state.selected_item.recipe_name + " has been removed", false);
+                        setTimeout(() => handleClose(),1000);
                     }
                 })
                 .catch(error => console.log(error));
@@ -756,7 +759,7 @@ export default function ViewerModal(props) {
 
         if (item_id === "new") {
             http.post("/api/" + type + "s/add", item)
-                .then(resp => {
+                .then(async resp => {
                     item_id = Number(resp.data.message.split(" ")[0]);
 
                     if (resp.data.message !== item_id + " " + capitalized_type + " " + item_name + " has been added successfully") {
@@ -771,14 +774,14 @@ export default function ViewerModal(props) {
                             "image_upload_item_id": item_id
                         });
 
-                        props.handleOperationMessage(capitalized_type + " " + item_name + " has been added");
-                        onClose();
+                        props.handleOperationMessage(capitalized_type + " " + item_name + " has been added", false);
+                        setTimeout(() => handleClose(),1000);
                     }
                 })
                 .catch(error => console.log(error));
         } else {
             http.put("/api/" + type + "s/update/" + item_id, item)
-                .then(resp => {
+                .then(async resp => {
 
                     if (resp.data.message !== capitalized_type + " " + item_name + " has been updated successfully") {
                         setState({
@@ -791,9 +794,8 @@ export default function ViewerModal(props) {
                             "submitted": true,
                             "image_upload_item_id": item_id
                         });
-
-                        props.handleOperationMessage(capitalized_type + " " + item_name + " has been updated");
-                        onClose();
+                        props.handleOperationMessage(capitalized_type + " " + item_name + " has been updated", false);
+                        setTimeout(() => handleClose(),1000);
                     }
                 })
                 .catch(error => console.log(error));

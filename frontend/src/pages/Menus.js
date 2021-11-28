@@ -16,11 +16,15 @@ import NavigateBeforeRoundedIcon from '@material-ui/icons/NavigateBeforeRounded'
 import NavigateNextRoundedIcon from '@material-ui/icons/NavigateNextRounded';
 import ViewerModal from "../components/ViewerModal";
 import {useHistory, useParams} from "react-router-dom";
-import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from '@material-ui/icons/Delete';
+import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import CheckIcon from '@material-ui/icons/Check';
 import ClearIcon from '@material-ui/icons/Clear';
+import Chip from "@material-ui/core/Chip";
+import Popover from "@material-ui/core/Popover";
+import FingerprintIcon from '@material-ui/icons/Fingerprint';
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 const useStyles = makeStyles({
     meal_hour: {
@@ -28,7 +32,7 @@ const useStyles = makeStyles({
         marginBottom: 'auto'
     },
     meal_description: {
-        width: '100%',
+        width: '85%',
         position: 'relative',
         marginTop: 'auto',
         marginBottom: 'auto',
@@ -49,14 +53,18 @@ const useStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
     },
+    recipe_macroelements: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
     recipe_row: {
         display: 'flex',
         alignItems: 'center'
     },
     recipe_nutrients: {
         display: 'flex',
-        flexDirection: 'row',
-        marginLeft: '2%'
+        flexDirection: 'column',
+        marginLeft: '30%',
     },
     nutrient: {
         marginLeft: '10px'
@@ -65,7 +73,7 @@ const useStyles = makeStyles({
         marginLeft: '2%'
     },
     item: {
-        minHeight: '140px'
+        minHeight: '180px',
     },
     centralContainer: {
         width: '87%',
@@ -73,7 +81,7 @@ const useStyles = makeStyles({
     },
     past_meal: {
         backgroundColor: 'rgba(0, 0, 0, 0.5) !important',
-        zIndex : '100',
+        zIndex: '100',
         position: 'absolute',
         top: 0,
         right: 0,
@@ -86,10 +94,10 @@ const useStyles = makeStyles({
         display: 'flex',
         justifyContent: 'space-evenly',
         width: '45%',
-        height: '45%',
+        // height: '38%',
         opacity: '0.7',
         position: 'absolute',
-        top: '27.5%',
+        top: '31%',
         right: '27.5%'
     },
     viewRecipe: {
@@ -100,6 +108,10 @@ const useStyles = makeStyles({
     },
     center: {
         textAlign: 'center'
+    },
+    calories: {
+        color: 'white',
+        backgroundColor: 'green'
     }
 });
 
@@ -107,6 +119,36 @@ export default function Menus(props) {
     const classes = useStyles();
     const history = useHistory();
     let {recipeId} = useParams();
+
+    const [openMessage, setOpenMessage] = React.useState(false);
+
+    const handleOpenMessage = () => {
+        setOpenMessage(true);
+    };
+
+    const handleCloseMessage = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpenMessage(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleCloseMessage}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     const [state, setState] = React.useState({
         // menu: {
@@ -189,13 +231,31 @@ export default function Menus(props) {
         loaded: false
     });
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    // const [anchorEl2, setAnchorEl2] = React.useState(null);
+
+    const handlePopoverOpen = (event) => {
+        if (anchorEl == null) {
+            setAnchorEl(event.currentTarget);
+        } else {
+            setAnchorEl(null);
+        }
+    };
+
+    // const handlePopoverClose = () => {
+    // };
+
+    const open = Boolean(anchorEl);
+
+    console.log("open " + open);
+
     useEffect(
         async () => {
             if (props.currentDietaryProgramme) {
                 try {
                     let response = await http.get("/api/menus/" + props.currentDietaryProgramme.dietaryProgrammeId);
                     let menus = [], menuRecipes = [];
-                    let currentDietaryProgrammeDay = props.currentDietaryProgrammeDay - 1;
+                    let currentDietaryProgrammeDay = props.currentDietaryProgrammeDay - 1 >= 0 ? props.currentDietaryProgrammeDay - 1 : 0;
 
                     for (let x in response.data) {
                         menus[x] = createMenu(response.data, x);
@@ -382,13 +442,7 @@ export default function Menus(props) {
                     msg: response.data.message
                 });
 
-                setTimeout(()=>{
-                    setState({
-                        ...state,
-                        menus: menus,
-                        msg: ""
-                    });
-                }, 3000);
+                handleOpenMessage();
 
             } catch (e) {
                 setState({
@@ -407,7 +461,15 @@ export default function Menus(props) {
                 <div>
                     <h2>Daily Menus</h2>
                 </div>
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={openMessage}
+                    autoHideDuration={5000}
+                    onClose={handleCloseMessage}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
                 {props.currentDietaryProgramme ?
                     <div className="dailyMenu">
                         <Fab aria-label="prev">
@@ -434,24 +496,31 @@ export default function Menus(props) {
                                             </TimelineSeparator>
                                             <TimelineContent>
                                                 <div className={classes.meal_description}>
-                                                    {new Date(meal.mealTime).setHours(new Date(meal.mealTime).getHours() - 2) < new Date() ? <div className={classes.past_meal}>
-                                                        <div className={classes.viewRecipe} onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}></div>
-                                                        {/*<Button className={classes.button} variant="contained" color="primary" type="button">Save</Button>*/}
-                                                        <div className={classes.consumedButtons}>
-                                                            <Tooltip title="Consumed" aria-label="Consumed">
-                                                                <IconButton aria-label="Consumed" className={meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"} onClick={event => handleMarkConsumed(event, index, true)}>
-                                                                    <CheckIcon fontSize="large"/>
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                            <Tooltip title="Not consumed" aria-label="Not consumed">
-                                                                <IconButton aria-label="Not consumed" className={!meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"} onClick={event => handleMarkConsumed(event, index, false)}>
-                                                                    <ClearIcon fontSize="large"/>
-                                                                </IconButton>
-                                                            </Tooltip>
+                                                    {new Date(meal.mealTime).setHours(new Date(meal.mealTime).getHours() - 2) < new Date() ?
+                                                        <div className={classes.past_meal}>
+                                                            <div className={classes.viewRecipe}
+                                                                 onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}></div>
+                                                            {/*<Button className={classes.button} variant="contained" color="primary" type="button">Save</Button>*/}
+                                                            <div className={classes.consumedButtons}>
+                                                                <Tooltip title="Consumed" aria-label="Consumed">
+                                                                    <IconButton aria-label="Consumed"
+                                                                                className={meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"}
+                                                                                onClick={event => handleMarkConsumed(event, index, true)}>
+                                                                        <CheckIcon fontSize="large"/>
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                                <Tooltip title="Not consumed" aria-label="Not consumed">
+                                                                    <IconButton aria-label="Not consumed"
+                                                                                className={!meal.consumed ? "nonMarkedConsumeButton markedConsumeButton" : "nonMarkedConsumeButton"}
+                                                                                onClick={event => handleMarkConsumed(event, index, false)}>
+                                                                        <ClearIcon fontSize="large"/>
+                                                                    </IconButton>
+                                                                </Tooltip>
 
-                                                        </div>
-                                                    </div> : null}
-                                                    <Typography variant="h6" component="div" className={classes.center}>
+                                                            </div>
+                                                        </div> : null}
+                                                    <Typography variant="h6" component="div"
+                                                                className={classes.center}>
                                                         {meal.mealName}
                                                     </Typography>
                                                     <Typography>
@@ -467,34 +536,99 @@ export default function Menus(props) {
                                                                      onClick={event => handleOpenRecipe(event, meal.recipe.recipe_id)}>
                                                                     {meal.recipe.recipe_name}
                                                                 </div>
-                                                            </div>
-                                                            <div className={classes.recipe_row}>
-                                                                {meal.recipe.recipe_calories} kCal
-                                                                <div className={classes.recipe_nutrients}>
-                                                                    <div>
-                                                                        Proteins: {meal.recipe.recipe_proteins} g
-                                                                    </div>
-                                                                    <div className={classes.nutrient}>
-                                                                        Carbohydrates: {meal.recipe.recipe_carbohydrates} g
-                                                                    </div>
-                                                                    <div className={classes.nutrient}>
-                                                                        Fats: {meal.recipe.recipe_fats} g
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className={classes.recipe_row}>
-                                                                <div>
-                                                                    belongs to collection:
-                                                                    <span>{meal.recipe.in_collection}</span>
+                                                                <div className={classes.recipe_name}>
+                                                                    <Chip
+                                                                        name="calories"
+                                                                        className={classes.calories}
+                                                                        size="small"
+                                                                        label={meal.recipe.recipe_calories + " kcal"}
+                                                                    />
                                                                 </div>
                                                                 <div className={classes.recipe_name}>
-                                                                    liked in preference:
-                                                                    <span>{meal.recipe.liked_in_preference}</span>
+                                                                    {meal.recipe.in_collection ?
+                                                                        <div>
+                                                                            <Typography
+                                                                                aria-owns={open ? 'mouse-over-popover' : undefined}
+                                                                                aria-haspopup="true"
+                                                                                onMouseEnter={handlePopoverOpen}
+                                                                                // onMouseLeave={handlePopoverClose}
+                                                                            >
+                                                                                <LibraryBooksIcon/>
+                                                                            </Typography>
+                                                                            <Popover
+                                                                                id="mouse-over-popover"
+                                                                                sx={{
+                                                                                    pointerEvents: 'none',
+                                                                                }}
+                                                                                open={open}
+                                                                                anchorEl={anchorEl}
+                                                                                anchorOrigin={{
+                                                                                    vertical: 'bottom',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                transformOrigin={{
+                                                                                    vertical: 'top',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                // onClose={handlePopoverClose}
+                                                                                disableRestoreFocus
+                                                                            >
+                                                                                <Typography sx={{p: 1}}>belongs to
+                                                                                    collection</Typography>
+                                                                            </Popover>
+                                                                        </div>
+                                                                        : null}
+                                                                </div>
+                                                                <div className={classes.recipe_name}>
+                                                                    {meal.recipe.liked_in_preference ?
+                                                                        <div>
+                                                                            <Typography
+                                                                                aria-owns={open ? 'mouse-over-popover' : undefined}
+                                                                                aria-haspopup="true"
+                                                                                onClick={handlePopoverOpen}
+                                                                            >
+                                                                                <FingerprintIcon/>
+                                                                            </Typography>
+                                                                            <Popover
+                                                                                id="mouse-over-popover"
+                                                                                sx={{
+                                                                                    pointerEvents: 'none',
+                                                                                }}
+                                                                                open={open}
+                                                                                anchorEl={anchorEl}
+                                                                                anchorOrigin={{
+                                                                                    vertical: 'bottom',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                transformOrigin={{
+                                                                                    vertical: 'top',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                // onClose={handlePopoverClose}
+                                                                                disableRestoreFocus
+                                                                            >
+                                                                                <Typography sx={{p: 1}}>liked in
+                                                                                    preference</Typography>
+                                                                            </Popover>
+                                                                        </div>
+                                                                        : null}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className={classes.recipe_nutrients}>
+                                                                <div>
+                                                                    Proteins: {meal.recipe.recipe_proteins} g
+                                                                </div>
+                                                                <div>
+                                                                    Carbohydrates: {meal.recipe.recipe_carbohydrates} g
+                                                                </div>
+                                                                <div>
+                                                                    Fats: {meal.recipe.recipe_fats} g
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </Typography>
-                                                    </div>
+                                                </div>
                                             </TimelineContent>
                                         </TimelineItem>
                                     ))}

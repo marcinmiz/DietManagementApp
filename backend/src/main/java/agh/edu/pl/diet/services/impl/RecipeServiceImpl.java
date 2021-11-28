@@ -218,9 +218,7 @@ public class RecipeServiceImpl implements RecipeService {
 
                 List<Recipes> recipesCollection = collection.stream().map(CollectionRecipe::getRecipe).collect(Collectors.toList());
 
-                recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
-
-                recipesList = recipesList.stream().filter(recipesCollection::contains).collect(Collectors.toList());
+                recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted") && recipesCollection.contains(recipe)).collect(Collectors.toList());
                 break;
             case "shared":
                 recipesList = recipesList.stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted")).collect(Collectors.toList());
@@ -247,6 +245,14 @@ public class RecipeServiceImpl implements RecipeService {
                 break;
             default:
                 recipesList = null;
+        }
+
+        if (recipesList != null) {
+            Integer groupNumber = recipeGetRequest.getGroupNumber();
+            recipesList = recipesList.stream().skip(groupNumber * 10).collect(Collectors.toList());
+            if (!recipeGetRequest.getAll().equals("yes")) {
+                recipesList = recipesList.stream().limit(10).collect(Collectors.toList());
+            }
         }
 
         return recipesList;
@@ -756,7 +762,26 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public ResponseMessage checkIfInCollection(Long recipeId) {
 
+//        User currentLoggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+//        if (currentLoggedUser == null) {
+//            return new ResponseMessage("Current logged user has not been found");
+//        }
+//
+//        List<CollectionRecipe> collection = collectionRecipeRepo.findByRecipeCollector(currentLoggedUser);
+//
+//        if (collection == null) {
+//            return new ResponseMessage("Collection recipes has not been found");
+//        }
+//
+//        List<Recipes> recipesCollection = collection.stream().map(CollectionRecipe::getRecipe).collect(Collectors.toList());
+//
+//        List<Recipes> recipesList = getAllRecipes().stream().filter(recipe -> recipe.getApprovalStatus().equals("accepted") && recipesCollection.contains(recipe)).collect(Collectors.toList());
+
+//        recipesList = recipesList.stream().filter(recipesCollection::contains).collect(Collectors.toList());
+
         RecipeGetRequest request = new RecipeGetRequest();
+        request.setAll("yes");
+        request.setGroupNumber(0);
         request.setRecipesGroup("personal");
         request.setPhrase("");
 

@@ -23,6 +23,8 @@ export default function ResetPasswordPage(props) {
                     "token": token
                 };
 
+                console.log("token " + token);
+
                 result = await http.post("/api/users/checkTokenValidity", credentials);
 
                 // if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
@@ -33,7 +35,7 @@ export default function ResetPasswordPage(props) {
                 });
                 // }
 
-                return result.data.message;
+                // return result.data.message;
 
             } catch (err) {
 
@@ -44,7 +46,7 @@ export default function ResetPasswordPage(props) {
                 });
                 console.error(err);
             }
-        }, [state.msg]
+        }, []
     );
 
     if (state.msg === "Token is valid") {

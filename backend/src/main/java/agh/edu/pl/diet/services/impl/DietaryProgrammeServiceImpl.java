@@ -76,15 +76,25 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
 
         dietaryProgrammeRepo.save(dietaryProgramme);
 
+        System.out.println("saving prog");
+
+        dietaryPreference.setRelatedDietaryProgramme(dietaryProgramme);
+        dietaryPreferencesRepo.save(dietaryPreference);
+        System.out.println("saving pref");
+
         for (int i = 1; i <= dietaryProgrammeDays; i++) {
             if (!dailyMenuService.addNewDailyMenu(dietaryProgramme, dietaryPreference.getTotalDailyCalories(), dietaryPreference.getMealsQuantity(), totalDailyNutrients, i, dietaryProgrammeDays).getMessage().equals("Daily Menu has been added")) {
+
+                dietaryPreference.setRelatedDietaryProgramme(null);
+                dietaryPreferencesRepo.save(dietaryPreference);
+                System.out.println("deleting pref");
+
+                System.out.println("deleting prog");
                 dietaryProgrammeRepo.delete(dietaryProgramme);
                 return new ResponseMessage("Daily Menu has not been created");
             }
         }
 
-        dietaryPreference.setRelatedDietaryProgramme(dietaryProgramme);
-        dietaryPreferencesRepo.save(dietaryPreference);
         return new ResponseMessage("Dietary Programme has been added");
     }
 
@@ -226,5 +236,40 @@ public class DietaryProgrammeServiceImpl implements DietaryProgrammeService {
 
     }
 
+    @Override
+    public ResponseMessage removeDietaryProgramme(Long programmeId) {
+
+        User currentLoggedOwner = userService.findByUsername(userService.getLoggedUser().getUsername());
+        if (currentLoggedOwner == null) {
+            return new ResponseMessage("Dietary programme owner has not been found");
+        }
+
+        DietaryProgramme programme = dietaryProgrammeRepo.findById(programmeId).orElse(null);
+        if (programme == null) {
+            return new ResponseMessage("Dietary programme with id " + programmeId + " has not been found");
+        }
+
+        List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(programme);
+        for (DailyMenu menu : menus) {
+            List<Meals> meals = mealRepo.findByDailyMenu(menu);
+            for (Meals meal : meals) {
+                mealRepo.delete(meal);
+            }
+            dailyMenuRepo.delete(menu);
+        }
+
+        DietaryPreferences dietaryPreference = dietaryPreferencesRepo.findByRelatedDietaryProgramme(programme);
+
+        if (dietaryPreference == null) {
+            return new ResponseMessage("Dietary preference related to dietary programme with id " + programmeId + " has not been found");
+        }
+
+        dietaryPreference.setRelatedDietaryProgramme(null);
+        dietaryPreferencesRepo.save(dietaryPreference);
+
+        dietaryProgrammeRepo.delete(programme);
+
+        return new ResponseMessage("Dietary programme " + programme.getDietaryProgrammeName() + " has been removed");
+    }
 
 }

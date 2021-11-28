@@ -2,6 +2,9 @@ import React, {useEffect} from 'react';
 import "../Authentication.css";
 import {useHistory} from "react-router-dom";
 import http from "../http-common";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 export default function Authentication(props) {
 
@@ -18,11 +21,41 @@ export default function Authentication(props) {
         mode: ""
     });
 
-    useEffect(
-        () => {
-            console.log(state.msg);
-        }, [state.msg]
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
     );
+
+    // useEffect(
+    //     () => {
+    //         console.log(state.msg);
+    //     }, [state.msg]
+    // );
 
     const validateRegistrationData = async () => {
 
@@ -167,17 +200,12 @@ export default function Authentication(props) {
                         msg: result.data.message
                     });
 
+                    handleOpen();
+
                     if (result.data.message === "User " + state.name + " " + state.surname + " has been registered") {
                         setTimeout(() => history.push('/login'), 3000);
-                        setTimeout(() => {
-                            setState({
-                                ...state,
-                                msg: ""
-                            });
-                        }, 5000);
                     }
                 }
-
             } else {
 
                 credentials = {
@@ -209,10 +237,12 @@ export default function Authentication(props) {
                             ...state,
                             "msg": "bad username or password"
                         });
+                        handleOpen();
                     })
 
             }
         } catch (err) {
+            handleOpen();
             console.error(err);
         }
 
@@ -265,7 +295,15 @@ export default function Authentication(props) {
                         </button>
                     </div>
 
-                    {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                    {state.msg !== "" ? <Snackbar
+                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                        open={open}
+                        autoHideDuration={5000}
+                        onClose={handleClose}
+                        message={state.msg}
+                        action={action}
+                    /> : null}
+                    {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
 
                     <form className="form">
 
@@ -366,7 +404,15 @@ export default function Authentication(props) {
                         </button>
                     </div>
 
-                    {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                    {state.msg !== "" ? <Snackbar
+                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                        open={open}
+                        autoHideDuration={5000}
+                        onClose={handleClose}
+                        message={state.msg}
+                        action={action}
+                    /> : null}
+                    {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
 
                     <form className="form">
 

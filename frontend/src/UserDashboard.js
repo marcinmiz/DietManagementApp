@@ -35,6 +35,7 @@ export default function UserDashboard(props) {
             startDate.setHours(0, 0, 0);
 
             const timeDifference = now - startDate;
+            console.log(timeDifference);
             if (timeDifference >= 0) {
 
                 let daysDiff = Math.floor(Math.abs(timeDifference / oneDay));
@@ -68,10 +69,10 @@ export default function UserDashboard(props) {
             <main>
                 <div>
                     <Switch>
-                        <Route path={`${path}dashboard`}>
+                        {props.adminMode === false ? <Route path={`${path}dashboard`}>
                             <div><Dashboard currentDietaryProgramme={props.currentDietaryProgramme}
                                             dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}/></div>
-                        </Route>
+                        </Route> : null}
                         <Route path={`${path}products/:productId?/:mode?`}>
                             <Products userId={props.userId} admin={admin} adminMode={adminMode}
                                       loggedInStatus={props.loggedInStatus} handleAdminMode={props.handleAdminMode}/>
@@ -80,23 +81,23 @@ export default function UserDashboard(props) {
                             <Recipes userId={props.userId} name={props.name} surname={props.surname} admin={admin}
                                      adminMode={adminMode}/>
                         </Route>
-                        <Route path={`${path}preferences`}>
+                        {props.adminMode === false ? <Route path={`${path}preferences`}>
                             <Preferences admin={admin} adminMode={adminMode}/>
-                        </Route>
-                        <Route path={`${path}programmes`}>
+                        </Route> : null}
+                        {props.adminMode === false ? <Route path={`${path}programmes`}>
                             <Programmes currentDietaryProgramme={props.currentDietaryProgramme}
                                         handleUseDietaryProgramme={props.handleUseDietaryProgramme}/>
-                        </Route>
-                        <Route path={`${path}menus/:recipeId?`}>
+                        </Route> : null}
+                        {props.adminMode === false ? <Route path={`${path}menus/:recipeId?`}>
                             <Menus userId={props.userId} currentDietaryProgramme={props.currentDietaryProgramme}
                                    currentDietaryProgrammeDay={props.currentDietaryProgrammeDay}/>
-                        </Route>
-                        <Route path={`${path}shopping`}>
+                        </Route> :null}
+                        {props.adminMode === false ? <Route path={`${path}shopping`}>
                             <ShoppingLists currentDietaryProgramme={props.currentDietaryProgramme}
                                            currentDietaryProgrammeDay={props.currentDietaryProgrammeDay}
                                            dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}
                             />
-                        </Route>
+                        </Route> : null}
                         <Route path={`${path}settings`}>
                             <Settings userId={props.userId} name={props.name} surname={props.surname}
                                       username={props.username} currentDietaryProgramme={props.currentDietaryProgramme}
@@ -105,19 +106,19 @@ export default function UserDashboard(props) {
                             />
                         </Route>
                         <Route path="*">
-                            <Redirect to={"/dashboard"}/>
+                            {props.adminMode === false ? <Redirect to={"/dashboard"}/> : <Redirect to={"/products"}/>}
                         </Route>
                     </Switch>
 
-                    {state.initialized && <FinishedDietaryProgrammeDialog
-                        open={state.openFinishedDietaryProgrammeDialog}
+                    <FinishedDietaryProgrammeDialog
+                        open={state.openFinishedDietaryProgrammeDialog && state.initialized}
                         onClose={handleCloseFinishedDietaryProgrammeDialog}
                         currentDietaryProgramme={props.currentDietaryProgramme}
                         daysDifference={state.daysDifference}
-                    />}
+                    />
                 </div>
             </main>
-            <UserBottomNavigation history={history}/>
+            <UserBottomNavigation history={history} admin={props.admin} adminMode={props.adminMode}/>
         </Container>
 
     );

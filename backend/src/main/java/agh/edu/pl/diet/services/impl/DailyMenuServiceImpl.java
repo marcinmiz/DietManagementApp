@@ -407,6 +407,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
         }
 
         RecipeGetRequest request = new RecipeGetRequest();
+        request.setAll("yes");
+        request.setGroupNumber(0);
         request.setRecipesGroup("accepted");
         request.setPhrase("");
         List<Recipes> recipes = recipeService.getRecipes(request);
@@ -657,12 +659,9 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                 fats = Double.valueOf(averageTemp) / 100;
 
                 String inCollection;
-                RecipeGetRequest request = new RecipeGetRequest();
-                request.setRecipesGroup("personal");
-                request.setPhrase("");
-                List<Recipes> collectionRecipes = recipeService.getRecipes(request);
+                ResponseMessage message = recipeService.checkIfInCollection(recipe.getRecipeId());
 
-                if (collectionRecipes.contains(recipe)) {
+                if (message.getMessage().equals("Recipe " + recipe.getRecipeName() + " with id " + recipe.getRecipeId() + " is in collection")) {
                     inCollection = "Yes";
                 } else {
                     inCollection = "No";

@@ -25,6 +25,8 @@ import ViewerModal from "../components/ViewerModal";
 import ArrowDownwardRoundedIcon from '@material-ui/icons/ArrowDownwardRounded';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import ReceiptIcon from '@material-ui/icons/Receipt';
+import CloseIcon from '@material-ui/icons/Close';
+import Snackbar from "@material-ui/core/Snackbar";
 
 const useStyles = makeStyles({
     paper: {
@@ -40,7 +42,12 @@ const useStyles = makeStyles({
         alignItems: 'center'
     },
     searchButton: {
-        marginLeft: '2%'
+        marginLeft: '2%',
+    },
+    loadMore: {
+        width: '10%',
+        marginLeft: 'auto',
+        marginRight: 'auto'
     }
 });
 
@@ -59,6 +66,7 @@ export default function Recipes(props) {
 
     const [state, setState] = React.useState({
         searchPhrase: '',
+        groupNumber: 0,
         recipes_group: 0,//0: personal, 1: shared, 2: unconfirmed
         recipes: [
             // {"recipe_id": 1, "recipe_name": "Salmon with green beans and bacon", "recipe_author": "John Smith", "recipe_favourite": false, "recipe_shared": false, "recipe_image": "http://localhost:8097/api/images/get/recipe/recipe1.jpg", "creation_date": "7.08.2021 21:11:14", "assessment_date": "9.08.2021 21:11:14", "rejectExplanation": "", "approval_status": "accepted", "recipeCustomerSatisfactions": [{"rating_author": "John Smith", "rating_value": 0.2}, {"rating_author": "Derek Johnson", "rating_value": 3.5}, {"rating_author": "Kate Bell", "rating_value": 2.0}, {"rating_author": "Jessica Wells", "rating_value": 5.0}], "ingredients": [{"ingredient_name": "salmon fillet", "ingredient_quantity": 4, "ingredient_unit": "pcs"}, {"ingredient_name": "green beans", "ingredient_quantity": 450, "ingredient_unit": "g"}, {"ingredient_name": "butter", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "smoked bacon", "ingredient_quantity": 2, "ingredient_unit": "slices"}, {"ingredient_name": "breadcrumbs", "ingredient_quantity": 2, "ingredient_unit": "tablespoons"}, {"ingredient_name": "olive oil", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}, {"ingredient_name": "water", "ingredient_quantity": 3, "ingredient_unit": "tablespoons"}], "steps": [{"step_number": 1, "step_name": "Cut each salmon fillet into 4 pieces and place them in ovenproof dish lined with parchment. Pour it some olive oil. Leave it for several minutes, then roast at 160 Celsius degrees for 15 minutes."}, {"step_number": 2, "step_name": "Cube smoked bacon and fry it up on the frying pan."}, {"step_number": 3, "step_name": "Blanch green beans, then strain it and add to smoked bacon. Stop frying after 1 minute."}, {"step_number": 4, "step_name": "Add butter to green beans and fry it for a few minutes."}, {"step_number": 5, "step_name": "Before you finish frying sprinkle its content with breadcrumbs. Serve with roasted salmon. You might append boiled rice."}]}
@@ -76,6 +84,36 @@ export default function Recipes(props) {
         suitabilityRecipeName: null,
         open_viewer_modal: false,
     });
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     switch (state.recipes_group) {
         case 0:
@@ -100,7 +138,7 @@ export default function Recipes(props) {
             }
             break;
         case 3:
-                recipes_parameters.recipesGroup = "favourite";
+            recipes_parameters.recipesGroup = "favourite";
             break;
         default:
             recipes_parameters.recipesGroup = "";
@@ -110,7 +148,7 @@ export default function Recipes(props) {
     useEffect(
         async () => {
             handleSearch();
-        }, [state.recipes_group, state.msg, props.adminMode, recipeId, mode]
+        }, [state.recipes_group, props.adminMode, recipeId, mode]
     );
 
     const createRecipe = async (data, x, recipesGroup) => {
@@ -180,14 +218,18 @@ export default function Recipes(props) {
     const handleTab = (event, newValue) => {
         setState({
             ...state,
+            groupNumber: 0,
             recipes_group: newValue,
+            recipes: []
         });
     };
 
     const handleChange = (event) => {
+        const phraseChange = state.searchPhrase !== event.target.value;
         setState({
             ...state,
             [event.target.name]: event.target.value,
+            groupNumber: phraseChange ? 0 : state.groupNumber
         });
     };
 
@@ -245,9 +287,10 @@ export default function Recipes(props) {
     };
 
     const handleCloseViewerModal = () => {
+        console.log("reloading");
         setState({
             ...state,
-            open_viewer_modal: false
+            groupNumber: 0
         });
         history.push("/recipes");
     };
@@ -292,38 +335,65 @@ export default function Recipes(props) {
 
         const recipeId = state.recipes[index].recipe_id;
 
-        // let recipe_favourite = false;
-        //
-        // recipe_favourite = state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author === props.name + " " + props.surname)[0].customer_satisfaction_favourite;
-
         let response = await http.put("/api/recipes/markFavourite/" + recipeId);
 
-        if (response.data.message.startsWith("Recipe with id")) {
+        let msg = response.data.message;
+
+        if (!msg.startsWith("Recipe with id")) {
+
+            console.error(msg);
+
             setState({
                 ...state,
-                "msg": response.data.message
+                "msg": msg
             });
 
-            setTimeout(() => {
-//                 const satisfactions = state.recipes[index].recipe_customer_satisfactions;
-//                 console.log(satisfactions);
-//                 const filteredSatisfactions = state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author === props.name + " " + props.surname);
-//                 console.log(filteredSatisfactions);
-//                 const firstFilteredSatisfaction = state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author === props.name + " " + props.surname)[0];
-//                 console.log(firstFilteredSatisfaction);
-//                 console.log(firstFilteredSatisfaction.customer_satisfaction_favourite);
-// console.log(recipe_favourite);
-//                 if (satisfactions && filteredSatisfactions && firstFilteredSatisfaction) {
-//                     state.recipes[index].recipe_customer_satisfactions.find(customer_satisfaction => customer_satisfaction.customer_satisfaction_author === props.name + " " + props.surname)[0].customer_satisfaction_favourite = !recipe_favourite;
-//                 }
+            handleOpen();
 
-                setState({
-                    ...state,
-                    "msg": ""
-                });
-            }, 3000);
         } else {
-            console.error(response.data.message);
+
+            let sat = {
+                customer_satisfaction_author: props.name + " " + props.surname,
+                customer_satisfaction_rating: null,
+                customer_satisfaction_favourite: false
+            };
+
+            let currentSatisfaction = state.recipes[index].recipe_customer_satisfactions.find(satisfaction => satisfaction.customer_satisfaction_author === (props.name + " " + props.surname));
+
+            console.log(currentSatisfaction);
+
+            if (currentSatisfaction) {
+                sat = {
+                    ...currentSatisfaction
+                };
+            }
+
+            console.log(sat);
+
+            sat.customer_satisfaction_favourite = !sat.customer_satisfaction_favourite;
+
+            const mark = sat.customer_satisfaction_favourite ? "marked" : "unmarked";
+
+            msg = "Recipe " + state.recipes[index].recipe_name + " has been " + mark + " as favourite";
+
+            const sats = [...state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author !== (props.name + " " + props.surname)), sat];
+
+            const recipe = {...state.recipes[index]};
+            recipe.recipe_customer_satisfactions = sats;
+
+            let recipe_index = state.recipes.findIndex(currentRecipe => currentRecipe.recipe_id === recipe.recipe_id);
+
+            const recipes = [...state.recipes];
+            recipes.splice(recipe_index, 1, recipe);
+
+            await setState({
+                ...state,
+                recipes: recipes,
+                msg: msg
+            });
+
+            handleOpen();
+
         }
 
     };
@@ -336,22 +406,42 @@ export default function Recipes(props) {
 
         const response = await http.get("/api/recipes/share/" + recipeId);
 
-        if (response.data.message.endsWith("has been shared") || response.data.message.endsWith("has been unshared")) {
+        let msg = response.data.message;
+
+        if (!(response.data.message.endsWith("has been shared") || response.data.message.endsWith("has been unshared"))) {
+            console.error(msg);
+
             setState({
                 ...state,
-                "msg": response.data.message
+                "msg": msg
             });
 
-            setTimeout(() => {
-                state.recipes[index].recipe_shared = !state.recipes[index].recipe_shared;
+            handleOpen();
 
-                setState({
-                    ...state,
-                    "msg": ""
-                });
-            }, 3000);
         } else {
-            console.error(response.data.message);
+
+            const recipe_index = state.recipes.findIndex(currentRecipe => currentRecipe.recipe_id === recipeId);
+            let currentRecipe = state.recipes[recipe_index];
+
+            const recipe = {...currentRecipe};
+
+            recipe.recipe_shared = !recipe.recipe_shared;
+
+            const recipe_shared = recipe.recipe_shared ? "shared" : "unshared";
+
+            msg = "Recipe " + currentRecipe.recipe_name + " has been " + recipe_shared;
+
+            const recipes = [...state.recipes];
+            recipes.splice(recipe_index, 1, recipe);
+
+            await setState({
+                ...state,
+                recipes: recipes,
+                msg: msg
+            });
+
+            handleOpen();
+
         }
     };
 
@@ -361,22 +451,42 @@ export default function Recipes(props) {
 
         const response = await http.get("/api/recipes/addToCollection/" + recipeId);
 
-        if (response.data.message.endsWith("has been added to collection") || response.data.message.endsWith("has been removed from collection")) {
+        let msg = response.data.message;
+
+        if (!(response.data.message.endsWith("has been added to collection") || response.data.message.endsWith("has been removed from collection"))) {
+            console.error(msg);
+
             setState({
                 ...state,
-                "msg": response.data.message
+                "msg": msg
             });
 
-            setTimeout(() => {
-                // state.recipes[index].recipe_shared = !state.recipes[index].recipe_shared;
+            handleOpen();
 
-                setState({
-                    ...state,
-                    "msg": ""
-                });
-            }, 3000);
         } else {
-            console.error(response.data.message);
+
+            const recipe_index = state.recipes.findIndex(currentRecipe => currentRecipe.recipe_id === recipeId);
+            let currentRecipe = state.recipes[recipe_index];
+
+            const recipe = {...currentRecipe};
+
+            recipe.in_collection = !recipe.in_collection;
+
+            const in_collection = recipe.in_collection ? "added to" : "removed from";
+
+            msg = "Recipe " + currentRecipe.recipe_name + " has been " + in_collection + " collection";
+
+            const recipes = [...state.recipes];
+            recipes.splice(recipe_index, 1, recipe);
+
+            await setState({
+                ...state,
+                recipes: recipes,
+                msg: msg
+            });
+
+            handleOpen();
+
         }
     };
 
@@ -388,11 +498,13 @@ export default function Recipes(props) {
             return 0;
         }
 
-        if (ratings.filter(rating => rating.customer_satisfaction_rating != null).length < 1) {
+        const ratings_length = ratings.filter(rating => rating.customer_satisfaction_rating != null).length;
+
+        if (ratings_length < 1) {
             return 0;
         }
 
-        let average_rating = ratings.flatMap(rating => rating.customer_satisfaction_rating).reduce((r1, r2) => r1 + r2) / ratings.length;
+        let average_rating = ratings.flatMap(rating => rating.customer_satisfaction_rating).reduce((r1, r2) => r1 + r2) / ratings_length;
         return Math.round(average_rating * 1000) / 1000;
     };
 
@@ -413,10 +525,7 @@ export default function Recipes(props) {
 
     const handlePersonalRatingEdit = async (event, index, newValue) => {
 
-        console.log(index);
-
         const recipeId = state.recipes[index].recipe_id;
-        console.log(recipeId);
 
         if (recipeId == null) {
             console.error("recipeId cannot be null");
@@ -425,31 +534,61 @@ export default function Recipes(props) {
 
         let response = await http.put("/api/recipes/rate/" + recipeId + "/" + newValue);
 
-        if (response.data.message.startsWith("Recipe with id")) {
-            setState({
+        let msg = response.data.message;
+
+        if (!msg.startsWith("Recipe with id")) {
+            console.error(msg);
+            await setState({
                 ...state,
-                "msg": "Recipe " + state.recipes[index].recipe_name + " has been rated"
+                msg: msg
             });
 
-            setTimeout(() => {
-                const satisfaction = state.recipes[index].recipe_customer_satisfactions.find(customer_satisfaction => customer_satisfaction.customer_satisfaction_author === props.name + " " + props.surname);
+            handleOpen();
 
-                if (satisfaction)
-                    satisfaction.customer_satisfaction_rating = newValue;
-
-                setState({
-                    ...state,
-                    "msg": ""
-                });
-            }, 3000);
         } else {
-            console.error(response.data.message);
-        }
+            msg = "Recipe " + state.recipes[index].recipe_name + " has been rated as " + newValue;
 
+            let sat = {
+                customer_satisfaction_author: props.name + " " + props.surname,
+                customer_satisfaction_rating: null,
+                customer_satisfaction_favourite: false
+            };
+
+            let currentSatisfaction = state.recipes[index].recipe_customer_satisfactions.find(satisfaction => satisfaction.customer_satisfaction_author === (props.name + " " + props.surname));
+
+            console.log(currentSatisfaction);
+
+            if (currentSatisfaction) {
+                sat = {
+                    ...currentSatisfaction
+                };
+            }
+
+            console.log(sat);
+
+            sat.customer_satisfaction_rating = newValue;
+
+            const sats = [...state.recipes[index].recipe_customer_satisfactions.filter(satisfaction => satisfaction.customer_satisfaction_author !== (props.name + " " + props.surname)), sat];
+
+            const recipe = {...state.recipes[index]};
+            recipe.recipe_customer_satisfactions = sats;
+
+            let recipe_index = state.recipes.findIndex(currentRecipe => currentRecipe.recipe_id === recipe.recipe_id);
+
+            const recipes = [...state.recipes];
+            recipes.splice(recipe_index, 1, recipe);
+
+            await setState({
+                ...state,
+                recipes: recipes,
+                msg: msg
+            });
+
+            handleOpen();
+
+        }
     };
-    const handleChangePersonalRating = async (event, index) => {
-        console.log("change " + index);
-    };
+
     const handleOpenPreferenceSuitabilityPopup = (event, suitabilityRecipeId, suitabilityRecipeName) => {
         event.cancelBubble = true;
         if (event.stopPropagation) event.stopPropagation();
@@ -469,22 +608,23 @@ export default function Recipes(props) {
 
     };
 
-    const handleOperationMessage = (message) => {
+    const handleOperationMessage = async (message, reload) => {
+
+        console.log(message);
 
         setState({
             ...state,
             msg: message,
+            open_viewer_modal: false,
+            open_confirmation_modal: false
         });
-        setTimeout(() => {
-            setState({
-                ...state,
-                msg: "",
-                open_viewer_modal: false,
-                open_confirmation_modal: false
-            });
-        }, 3000)
-    };
 
+        handleOpen();
+
+        if (reload) {
+            setTimeout(() => history.push("/recipes"),1000);
+        }
+    };
 
     const handlePrevRecipe = () => {
 
@@ -531,14 +671,14 @@ export default function Recipes(props) {
     };
 
     const handleSearch = async () => {
-        setState({
-            ...state,
-            recipes: [],
-            loaded: false
-        });
 
+        recipes_parameters.all = "no";
+        recipes_parameters.groupNumber = state.groupNumber;
         recipes_parameters.phrase = state.searchPhrase;
         let response;
+
+        console.log(recipes_parameters.groupNumber);
+        console.log(recipes_parameters.phrase);
 
         try {
             if (recipes_parameters.recipesGroup === "personal" || recipes_parameters.recipesGroup === "shared" || recipes_parameters.recipesGroup === "favourite") {
@@ -552,14 +692,19 @@ export default function Recipes(props) {
                 table[x] = await createRecipe(response.data, x, recipes_parameters.recipesGroup);
             }
 
+            console.log(table);
+            let recipes = state.groupNumber === 0 ? [...table] : [...state.recipes, ...table];
+            console.log(recipes);
+
             let recipe_index = 'new';
 
             if (recipeId !== 'new' && (mode === 'view' || mode === 'edit')) {
 
-                for (let i = 0; i < table.length; i++) {
-                    if (table[i]) {
-                        if (table[i].recipe_id === Number(recipeId)) {
+                for (let i = 0; i < recipes.length; i++) {
+                    if (recipes[i]) {
+                        if (recipes[i].recipe_id === Number(recipeId)) {
                             recipe_index = i;
+                            console.log(recipe_index);
                         }
                     }
                 }
@@ -592,9 +737,10 @@ export default function Recipes(props) {
 
             setState({
                 ...state,
-                recipes: table,
+                recipes: recipes,
                 loaded: true,
                 recipe_index: recipe_index,
+                groupNumber: state.groupNumber + 1,
                 open_viewer_modal: recipeId && mode && state.msg === "" ? true : false
             });
 
@@ -705,6 +851,10 @@ export default function Recipes(props) {
                 </div>
             ))}
 
+            {state.recipes.length > 0 && state.recipes.length % 10 === 0 ?
+                <Button className={classes.loadMore} variant="contained" color="primary" type="button"
+                        onClick={() => handleSearch()}>Load more</Button> : null}
+
             <ConfirmationDialog
                 classes={{
                     paper: classes.paper,
@@ -805,7 +955,7 @@ export default function Recipes(props) {
                                         <div className="recipe_actions">
                                             <div className="recipe_ratings_header">
                                                 <div className="recipe_ratings">
-                                                    General: {handleGeneralRating(index)} ({state.recipes[index].recipe_customer_satisfactions ? state.recipes[index].recipe_customer_satisfactions.length : 0} {state.recipes[index].recipe_customer_satisfactions ? (state.recipes[index].recipe_customer_satisfactions.length === 1 ? "rating" : "ratings") : "ratings"})
+                                                    General: {handleGeneralRating(index)} ({state.recipes[index].recipe_customer_satisfactions.filter(rating => rating.customer_satisfaction_rating != null) ? state.recipes[index].recipe_customer_satisfactions.filter(rating => rating.customer_satisfaction_rating != null).length : 0} {state.recipes[index].recipe_customer_satisfactions.filter(rating => rating.customer_satisfaction_rating != null) ? (state.recipes[index].recipe_customer_satisfactions.filter(rating => rating.customer_satisfaction_rating != null).length === 1 ? "rating" : "ratings") : "ratings"})
                                                 </div>
                                                 <Rating name="read-only" value={handleGeneralRating(index)}
                                                         precision={0.1} readOnly/>
@@ -844,6 +994,10 @@ export default function Recipes(props) {
                             </Grid>
                         ))}
                     </Grid>
+
+                    {state.recipes.length > 0 && state.recipes.length % 10 === 0 ?
+                        <Button className={classes.loadMore} variant="contained" color="primary" type="button"
+                                onClick={() => handleSearch()}>Load more</Button> : null}
 
                     {state.loaded && state.suitabilityRecipeId && <SuitableRecipeModal
                         open={state.open_preference_suitability_popup}
@@ -945,6 +1099,9 @@ export default function Recipes(props) {
                         </div>
                     ))}
 
+                    {state.recipes.length > 0 && state.recipes.length % 10 === 0 ?
+                        <Button className={classes.loadMore} variant="contained" color="primary" type="button"
+                                onClick={() => handleSearch()}>Load more</Button> : null}
                 </div>;
                 break;
         }
@@ -1004,11 +1161,19 @@ export default function Recipes(props) {
                         <AddIcon/>
                     </Fab>
                 </div>
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={open}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
                 {state.recipes.length === 0 ?
                     <div className="loading">{!state.loaded ? "Loading" : "No recipes found"}</div> : null}
                 {tab}
-                {recipeId && state.recipes.length > 0 && mode && <ViewerModal
+                {recipeId && state.recipes.length >= 0 && mode && <ViewerModal
                     open={state.open_viewer_modal}
                     onClose={handleCloseViewerModal}
                     type="recipe"

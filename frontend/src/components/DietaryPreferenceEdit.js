@@ -96,6 +96,8 @@ export default function DietaryPreferenceEdit(props) {
                 }
 
                 let recipes_parameters = {};
+                recipes_parameters.all = "yes";
+                recipes_parameters.groupNumber = 0;
                 recipes_parameters.recipesGroup = "personal";
                 recipes_parameters.phrase = "";
 

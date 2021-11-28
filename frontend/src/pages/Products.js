@@ -21,6 +21,8 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import ViewerModal from "../components/ViewerModal";
 import {useHistory, useParams} from "react-router-dom";
 import SpaIcon from '@material-ui/icons/Spa';
+import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
+import Snackbar from "@material-ui/core/Snackbar/Snackbar";
 
 // const BorderLinearProgress = withStyles((theme) => ({
 //     root: {
@@ -92,6 +94,35 @@ export default function Products(props) {
         open_viewer_modal: false,
     });
 
+    const [open, setOpen] = React.useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = async (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        await setState({
+            ...state,
+            msg: ""
+        });
+        setOpen(false);
+    };
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small"/>
+            </IconButton>
+        </React.Fragment>
+    );
 
     switch (state.products_group) {
         case 0:
@@ -123,7 +154,7 @@ export default function Products(props) {
     useEffect(
         async () => {
             handleSearch();
-        }, [state.products_group, state.msg, props.adminMode, productId, mode]
+        }, [state.products_group, props.adminMode, productId, mode]
     );
 
     const createProduct = (data, x) => {
@@ -212,7 +243,7 @@ export default function Products(props) {
 
         http.delete("/api/products/remove/" + product_id)
             .then(resp => {
-                handleOperationMessage(resp.data.message);
+                handleOperationMessage(resp.data.message, true);
             })
             .catch(error => console.log(error));
     };
@@ -238,27 +269,27 @@ export default function Products(props) {
     };
 
     const handleCloseViewerModal = () => {
-        setState({
-            ...state,
-            open_viewer_modal: false
-        });
+        // setState({
+        //     ...state,
+        //     open_viewer_modal: false
+        // });
         history.push("/products");
     };
 
-    const handleOperationMessage = (message) => {
+    const handleOperationMessage = (message, reload) => {
 
         setState({
             ...state,
             msg: message,
+            open_viewer_modal: false,
+            open_confirmation_modal: false
         });
-        setTimeout(() => {
-            setState({
-                ...state,
-                msg: "",
-                open_viewer_modal: false,
-                open_confirmation_modal: false
-            });
-        }, 3000)
+
+        handleOpen();
+
+        if (reload) {
+            setTimeout(() => history.push("/products"),1000);
+        }
     };
 
     const handlePrevProduct = () => {
@@ -720,7 +751,15 @@ export default function Products(props) {
                         <AddIcon/>
                     </Fab>
                 </div>
-                {state.msg !== "" ? <div className="msg">{state.msg}</div> : null}
+                {state.msg !== "" ? <Snackbar
+                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                    open={open}
+                    autoHideDuration={5000}
+                    onClose={handleClose}
+                    message={state.msg}
+                    action={action}
+                /> : null}
+                {/*{state.msg !== "" ? <div className="msg">{state.msg}</div> : null}*/}
                 {state.products.length === 0 ?
                     <div className="loading">{!state.loaded ? "Loading" : "No products found"}</div> : null}
                 {/*<BorderLinearProgress variant="determinate" value={90}/>*/}

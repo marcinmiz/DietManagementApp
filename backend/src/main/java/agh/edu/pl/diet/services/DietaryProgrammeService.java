@@ -16,4 +16,6 @@ public interface DietaryProgrammeService {
 
     ResponseMessage finishDietaryProgramme(Long programmeId);
 
+    ResponseMessage removeDietaryProgramme(Long programmeId);
+
 }
