@@ -100,7 +100,7 @@ export default function UserDashboard(props) {
                         </Route> : null}
                         <Route path={`${path}settings`}>
                             <Settings userId={props.userId} name={props.name} surname={props.surname}
-                                      username={props.username} currentDietaryProgramme={props.currentDietaryProgramme}
+                                      username={props.username} email={props.email} currentDietaryProgramme={props.currentDietaryProgramme}
                                       dietaryProgrammeStartDate={props.dietaryProgrammeStartDate}
                                       avatarImage={props.avatarImage}
                             />

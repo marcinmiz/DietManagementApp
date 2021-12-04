@@ -110,7 +110,7 @@ export default function Settings(props) {
                                     <ChangePassword resetType="settings"/>
                                 </div>
                                 <div className={classes.emailPassword}>
-                                    <ChangeEmail/>
+                                    <ChangeEmail email={props.email}/>
                                 </div>
                                 <div>
                                     <WeightManager currentDietaryProgramme={props.currentDietaryProgramme}/>

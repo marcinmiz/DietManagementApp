@@ -49,11 +49,13 @@ export default function ConfirmationDialog(props) {
                 } else {
 
                     if (data.message === "Product " + itemName + " has been accepted") {
-                        onClose();
-                        props.handleOperationMessage("Product " + itemName + " has been accepted");
+                        // onClose();
+                        props.handleOperationMessage("Product " + itemName + " has been accepted", true);
+                        setTimeout(() => onClose(),1000);
                     } else {
-                        onClose();
-                        props.handleOperationMessage("Product " + itemName + " has been rejected");
+                        // onClose();
+                        props.handleOperationMessage("Product " + itemName + " has been rejected", true);
+                        setTimeout(() => onClose(),1000);
                     }
                 }
             } else if (type === "recipe") {
@@ -65,11 +67,13 @@ export default function ConfirmationDialog(props) {
                 } else {
 
                     if (data.message === "Recipe " + itemName + " has been accepted") {
-                        onClose();
-                        props.handleOperationMessage("Recipe " + itemName + " has been accepted");
+                        // onClose();
+                        props.handleOperationMessage("Recipe " + itemName + " has been accepted", true);
+                        // setTimeout(() => onClose(),1000);
                     } else {
-                        onClose();
-                        props.handleOperationMessage("Recipe " + itemName + " has been rejected");
+                        // onClose();
+                        props.handleOperationMessage("Recipe " + itemName + " has been rejected", true);
+                        // setTimeout(() => onClose(),500);
                     }
                 }
             } else {

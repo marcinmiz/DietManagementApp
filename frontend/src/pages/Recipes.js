@@ -147,6 +147,7 @@ export default function Recipes(props) {
 
     useEffect(
         async () => {
+            console.log("ef");
             handleSearch();
         }, [state.recipes_group, props.adminMode, recipeId, mode]
     );
@@ -260,7 +261,7 @@ export default function Recipes(props) {
 
         http.delete("/api/recipes/remove/" + recipe_id)
             .then(resp => {
-                handleOperationMessage(resp.data.message);
+                handleOperationMessage(resp.data.message, true);
             })
             .catch(error => console.log(error));
     };
@@ -612,8 +613,9 @@ export default function Recipes(props) {
 
         console.log(message);
 
-        setState({
+        await setState({
             ...state,
+            groupNumber: 0,
             msg: message,
             open_viewer_modal: false,
             open_confirmation_modal: false
@@ -622,7 +624,10 @@ export default function Recipes(props) {
         handleOpen();
 
         if (reload) {
-            setTimeout(() => history.push("/recipes"),1000);
+            setTimeout(() => {
+                console.log(state.groupNumber);
+                handleSearch(true)
+            },2000);
         }
     };
 
@@ -670,10 +675,23 @@ export default function Recipes(props) {
 
     };
 
-    const handleSearch = async () => {
+    const handleSearch = async (zeroGroupNumber = false) => {
+
+        console.log(zeroGroupNumber);
+
+        setState({
+            ...state,
+            loaded: false,
+            groupNumber: zeroGroupNumber ? 0 : state.groupNumber,
+            recipes: []
+        });
 
         recipes_parameters.all = "no";
-        recipes_parameters.groupNumber = state.groupNumber;
+        if (zeroGroupNumber) {
+            recipes_parameters.groupNumber = 0;
+        } else {
+            recipes_parameters.groupNumber = state.groupNumber;
+        }
         recipes_parameters.phrase = state.searchPhrase;
         let response;
 
@@ -693,7 +711,7 @@ export default function Recipes(props) {
             }
 
             console.log(table);
-            let recipes = state.groupNumber === 0 ? [...table] : [...state.recipes, ...table];
+            let recipes = recipes_parameters.groupNumber === 0 ? [...table] : [...state.recipes, ...table];
             console.log(recipes);
 
             let recipe_index = 'new';
@@ -741,6 +759,7 @@ export default function Recipes(props) {
                 loaded: true,
                 recipe_index: recipe_index,
                 groupNumber: state.groupNumber + 1,
+                open_confirmation_modal: false,
                 open_viewer_modal: recipeId && mode && state.msg === "" ? true : false
             });
 
@@ -861,7 +880,7 @@ export default function Recipes(props) {
                 }}
                 id="confirmation_popup"
                 type="recipe"
-                open={state.open_confirmation_modal && state.msg === ''}
+                open={state.open_confirmation_modal && state.loaded}
                 onClose={handleCloseConfirmationPopup}
                 complement={state.complement}
                 itemId={state.confirmation_recipe_id}
@@ -1111,7 +1130,7 @@ export default function Recipes(props) {
     return (
         <Container id="main_container" maxWidth="lg">
             <div
-                className={(state.open_viewer_modal || state.open_confirmation_modal) && state.msg === '' ? "background_blur page_container" : "page_container"}>
+                className={(state.open_viewer_modal || state.open_confirmation_modal) && !state.loaded ? "background_blur page_container" : "page_container"}>
                 <h2>Recipes</h2>
                 <div className="toolbar_container">
 
@@ -1150,6 +1169,7 @@ export default function Recipes(props) {
                                 id="searchPhrase"
                                 name="searchPhrase"
                                 className="search_input"
+                                autoComplete="off"
                                 value={state.searchPhrase}
                                 onChange={handleChange}
                             />

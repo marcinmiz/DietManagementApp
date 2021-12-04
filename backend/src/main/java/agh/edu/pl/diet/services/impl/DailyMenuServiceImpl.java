@@ -4,25 +4,20 @@ import agh.edu.pl.diet.entities.*;
 import agh.edu.pl.diet.payloads.request.DailyMenuRequest;
 import agh.edu.pl.diet.payloads.request.RecipeGetRequest;
 import agh.edu.pl.diet.payloads.response.DailyMenuResponse;
-import agh.edu.pl.diet.payloads.response.RecipeResponse;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.DailyMenuRepo;
 import agh.edu.pl.diet.repos.DietaryPreferencesRepo;
 import agh.edu.pl.diet.repos.DietaryProgrammeRepo;
 import agh.edu.pl.diet.repos.MealRepo;
-import agh.edu.pl.diet.services.DailyMenuService;
-import agh.edu.pl.diet.services.MealService;
-import agh.edu.pl.diet.services.RecipeService;
-import agh.edu.pl.diet.services.UserService;
+import agh.edu.pl.diet.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
-public class DailyMenuServiceImpl implements DailyMenuService {
+public class DailyMenuServiceImpl implements DailyMenuService, MenusAndMealsService {
 
     @Autowired
     private DailyMenuRepo dailyMenuRepo;
@@ -44,115 +39,6 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
     @Autowired
     private DietaryPreferencesRepo preferenceRepo;
-
-//    @Autowired
-//    private NutrientRepo nutrientRepo;
-//    @Autowired
-//    private CategoryRepo categoryRepo;
-//    @Autowired
-//    private UserRepo userRepo;
-
-    private ResponseMessage verify(String mode, String type, Object item) {
-        switch (type) {
-            case "name":
-                String name = String.valueOf(item);
-                if (name == null) {
-                    return new ResponseMessage("Daily Menu name has to be given");
-                } else if (name.length() < 2 || name.length() > 40) {
-                    return new ResponseMessage("Daily Menu name has to have min 2 and max 40 characters");
-                } else if (!(name.matches("^[a-zA-Z ]+$"))) {
-                    return new ResponseMessage("Daily Menu name has to contain only letters and spaces");
-                } else if (!mode.equals("update") && dailyMenuRepo.findByDailyMenuName(name) != null) {
-                    return new ResponseMessage("Daily Menu with this name exists yet");
-                } else {
-                    return new ResponseMessage("Daily Menu name is valid");
-                }
-//            case "calories":
-//                if (item == null) {
-//                    return new ResponseMessage("Product calories has to be given");
-//                }
-//
-//                Integer calories = Integer.parseInt(item.toString());
-//
-//                if (calories.toString().length() < 1 || calories.toString().length() > 10) {
-//                    return new ResponseMessage("Product calories has to have min 1 and max 10 characters");
-//                } else if (!(calories.toString().matches("^0$") || calories.toString().matches("^(-)?[1-9]\\d*$"))) {
-//                    return new ResponseMessage("Product calories has to contain only digits");
-//                } else if (calories < 0) {
-//                    return new ResponseMessage("Product calories has to be greater or equal 0");
-//                } else {
-//                    return new ResponseMessage("Product calories are valid");
-//                }
-//            case "category":
-//                String categoryName = String.valueOf(item);
-//                if (categoryName == null) {
-//                    return new ResponseMessage("Product category has to be given");
-//                } else if (categoryName.equals("")) {
-//                    return new ResponseMessage("Product category has to be chosen");
-//                } else if (categoryRepo.findByCategoryName(categoryName) == null) {
-//                    return new ResponseMessage("Product category does not exist");
-//                } else {
-//                    return new ResponseMessage("Product category is valid");
-//                }
-//            case "list":
-//                List<String> nutrients = (List<String>) item;
-//                if (nutrients == null) {
-//                    return new ResponseMessage("Product nutrients has to be given");
-//                } else if (nutrients.isEmpty()) {
-//                    return new ResponseMessage("At least 1 product nutrient is required");
-//                } else {
-//                    return new ResponseMessage("Product nutrients are valid");
-//                }
-//            case "nutrientStatement":
-//                String nutrientStatement = String.valueOf(item);
-//                if (nutrientStatement.equals("")) {
-//                    return new ResponseMessage("Product nutrient has to be defined");
-//                } else if (!(nutrientStatement.matches("^[a-zA-Z]+;0$") || nutrientStatement.matches("^[a-zA-Z]+;(-)?[1-9]\\d*$"))) {
-//                    return new ResponseMessage("Product nutrient has to match format \"productName;productAmount\"");
-//                } else {
-//                    return new ResponseMessage("Product nutrient statement is valid");
-//                }
-//            case "nutrientName":
-//                String nutrientName = String.valueOf(item);
-//
-//                if (nutrientRepo.findByNutrientName(nutrientName) == null) {
-//                    return new ResponseMessage("Product nutrient name has to be proper");
-//                } else {
-//                    return new ResponseMessage("Product nutrient name is valid");
-//                }
-//            case "nutrientAmount":
-//                Double nutrientAmount = Double.valueOf(item.toString());
-//
-//                if (nutrientAmount.toString().length() < 1 || nutrientAmount.toString().length() > 20) {
-//                    return new ResponseMessage("Product nutrient amount has to have min 1 and max 20 characters");
-//                } else if (nutrientAmount < 0) {
-//                    return new ResponseMessage("Product nutrient amount has to be greater or equal 0");
-//                } else {
-//                    return new ResponseMessage("Product nutrient amount is valid");
-//                }
-//
-        }
-
-        return new ResponseMessage("Invalid type");
-    }
-
-    @Override
-    public DailyMenu getDailyMenuByProgrammeDay(Long dailyMenuId) {
-        DailyMenu dailyMenu = dailyMenuRepo.findById(dailyMenuId).get();
-        return dailyMenu;
-    }
-
-//    @Override
-//    public Meals getMeals(Long dailyMenuId) {
-//        Meals meals = mealRepo.findById(dailyMenuId).get();
-//        return meals;
-//    }
-//
-//    @Override
-//    public DietaryProgramme getDietaryProgramme(Long dailyMenuId) {
-//        DietaryProgramme dietaryProgramme = dietaryProgrammeRepo.findById(dailyMenuId).get();
-//        return dietaryProgramme;
-//    }
 
     @Override
     public ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes, DietaryPreferences preference) {
@@ -279,7 +165,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         if (ultimateForce >= 0.15) {
             failExplanation = "";
-        } else  {
+        } else {
             failExplanation = recipe.getRecipeName() + " contains most " + majorCategoryProductName + " category products";
         }
 
@@ -595,6 +481,8 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         dailyMenu.setDietaryProgramme(dietaryProgramme);
 
+        System.out.println(dailyMenu.getDailyMenuName());
+
         dailyMenuRepo.save(dailyMenu);
 
         for (int i = 0; i < chosenRecipes.size(); i++) {
@@ -602,14 +490,7 @@ public class DailyMenuServiceImpl implements DailyMenuService {
             Recipes recipe = chosenRecipes.get(i);
             if (!mealService.addNewMeal(mealName, recipe, dailyMenu).getMessage().equals("Meal has been added")) {
 
-                List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(dietaryProgramme);
-                for (DailyMenu menu : menus) {
-                    List<Meals> meals = mealRepo.findByDailyMenu(menu);
-                    for (Meals meal : meals) {
-                        mealRepo.delete(meal);
-                    }
-                    dailyMenuRepo.delete(menu);
-                }
+                removeDailyMenusWithMeals(dietaryProgramme);
 
                 return new ResponseMessage("Meal has not been created");
             }
@@ -621,6 +502,12 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     @Override
     public List<DailyMenuResponse> getDietaryProgrammeDailyMenus(Long dietaryProgrammeId) {
 
+        User loggedUser = userService.findByUsername(userService.getLoggedUser().getUsername());
+
+        if (loggedUser == null) {
+            return new ArrayList<>();
+        }
+
         List<DailyMenuResponse> dietaryProgrammeMenus = new ArrayList<>();
         DietaryProgramme programme = dietaryProgrammeRepo.findById(dietaryProgrammeId).orElse(null);
 
@@ -631,12 +518,36 @@ public class DailyMenuServiceImpl implements DailyMenuService {
 
         List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(programme);
 
+        menus.sort((m1, m2) -> {
+            Integer dayNumber1 = Integer.valueOf(m1.getDailyMenuName().split(" ")[1]);
+            Integer dayNumber2 = Integer.valueOf(m2.getDailyMenuName().split(" ")[1]);
+            return dayNumber1.compareTo(dayNumber2);
+        });
+
+        System.out.println();
+        menus.forEach(menu1 -> System.out.println(menu1.getDailyMenuName()));
+        System.out.println();
+
         for (DailyMenu menu : menus) {
             DailyMenuResponse response = new DailyMenuResponse(menu.getDailyMenuId(), menu.getDailyMenuName(), menu.getDailyMenuDate(), menu.getMealsQuantity());
 
             List<Meals> meals = mealRepo.findByDailyMenu(menu);
 
+            Map<Integer, Meals> orderedMealsTree = new TreeMap<>();
+
+            List<String> listOrder = Arrays.asList("breakfast", "lunch", "dinner", "tea", "supper");
+
             for (Meals meal : meals) {
+                orderedMealsTree.put(listOrder.indexOf(meal.getMealsName()), meal);
+            }
+
+            List<Meals> orderedMealsList = new ArrayList<>(orderedMealsTree.values());
+
+            System.out.println();
+            orderedMealsList.forEach(meals1 -> System.out.println(meals1.getMealsName()));
+            System.out.println();
+
+            for (Meals meal : orderedMealsList) {
 
                 Recipes recipe = recipeService.getRecipe(meal.getRecipe().getRecipeId());
 
@@ -688,7 +599,19 @@ public class DailyMenuServiceImpl implements DailyMenuService {
                     }
                 }
 
-                DailyMenuResponse.Recipe createdRecipe = response.createRecipe(recipe.getRecipeId(), recipe.getRecipeName(), recipe.getCreationDate(), recipe.getRecipeOwner().getUserId(), recipeAuthor, recipe.getRecipeOwner().getAvatarImage(), recipe.getRecipeImage(), calories, proteins, carbohydrates, fats, inCollection, likedInPreference, recipe.getRecipeProducts(), recipe.getRecipeSteps());
+                String favourite = "No";
+
+                List<RecipeCustomerSatisfaction> customerSatisfactions = recipe.getRecipeCustomerSatisfactions().stream().filter(satisfaction -> satisfaction.getCustomerSatisfactionOwner().getUserId().equals(loggedUser.getUserId())).collect(Collectors.toList());
+
+                if (!customerSatisfactions.isEmpty()) {
+                    if (customerSatisfactions.get(0).getRecipeFavourite()) {
+                        favourite = "Yes";
+                    } else {
+                        favourite = "No";
+                    }
+                }
+
+                DailyMenuResponse.Recipe createdRecipe = response.createRecipe(recipe.getRecipeId(), recipe.getRecipeName(), recipe.getCreationDate(), recipe.getRecipeOwner().getUserId(), recipeAuthor, recipe.getRecipeOwner().getAvatarImage(), recipe.getRecipeImage(), calories, proteins, carbohydrates, fats, inCollection, likedInPreference, favourite, recipe.getRecipeProducts(), recipe.getRecipeSteps());
 
                 response.addMeal(meal.getMealId(), meal.getMealsName(), meal.getMealHourTime(), createdRecipe, meal.getConsumed());
             }
@@ -700,96 +623,16 @@ public class DailyMenuServiceImpl implements DailyMenuService {
     }
 
     @Override
-    public ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest) {
+    public Boolean removeDailyMenusWithMeals(DietaryProgramme programme) {
 
-        String dailyMenuName = "";
-        Optional<DailyMenu> dailyMenu = dailyMenuRepo.findById(dailyMenuId);
-        if (dailyMenu.isPresent()) {
-            DailyMenu updatedDailyMenu = dailyMenu.get();
-            dailyMenuName = dailyMenuRequest.getDailyMenuName();
-
-            ResponseMessage responseMessage = verify("update", "name", dailyMenuName);
-            if (responseMessage.getMessage().equals("Daily menu name is valid")) {
-                updatedDailyMenu.setDailyMenuName(dailyMenuName);
-            } else {
-                return responseMessage;
+        List<DailyMenu> menus = dailyMenuRepo.findByDietaryProgramme(programme);
+        for (DailyMenu menu : menus) {
+            List<Meals> meals = mealRepo.findByDailyMenu(menu);
+            for (Meals meal : meals) {
+                mealRepo.delete(meal);
             }
-
-            String dailyMenuDate = dailyMenuRequest.getDailyMenuDate();
-
-            ResponseMessage responseMessage2 = verify("update", "dailyMenuDate", dailyMenuDate);
-
-            if (responseMessage2.getMessage().equals("Daily Menu Date are valid")) {
-                updatedDailyMenu.setDailyMenuDate(dailyMenuDate);
-            } else {
-                return responseMessage2;
-            }
-
-            Integer mealsQuantity = dailyMenuRequest.getMealsQuantity();
-
-            ResponseMessage responseMessage3 = verify("update", "mealsQuantity", mealsQuantity);
-
-            if (responseMessage3.getMessage().equals("Product category is valid")) {
-                updatedDailyMenu.getMealsQuantity();
-            } else {
-                return responseMessage3;
-            }
-
-            List<String> meals = dailyMenuRequest.getMeals();
-
-            ResponseMessage responseMessage4 = verify("update", "list", meals);
-
-            if (!(responseMessage4.getMessage().equals("Meals are valid"))) {
-                return responseMessage4;
-            }
-
-            for (String mealsStatement : meals) {
-
-                ResponseMessage responseMessage5 = verify("update", "mealsStatement", mealsStatement);
-
-                if (!(responseMessage5.getMessage().equals("Meals statement is valid"))) {
-                    return responseMessage5;
-                }
-                String[] parts = mealsStatement.split(";");
-                String mealsName = parts[0];
-//                Double nutrientAmount = Double.valueOf(parts[1]);
-
-                ResponseMessage responseMessage6 = verify("update", "mealsName", mealsName);
-
-                if (!(responseMessage6.getMessage().equals("Meals name is valid"))) {
-                    return responseMessage6;
-                }
-
-//                ResponseMessage responseMessage7 = verify("update", "nutrientAmount", nutrientAmount);
-//
-//                if (!(responseMessage7.getMessage().equals("Product nutrient amount is valid"))) {
-//                    return responseMessage7;
-//                }
-
-//                ProductNutrient productNutrient = updatedProduct.getNutrients().stream().filter(pn -> pn.getNutrient().getNutrientName().equals(nutrientName)).findFirst().orElse(null);
-//
-//                if (productNutrient != null) {
-//                    productNutrient.setNutrientAmount(nutrientAmount);
-//                } else {
-//                    return new ResponseMessage( "Nutrient " + nutrientName + " belonging to product " + productName + " has not been found");
-//                }
-            }
-            dailyMenuRepo.save(updatedDailyMenu);
-
-            return new ResponseMessage("Daily Menu " + dailyMenuName + " has been updated successfully");
+            dailyMenuRepo.delete(menu);
         }
-        return new ResponseMessage("Daily Menu " + dailyMenuName + " has not been found");
-    }
-
-    @Override
-    public ResponseMessage removeDailyMenu(Long dailyMenuId) {
-
-        Optional<DailyMenu> dailyMenu = dailyMenuRepo.findById(dailyMenuId);
-        if (dailyMenu.isPresent()) {
-            DailyMenu removedDailyMenu = dailyMenu.get();
-            dailyMenuRepo.delete(removedDailyMenu);
-            return new ResponseMessage("DailyMenu " + removedDailyMenu.getDailyMenuName() + " has been removed successfully");
-        }
-        return new ResponseMessage("Daily Menu id " + dailyMenuId + " has not been found");
+        return true;
     }
 }

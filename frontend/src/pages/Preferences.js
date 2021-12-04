@@ -17,6 +17,18 @@ import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
 const useStyles = makeStyles((theme) => ({
     formControl: {
         minWidth: 110,
+    },
+    preference_header_id: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '50%'
+    },
+    preferenceProgrammeJoiner: {
+        color: 'gray'
+    },
+    appliedProgramme: {
+        width: '70%'
     }
 }));
 
@@ -214,7 +226,21 @@ export default function Preferences(props) {
                     {state.preferences.map((preference, index) => (
                         <div key={index} className="preference_container">
                             <div className="preference_header">
-                                <div className="preference_header_part">{index + 1}. Dietary Preference</div>
+                                {/*<div className={classes. " preference_header_part"}>*/}
+                                <div className={classes.preference_header_id}>
+                                        <span>
+                                            {index + 1}. Dietary Preference
+                                        </span>
+                                        {preference.relatedDietaryProgramme.dietaryProgrammeId ? <span className={classes.appliedProgramme}>
+                                            <span className={classes.preferenceProgrammeJoiner + " preference_header_part"}>
+                                           applied in
+                                            </span>
+                                            <span className={"preference_header_part"}>
+                                            {preference.relatedDietaryProgramme.dietaryProgrammeName} <span className={classes.preferenceProgrammeJoiner}>Dietary Programme</span>
+                                            </span>
+                                        </span> : null}
+                                </div>
+                                {/*</div>*/}
                                 <div className="product_buttons preference_header_part">
                                     <Tooltip title="Delete" aria-label="delete">
                                         <IconButton aria-label="delete" className="product_icon_button"
@@ -236,74 +262,74 @@ export default function Preferences(props) {
                                 <DietaryPreferenceEdit mode='edit' item={preference} handleEdit={handleEdit}
                                                        handleSetMsg={handleSetMsg}/>
                                 :
-                            <div className="preference_basic">
-                                <div id={"preference" + preference.preferenceId}
-                                     className="dietary_preference"
-                                >
-                                    <div className="preference_basic_info">
-                                        <div className="dietary_preference_diet_type">
-                                            {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
+                                <div className="preference_basic">
+                                    <div id={"preference" + preference.preferenceId}
+                                         className="dietary_preference"
+                                    >
+                                        <div className="preference_basic_info">
+                                            <div className="dietary_preference_diet_type">
+                                                {preference.preferenceDietType.dietTypeName !== "" ? preference.preferenceDietType.dietTypeName : "CUSTOMIZED DIET"}
+                                            </div>
+                                            <div className="dietary_preference_total_daily_calories">
+                                                {preference.totalDailyCalories} kcal daily
+                                            </div>
+                                            <div className="dietary_preference_meals_quantity">
+                                                {preference.mealsQuantity} meals
+                                            </div>
+                                            <div className="dietary_preference_target_weight">
+                                                target {preference.targetWeight} kg
+                                            </div>
                                         </div>
-                                        <div className="dietary_preference_total_daily_calories">
-                                            {preference.totalDailyCalories} kcal daily
+                                        <div className="preference_nutrients">
+                                            <div className="preference_nutrients_header">Nutrients</div>
+                                            {preference.preferenceNutrients.length === 0 ? "No nutrients" :
+                                                preference.preferenceNutrients.map((nutrient, index) => (
+                                                    <div key={index} className="preference_nutrient">
+                                                        <div>
+                                                            {nutrient.nutrientName}s
+                                                        </div>
+                                                        <div>
+                                                            {nutrient.nutrientAmount} g
+                                                        </div>
+                                                    </div>
+                                                ))}
                                         </div>
-                                        <div className="dietary_preference_meals_quantity">
-                                            {preference.mealsQuantity} meals
+                                        <div className="preference_products">
+                                            <div className="preference_products_header">Products</div>
+                                            {preference.preferenceProducts.length === 0 ? "No preferred products" :
+                                                preference.preferenceProducts.map((product, index) => (
+                                                    <div key={index} className="preference_product">
+                                                        <div>
+                                                            {product.productName}
+                                                        </div>
+                                                        <div>
+                                                            {product.productPreferred ?
+                                                                <ThumbUpRoundedIcon className="upThumb"/> :
+                                                                <ThumbDownRoundedIcon
+                                                                    className="downThumb"/>}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                         </div>
-                                        <div className="dietary_preference_target_weight">
-                                            target {preference.targetWeight} kg
+                                        <div className="preference_recipes">
+                                            <div className="preference_recipes_header">Recipes</div>
+                                            {preference.preferenceRecipes.length === 0 ? "No preferred recipes" :
+                                                preference.preferenceRecipes.map((recipe, index) => (
+                                                    <div key={index} className="preference_recipe">
+                                                        <div>
+                                                            {recipe.recipeName}
+                                                        </div>
+                                                        <div>
+                                                            {recipe.recipePreferred ?
+                                                                <ThumbUpRoundedIcon className="upThumb"/> :
+                                                                <ThumbDownRoundedIcon
+                                                                    className="downThumb"/>}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
-                                    <div className="preference_nutrients">
-                                        <div className="preference_nutrients_header">Nutrients</div>
-                                        {preference.preferenceNutrients.length === 0 ? "No nutrients" :
-                                            preference.preferenceNutrients.map((nutrient, index) => (
-                                                <div key={index} className="preference_nutrient">
-                                                    <div>
-                                                        {nutrient.nutrientName}s
-                                                    </div>
-                                                    <div>
-                                                        {nutrient.nutrientAmount} g
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                    <div className="preference_products">
-                                        <div className="preference_products_header">Products</div>
-                                        {preference.preferenceProducts.length === 0 ? "No preferred products" :
-                                            preference.preferenceProducts.map((product, index) => (
-                                                <div key={index} className="preference_product">
-                                                    <div>
-                                                        {product.productName}
-                                                    </div>
-                                                    <div>
-                                                        {product.productPreferred ?
-                                                            <ThumbUpRoundedIcon className="upThumb"/> :
-                                                            <ThumbDownRoundedIcon
-                                                                className="downThumb"/>}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                    <div className="preference_recipes">
-                                        <div className="preference_recipes_header">Recipes</div>
-                                        {preference.preferenceRecipes.length === 0 ? "No preferred recipes" :
-                                            preference.preferenceRecipes.map((recipe, index) => (
-                                                <div key={index} className="preference_recipe">
-                                                    <div>
-                                                        {recipe.recipeName}
-                                                    </div>
-                                                    <div>
-                                                        {recipe.recipePreferred ?
-                                                            <ThumbUpRoundedIcon className="upThumb"/> :
-                                                            <ThumbDownRoundedIcon
-                                                                className="downThumb"/>}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                </div>
-                            </div>}
+                                </div>}
                         </div>
 
                     ))}

@@ -25,6 +25,7 @@ import Popover from "@material-ui/core/Popover";
 import FingerprintIcon from '@material-ui/icons/Fingerprint';
 import CloseIcon from "@material-ui/core/SvgIcon/SvgIcon";
 import Snackbar from "@material-ui/core/Snackbar/Snackbar";
+import FavoriteIcon from '@material-ui/icons/Favorite';
 
 const useStyles = makeStyles({
     meal_hour: {
@@ -112,7 +113,13 @@ const useStyles = makeStyles({
     calories: {
         color: 'white',
         backgroundColor: 'green'
-    }
+    },
+    popover: {
+        pointerEvents: 'none',
+    },
+    popoverContent: {
+        pointerEvents: 'auto',
+    },
 });
 
 export default function Menus(props) {
@@ -230,24 +237,43 @@ export default function Menus(props) {
         msg: "",
         loaded: false
     });
+    const [openedPopover, setOpenedPopover] = React.useState(false);
+    const [openedPopover2, setOpenedPopover2] = React.useState(false);
+    const [openedPopover3, setOpenedPopover3] = React.useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
-    // const [anchorEl2, setAnchorEl2] = React.useState(null);
+    const [anchorEl2, setAnchorEl2] = React.useState(null);
+    const [anchorEl3, setAnchorEl3] = React.useState(null);
 
-    const handlePopoverOpen = (event) => {
-        if (anchorEl == null) {
-            setAnchorEl(event.currentTarget);
-        } else {
-            setAnchorEl(null);
-        }
+    const popoverEnter = ({ currentTarget }) => {
+        setAnchorEl(currentTarget);
+        setOpenedPopover(true);
     };
 
-    // const handlePopoverClose = () => {
-    // };
+    const popoverLeave = ({ currentTarget }) => {
+        setAnchorEl(null);
+        setOpenedPopover(false)
+    };
 
-    const open = Boolean(anchorEl);
+    const popoverEnter2 = ({ currentTarget }) => {
+        setAnchorEl2(currentTarget);
+        setOpenedPopover2(true);
+    };
 
-    console.log("open " + open);
+    const popoverLeave2 = ({ currentTarget }) => {
+        setAnchorEl2(null);
+        setOpenedPopover2(false)
+    };
+
+    const popoverEnter3 = ({ currentTarget }) => {
+        setAnchorEl3(currentTarget);
+        setOpenedPopover3(true);
+    };
+
+    const popoverLeave3 = ({ currentTarget }) => {
+        setAnchorEl3(null);
+        setOpenedPopover3(false)
+    };
 
     useEffect(
         async () => {
@@ -333,6 +359,7 @@ export default function Menus(props) {
             menu.meals[i].recipe.recipe_fats = meals[i].recipe.recipeFats;
             menu.meals[i].recipe.in_collection = meals[i].recipe.inCollection;
             menu.meals[i].recipe.liked_in_preference = meals[i].recipe.likedInPreference;
+            menu.meals[i].recipe.favourite = meals[i].recipe.favourite;
 
             let ingredients_quantity = meals[i].recipe.recipeIngredients.length;
             menu.meals[i].recipe.recipe_ingredients = [];
@@ -545,22 +572,23 @@ export default function Menus(props) {
                                                                     />
                                                                 </div>
                                                                 <div className={classes.recipe_name}>
-                                                                    {meal.recipe.in_collection ?
+                                                                    {meal.recipe.in_collection === 'Yes' ?
                                                                         <div>
-                                                                            <Typography
-                                                                                aria-owns={open ? 'mouse-over-popover' : undefined}
+                                                                            <span
+                                                                                aria-owns="mouse-over-popover"
                                                                                 aria-haspopup="true"
-                                                                                onMouseEnter={handlePopoverOpen}
-                                                                                // onMouseLeave={handlePopoverClose}
+                                                                                onMouseEnter={popoverEnter}
+                                                                                onMouseLeave={popoverLeave}
                                                                             >
                                                                                 <LibraryBooksIcon/>
-                                                                            </Typography>
+                                                                            </span>
                                                                             <Popover
                                                                                 id="mouse-over-popover"
-                                                                                sx={{
-                                                                                    pointerEvents: 'none',
+                                                                                className={classes.popover}
+                                                                                classes={{
+                                                                                    paper: classes.popoverContent,
                                                                                 }}
-                                                                                open={open}
+                                                                                open={openedPopover}
                                                                                 anchorEl={anchorEl}
                                                                                 anchorOrigin={{
                                                                                     vertical: 'bottom',
@@ -570,8 +598,7 @@ export default function Menus(props) {
                                                                                     vertical: 'top',
                                                                                     horizontal: 'left',
                                                                                 }}
-                                                                                // onClose={handlePopoverClose}
-                                                                                disableRestoreFocus
+                                                                                PaperProps={{onMouseEnter: popoverEnter, onMouseLeave: popoverLeave}}
                                                                             >
                                                                                 <Typography sx={{p: 1}}>belongs to
                                                                                     collection</Typography>
@@ -580,22 +607,24 @@ export default function Menus(props) {
                                                                         : null}
                                                                 </div>
                                                                 <div className={classes.recipe_name}>
-                                                                    {meal.recipe.liked_in_preference ?
+                                                                    {meal.recipe.liked_in_preference === 'Yes' ?
                                                                         <div>
-                                                                            <Typography
-                                                                                aria-owns={open ? 'mouse-over-popover' : undefined}
+                                                                            <span
+                                                                                aria-owns="mouse-over-popover"
                                                                                 aria-haspopup="true"
-                                                                                onClick={handlePopoverOpen}
+                                                                                onMouseEnter={popoverEnter2}
+                                                                                onMouseLeave={popoverLeave2}
                                                                             >
                                                                                 <FingerprintIcon/>
-                                                                            </Typography>
+                                                                            </span>
                                                                             <Popover
-                                                                                id="mouse-over-popover"
-                                                                                sx={{
-                                                                                    pointerEvents: 'none',
+                                                                                id="mouse-over-popover2"
+                                                                                className={classes.popover}
+                                                                                classes={{
+                                                                                    paper: classes.popoverContent,
                                                                                 }}
-                                                                                open={open}
-                                                                                anchorEl={anchorEl}
+                                                                                open={openedPopover2}
+                                                                                anchorEl={anchorEl2}
                                                                                 anchorOrigin={{
                                                                                     vertical: 'bottom',
                                                                                     horizontal: 'left',
@@ -604,11 +633,44 @@ export default function Menus(props) {
                                                                                     vertical: 'top',
                                                                                     horizontal: 'left',
                                                                                 }}
-                                                                                // onClose={handlePopoverClose}
-                                                                                disableRestoreFocus
+                                                                                PaperProps={{onMouseEnter: popoverEnter2, onMouseLeave: popoverLeave2}}
                                                                             >
                                                                                 <Typography sx={{p: 1}}>liked in
                                                                                     preference</Typography>
+                                                                            </Popover>
+                                                                        </div>
+                                                                        : null}
+                                                                </div>
+                                                                <div className={classes.recipe_name}>
+                                                                    {meal.recipe.favourite === 'Yes' ?
+                                                                        <div>
+                                                                            <span
+                                                                                aria-owns="mouse-over-popover"
+                                                                                aria-haspopup="true"
+                                                                                onMouseEnter={popoverEnter3}
+                                                                                onMouseLeave={popoverLeave3}
+                                                                            >
+                                                                                <FavoriteIcon/>
+                                                                            </span>
+                                                                            <Popover
+                                                                                id="mouse-over-popover3"
+                                                                                className={classes.popover}
+                                                                                classes={{
+                                                                                    paper: classes.popoverContent,
+                                                                                }}
+                                                                                open={openedPopover3}
+                                                                                anchorEl={anchorEl3}
+                                                                                anchorOrigin={{
+                                                                                    vertical: 'bottom',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                transformOrigin={{
+                                                                                    vertical: 'top',
+                                                                                    horizontal: 'left',
+                                                                                }}
+                                                                                PaperProps={{onMouseEnter: popoverEnter2, onMouseLeave: popoverLeave2}}
+                                                                            >
+                                                                                <Typography sx={{p: 1}}>favourite</Typography>
                                                                             </Popover>
                                                                         </div>
                                                                         : null}

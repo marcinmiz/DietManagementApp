@@ -5,6 +5,7 @@ import agh.edu.pl.diet.payloads.request.DietaryPreferencesRequest;
 import agh.edu.pl.diet.payloads.response.ResponseMessage;
 import agh.edu.pl.diet.repos.*;
 import agh.edu.pl.diet.services.DietaryPreferencesService;
+import agh.edu.pl.diet.services.DietaryProgrammeService;
 import agh.edu.pl.diet.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,11 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
     @Autowired
     private DietaryPreferencesRecipesRepo dietaryPreferencesRecipesRepo;
     @Autowired
-    private UserRepo userRepo;
+    private DailyMenuRepo menuRepo;
     @Autowired
     private UserService userService;
+    @Autowired
+    private DietaryProgrammeService dietaryProgrammeService;
 
     private ResponseMessage verify(String type, Object item) {
         switch (type) {
@@ -466,6 +469,7 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
         Optional<DietaryPreferences> dietaryPreference = dietaryPreferencesRepo.findById(dietaryPreferenceId);
         if (dietaryPreference.isPresent()) {
             DietaryPreferences updatedDietaryPreference = dietaryPreference.get();
+            DietaryPreferences oldDietaryPreference = updatedDietaryPreference;
 
             Boolean dietTypeSelected = dietaryPreferencesRequest.getDietTypeSelected();
 
@@ -724,6 +728,19 @@ public class DietaryPreferencesServiceImpl implements DietaryPreferencesService 
 
             dietaryPreferencesRepo.save(updatedDietaryPreference);
 
+            DietaryProgramme relatedProgramme = updatedDietaryPreference.getRelatedDietaryProgramme();
+
+            if (relatedProgramme != null) {
+                ResponseMessage resultMessage = dietaryProgrammeService.updateDietaryProgramme(relatedProgramme);
+
+                if (!resultMessage.getMessage().equals("Dietary Programme has been updated")) {
+                    return new ResponseMessage("Dietary Programme related to this dietary preference has not been updated");
+                }
+
+                updatedDietaryPreference = oldDietaryPreference;
+                dietaryPreferencesRepo.save(updatedDietaryPreference);
+
+            }
             return new ResponseMessage("Dietary Preferences " + dietaryPreferenceId + " has been updated");
         }
         System.out.println("Dietary Preferences not found");

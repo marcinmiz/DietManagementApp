@@ -131,7 +131,6 @@ export default function ViewerModal(props) {
         recipe_add_step_name: "",
         hover_rating: -1
     });
-    console.log("asa");
 
     useEffect(
         async () => {

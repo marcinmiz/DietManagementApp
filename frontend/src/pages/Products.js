@@ -266,6 +266,7 @@ export default function Products(props) {
             ...state,
             open_confirmation_modal: false
         });
+        // window.location.reload();
     };
 
     const handleCloseViewerModal = () => {
@@ -288,7 +289,7 @@ export default function Products(props) {
         handleOpen();
 
         if (reload) {
-            setTimeout(() => history.push("/products"),1000);
+            setTimeout(() => handleSearch(),1000);
         }
     };
 
@@ -415,6 +416,7 @@ export default function Products(props) {
                     categories: categoriesTable,
                     loaded: true,
                     product_index: product_index,
+                    open_confirmation_modal: false,
                     open_viewer_modal: productId && mode && state.msg === "" ? true : false
                 });
             })
@@ -525,7 +527,7 @@ export default function Products(props) {
                 }}
                 id="confirmation_popup"
                 type="product"
-                open={state.open_confirmation_modal && state.msg === ''}
+                open={state.open_confirmation_modal && state.loaded}
                 onClose={handleCloseConfirmationModal}
                 complement={state.complement}
                 itemId={state.confirmation_product_id}
@@ -722,6 +724,7 @@ export default function Products(props) {
                                 id="searchPhrase"
                                 name="searchPhrase"
                                 className="search_input"
+                                autoComplete="off"
                                 value={state.searchPhrase}
                                 onChange={handleChange}
                             />
@@ -764,7 +767,7 @@ export default function Products(props) {
                     <div className="loading">{!state.loaded ? "Loading" : "No products found"}</div> : null}
                 {/*<BorderLinearProgress variant="determinate" value={90}/>*/}
                 {tab}
-                {productId && state.products.length > 0 && mode && <ViewerModal
+                {productId && state.products.length >= 0 && mode && <ViewerModal
                     open={state.open_viewer_modal}
                     onClose={handleCloseViewerModal}
                     type="product"

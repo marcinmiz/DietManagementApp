@@ -72,10 +72,11 @@ public class DailyMenuResponse {
         private Double recipeFats;
         private String inCollection;
         private String likedInPreference;
+        private String favourite;
         private List<RecipeProduct> recipeIngredients;
         private List<RecipeStep> recipeSteps;
 
-        private Recipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
+        private Recipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, String favourite, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
             this.recipeId = recipeId;
             this.recipeName = recipeName;
             this.creationDate = creationDate;
@@ -89,6 +90,7 @@ public class DailyMenuResponse {
             this.recipeFats = recipeFats;
             this.inCollection = inCollection;
             this.likedInPreference = likedInPreference;
+            this.favourite = favourite;
             this.recipeIngredients = recipeIngredients;
             this.recipeSteps = recipeSteps;
         }
@@ -145,6 +147,10 @@ public class DailyMenuResponse {
             return likedInPreference;
         }
 
+        public String getFavourite() {
+            return favourite;
+        }
+
         public List<RecipeProduct> getRecipeIngredients() {
             return recipeIngredients;
         }
@@ -178,9 +184,9 @@ public class DailyMenuResponse {
         this.meals.add(new Meal(mealId, mealName, mealHourTime, recipe, consumed));
     }
 
-    public Recipe createRecipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
+    public Recipe createRecipe(Long recipeId, String recipeName, String creationDate, Long recipeAuthorId, String recipeAuthor, String recipeAuthorImage, String recipeImage, Double recipeCalories, Double recipeProteins, Double recipeCarbohydrates, Double recipeFats, String inCollection, String likedInPreference, String favourite, List<RecipeProduct> recipeIngredients, List<RecipeStep> recipeSteps) {
 
-        return new Recipe(recipeId, recipeName, creationDate, recipeAuthorId, recipeAuthor, recipeAuthorImage, recipeImage, recipeCalories, recipeProteins, recipeCarbohydrates, recipeFats, inCollection, likedInPreference, recipeIngredients, recipeSteps);
+        return new Recipe(recipeId, recipeName, creationDate, recipeAuthorId, recipeAuthor, recipeAuthorImage, recipeImage, recipeCalories, recipeProteins, recipeCarbohydrates, recipeFats, inCollection, likedInPreference, favourite, recipeIngredients, recipeSteps);
     }
 
 }

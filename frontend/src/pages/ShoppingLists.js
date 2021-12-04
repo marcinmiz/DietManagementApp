@@ -40,7 +40,7 @@ export default function ShoppingLists(props) {
 
     const [state, setState] = React.useState({
         shoppingLists: [],
-        currentWeekShoppingList: null,
+        currentWeekShoppingList: 0,
         startWeekDate: null,
         endWeekDate: null,
         msg: "",
@@ -48,20 +48,20 @@ export default function ShoppingLists(props) {
     });
 
     useEffect(
-        async () => {
+         () => {
             if (props.currentDietaryProgramme) {
                 let startWeekDate = new Date(props.dietaryProgrammeStartDate);
                 let endWeekDate = new Date(props.dietaryProgrammeStartDate);
-                startWeekDate.setDate(startWeekDate.getDate() + (7 * (Math.floor(props.currentDietaryProgrammeDay / 7))));
+                startWeekDate.setDate(startWeekDate.getDate() + (7 * state.currentWeekShoppingList));
 
-                let programmeDays = props.currentDietaryProgramme.dietaryProgrammeDays;
+                let programmeDays = props.currentDietaryProgramme.dietaryProgrammeDays - (7 * state.currentWeekShoppingList);
 
                 console.log(programmeDays);
 
                 if(programmeDays < 7) {
                     endWeekDate.setDate(startWeekDate.getDate() + programmeDays - 1);
                 } else {
-                    endWeekDate.setDate(startWeekDate.getDate() + 6 + (7 * (Math.floor(props.currentDietaryProgrammeDay / 7))));
+                    endWeekDate.setDate(startWeekDate.getDate() + 6 + (7 * state.currentWeekShoppingList));
                 }
                 startWeekDate = startWeekDate.toLocaleDateString();
                 endWeekDate = endWeekDate.toLocaleDateString();
@@ -84,13 +84,13 @@ export default function ShoppingLists(props) {
                             startWeekDate: startWeekDate,
                             endWeekDate: endWeekDate,
                             shoppingLists: table,
-                            currentWeekShoppingList: Math.floor(props.currentDietaryProgrammeDay / 7),
+                            // currentWeekShoppingList: Math.floor(props.currentDietaryProgrammeDay / 7),
                             loaded: true,
                         });
                     })
                     .catch(error => console.log(error))
             }
-        }, [props.adminMode]
+        }, [props.adminMode, state.currentWeekShoppingList]
     );
 
     const createShoppingList = (data, y) => {

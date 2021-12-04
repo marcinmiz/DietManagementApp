@@ -14,20 +14,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public interface DailyMenuService {
 
-    DailyMenu getDailyMenuByProgrammeDay(Long dailyMenuId);
-
-//    Meals getMeals(Long dailyMenuId);
-
-//    DietaryProgramme getDietaryProgramme(Long dailyMenuId);
-
     ResponseMessage verifyRecipe(Recipes recipe, Map<String, List<Double>> dailyNutrientsScopes, DietaryPreferences preference);
 
     ResponseMessage addNewDailyMenu(DietaryProgramme dietaryProgramme, Double totalDailyCalories, Integer mealsQuantity, Map<String, Double> totalDailyNutrients, Integer currentDay, Integer lastDay);
 
     List<DailyMenuResponse> getDietaryProgrammeDailyMenus(Long dietaryProgrammeId);
-
-    ResponseMessage updateDailyMenu(Long dailyMenuId, DailyMenuRequest dailyMenuRequest);
-
-    ResponseMessage removeDailyMenu(Long dailyMenuId);
 
 }

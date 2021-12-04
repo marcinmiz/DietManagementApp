@@ -32,17 +32,6 @@ public class DailyMenuController {
     @Autowired
     private RecipeService recipeService;
 
-
-//    @GetMapping("/{id}")
-//    public DailyMenu getDailyMenu(@PathVariable("id") Long dailyMenuId) {
-//        return dailyMenuService.getDailyMenu(dailyMenuId);
-//    }
-//
-//    @GetMapping("/meal/{id}")
-//    public Meals getMeal(@PathVariable("id") Long dailyMenuId) {
-//        return dailyMenuService.getMeals(dailyMenuId);
-//    }
-//
     @GetMapping("/{programmeId}")
     public ResponseEntity<List<DailyMenuResponse>> getDietaryProgrammeDailyMenus(@PathVariable("programmeId") Long programmeId) {
         List<DailyMenuResponse> menuResponses = dailyMenuService.getDietaryProgrammeDailyMenus(programmeId);
@@ -68,26 +57,6 @@ public class DailyMenuController {
             return ResponseEntity.status(HttpStatus.OK).body(consumed);
         }
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(consumed);
-    }
-
-//    @PostMapping("/add")
-//    public ResponseEntity<ResponseMessage> addNewDailyMenu(@RequestBody DailyMenuRequest dailyMenuRequest) {
-//        ResponseMessage message = dailyMenuService.addNewDailyMenu(dailyMenuRequest);
-//        if (message.getMessage().endsWith(" has been added successfully")) {
-//            return ResponseEntity.status(HttpStatus.OK).body(message);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
-//        }
-//    }
-
-    @PutMapping("/update/{id}")
-    public ResponseMessage updateDailyMenu(@PathVariable("id") Long dailyMenuId, @RequestBody DailyMenuRequest dailyMenuRequest) {
-        return dailyMenuService.updateDailyMenu(dailyMenuId, dailyMenuRequest);
-    }
-
-    @DeleteMapping("/remove/{id}")
-    public ResponseMessage removeDailyMenu(@PathVariable("id") Long dailyMenuId) {
-        return dailyMenuService.removeDailyMenu(dailyMenuId);
     }
 
 }

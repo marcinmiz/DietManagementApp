@@ -53,6 +53,10 @@ export default function ChangeEmail(props) {
 
     useEffect(
         () => {
+            setState({
+                ...state,
+                email: props.email
+            });
         }, [state.msg]
     );
 

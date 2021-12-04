@@ -56,7 +56,7 @@ public class MealServiceImpl implements MealService {
 
         meal.setDailyMenu(dailyMenu);
 
-        System.out.println(meal);
+        System.out.println(meal.getDailyMenu().getDailyMenuName() + " " + meal.getMealsName());
 
         mealRepo.save(meal);
 

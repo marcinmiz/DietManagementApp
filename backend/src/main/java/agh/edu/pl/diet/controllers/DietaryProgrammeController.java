@@ -68,10 +68,14 @@ public class DietaryProgrammeController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
     }
 
-//    @PutMapping("/update/{id}")
-//    public ResponseMessage updateDailyMenu(@PathVariable("id") Long dailyMenuId, @RequestBody DailyMenuRequest dailyMenuRequest) {
-//        return dailyMenuService.updateDailyMenu(dailyMenuId, dailyMenuRequest);
-//    }
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<ResponseMessage> editDietaryProgramme(@PathVariable("id") Long dietaryProgrammeId, @RequestBody DietaryProgrammeRequest dietaryProgrammeRequest) {
+        ResponseMessage responseMessage = dietaryProgrammeService.editDietaryProgramme(dietaryProgrammeId, dietaryProgrammeRequest);
+        if (!responseMessage.getMessage().endsWith(" has been edited")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(responseMessage);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessage);
+    }
 
     @DeleteMapping("/remove/{id}")
     public ResponseEntity<ResponseMessage> removeDietaryProgramme(@PathVariable("id") Long dietaryProgrammeId) {

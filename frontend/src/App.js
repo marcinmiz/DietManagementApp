@@ -155,15 +155,16 @@ export default function App() {
                             {
                                 state.loggedInStatus === "LOGGED_IN"
                                     ?
-                                    (<UserDashboard userId={state.user.userId} name={state.user.name}
+                                    (<UserDashboard userId={state.user.userId}
+                                                    name={state.user.name}
                                                     surname={state.user.surname}
                                                     username={state.user.username}
+                                                    email={state.user.email}
                                                     loggedInStatus={state.loggedInStatus}
                                                     admin={state.admin} adminMode={state.adminMode}
                                                     currentDietaryProgramme={state.user.currentDietaryProgramme}
                                                     currentDietaryProgrammeDay={state.user.currentDietaryProgrammeDay}
                                                     dietaryProgrammeStartDate={state.user.dietaryProgrammeStartDate}
-                                                    userId={state.user.userId}
                                                     avatarImage={state.user.avatarImage}
                                                     handleAdminMode={handleAdminMode}
                                                     handleLogout={handleLogout}
